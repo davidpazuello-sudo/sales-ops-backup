@@ -116,6 +116,33 @@ const sellerAttentionRows = [
   ["Bruno Melo", "Forecast sem proximo passo definido", "Alta"],
 ];
 
+const notificationItems = [
+  {
+    id: "1",
+    title: "Joseph Israel tornou voce o Prospectante do contrato JN Corte - Manaus (AM).",
+    tag: "Marcos Nakahara",
+    age: "12d",
+    read: false,
+    trash: false,
+  },
+  {
+    id: "2",
+    title: "Voce foi atribuido a tarefa \"Preencher propriedade de aprovacao\".",
+    tag: "",
+    age: "14d",
+    read: false,
+    trash: false,
+  },
+  {
+    id: "3",
+    title: "Tabela de preco do negocio Nautilus Sports foi aceita pelo cliente.",
+    tag: "Equipe Comercial",
+    age: "2d",
+    read: true,
+    trash: false,
+  },
+];
+
 const sellerAgendaRows = [
   ["1:1 de coaching", "Hoje, 15:00", "Lucas Prado"],
   ["Revisao de forecast", "Hoje, 17:30", "Squad Enterprise"],
@@ -530,11 +557,49 @@ function DealsContent({ dashboardData }) {
   const [draggedDealId, setDraggedDealId] = useState("");
   const [ownerFilter, setOwnerFilter] = useState("todos");
   const [activityWeeksFilter, setActivityWeeksFilter] = useState("1");
-  const stageOrder = ["Discovery", "Proposal", "Negotiation", "Commit", "Closed Won"];
+  const [collapsedStages, setCollapsedStages] = useState({});
+  const stageOrder = [
+    "Oportunidade",
+    "Primeira Reunião",
+    "Avaliação Técnica Feita",
+    "Criação de Tabela de Preço",
+    "Tabela de Preço Criada",
+    "Avaliação da Tabela Feita",
+    "Tabela de Preço Enviada",
+    "Tabela de Preço Aceita",
+    "Elaboração de DOT",
+    "DOT Criado",
+    "Avaliação de DOT",
+    "DOT Aprovado",
+    "DOT Entregue",
+    "Elaboração da Proposta",
+    "Proposta Criada",
+    "Avaliação da Proposta Feita",
+    "Proposta Enviada",
+    "Proposta Aceita",
+    "Elaboração do Acordo de Cooperação",
+    "Acordo de Cooperação Criado",
+    "Acordo de Cooperação Assinado",
+    "Elaboração do Contrato",
+    "Contrato Enviado",
+    "Negócio Fechado",
+    "Negócio Perdido",
+  ];
 
   useEffect(() => {
     setBoardDeals(dashboardData.deals);
   }, [dashboardData.deals]);
+
+  useEffect(() => {
+    setBoardDeals((currentDeals) =>
+      currentDeals.map((deal) => {
+        if (deal.id === "1") return { ...deal, stage: "Proposta Enviada" };
+        if (deal.id === "2") return { ...deal, stage: "Avaliação de DOT" };
+        if (deal.id === "3") return { ...deal, stage: "Primeira Reunião" };
+        return deal;
+      }),
+    );
+  }, []);
 
   const formatCurrencyFromLabel = (label) => {
     const numericValue = Number.parseFloat(
@@ -603,6 +668,13 @@ function DealsContent({ dashboardData }) {
     setDraggedDealId("");
   };
 
+  const toggleStageCollapse = (stage) => {
+    setCollapsedStages((current) => ({
+      ...current,
+      [stage]: !current[stage],
+    }));
+  };
+
   return (
     <section className={styles.dashboardSection}>
       <header className={styles.settingsHeader}>
@@ -635,19 +707,37 @@ function DealsContent({ dashboardData }) {
         {boardColumns.map((column) => (
           <article
             key={column.stage}
-            className={styles.pipelineColumn}
+            className={`${styles.pipelineColumn} ${collapsedStages[column.stage] ? styles.pipelineColumnCollapsed : ""}`.trim()}
             onDragOver={(event) => event.preventDefault()}
             onDrop={() => handleDropStage(column.stage)}
           >
             <header className={styles.pipelineColumnHeader}>
               <div>
                 <span>{column.stage}</span>
-                <strong>{column.totalLabel}</strong>
+                {!collapsedStages[column.stage] ? <strong>{column.totalLabel}</strong> : null}
               </div>
-              <small>{column.count} negócio(s)</small>
+              <div className={styles.pipelineColumnActions}>
+                <small>{column.count} negócio(s)</small>
+                <button
+                  type="button"
+                  className={styles.pipelineCollapseButton}
+                  onClick={() => toggleStageCollapse(column.stage)}
+                  aria-expanded={!collapsedStages[column.stage]}
+                  aria-label={collapsedStages[column.stage] ? `Expandir etapa ${column.stage}` : `Recolher etapa ${column.stage}`}
+                  title={collapsedStages[column.stage] ? "Expandir etapa" : "Recolher etapa"}
+                >
+                  {collapsedStages[column.stage] ? ">" : "<"}
+                </button>
+              </div>
             </header>
 
             <div className={styles.pipelineColumnBody}>
+              {collapsedStages[column.stage] ? (
+                <div className={styles.pipelineCollapsedSummary}>
+                  <span>{column.stage}</span>
+                  <strong>{column.count}</strong>
+                </div>
+              ) : null}
               {column.deals.length ? column.deals.map((deal) => (
                 <article
                   key={deal.id}
@@ -656,6 +746,8 @@ function DealsContent({ dashboardData }) {
                   onDragStart={() => setDraggedDealId(deal.id)}
                   onDragEnd={() => setDraggedDealId("")}
                 >
+                  {collapsedStages[column.stage] ? null : (
+                    <>
                   <div className={styles.pipelineDealTop}>
                     <strong>{deal.name}</strong>
                     <span>{formatCurrencyFromLabel(deal.amountLabel)}</span>
@@ -665,6 +757,8 @@ function DealsContent({ dashboardData }) {
                     <span>{deal.staleLabel}</span>
                   </div>
                   <small>Sincronizado com HubSpot. Arraste para atualizar o estágio.</small>
+                    </>
+                  )}
                 </article>
               )) : (
                 <div className={styles.pipelineEmptyState}>
@@ -1239,6 +1333,8 @@ export default function DashboardShell({
   const [collapsed, setCollapsed] = useState(personalizationDefaults.collapseSidebarOnOpen);
   const [menuOpen, setMenuOpen] = useState(false);
   const [logoutPromptOpen, setLogoutPromptOpen] = useState(false);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [notificationTab, setNotificationTab] = useState("unread");
   const menuRef = useRef(null);
 
   useEffect(() => {
@@ -1249,6 +1345,7 @@ export default function DashboardShell({
       if (event.key === "Escape") {
         setMenuOpen(false);
         setLogoutPromptOpen(false);
+        setNotificationsOpen(false);
       }
     }
     document.addEventListener("mousedown", closeOnOutside);
@@ -1394,6 +1491,11 @@ export default function DashboardShell({
   const currentSection = activeNav === "profile"
     ? accountSection
     : configSections.find((item) => item.id === activeConfig);
+  const visibleNotifications = notificationItems.filter((item) => {
+    if (notificationTab === "unread") return !item.read && !item.trash;
+    if (notificationTab === "trash") return item.trash;
+    return !item.trash;
+  });
 
   return (
     <main className={`${styles.appShell} ${collapsed ? styles.appShellCollapsed : ""}`.trim()}>
@@ -1408,7 +1510,13 @@ export default function DashboardShell({
           <button type="button" className={styles.topbarButton} aria-label="Avançar" onClick={() => window.history.forward()}><SimpleArrow right /></button>
         </div>
         <div className={styles.topbarActions}>
-          <button type="button" className={`${styles.topbarButton} ${styles.notificationButton}`.trim()} aria-label="Notificações" title="Notificações" onClick={() => router.push("/configuracoes?section=notifications")}>
+          <button
+            type="button"
+            className={`${styles.topbarButton} ${styles.notificationButton} ${notificationsOpen ? styles.topbarButtonActive : ""}`.trim()}
+            aria-label="Notificações"
+            title="Notificações"
+            onClick={() => setNotificationsOpen(true)}
+          >
             <BellIcon />
           </button>
           <button type="button" className={styles.aiButton} onClick={() => router.push("/ai-agent")} title="Agente de IA para análise completa do sistema respeitando perfil e acesso">
@@ -1424,7 +1532,10 @@ export default function DashboardShell({
 
       <aside className={styles.sidebar}>
         <div>
-          <div className={styles.logoRow}><span className={styles.logoDark}>SALES</span><span className={styles.logoAccent}>OPS</span></div>
+          <button type="button" className={styles.logoRow} onClick={() => router.push("/")}>
+            <span className={styles.logoDark}>SALES</span>
+            <span className={styles.logoAccent}>OPS</span>
+          </button>
           <nav className={styles.navigation} aria-label="Principal">
             {navItems.slice(0, 3).map((item) => (
               <button key={item.id} type="button" onClick={() => navigateToMainSection(item.id)} className={`${styles.navItem} ${activeNav === item.id ? styles.navItemActive : ""}`.trim()} title={collapsed ? item.label : undefined}>
@@ -1520,6 +1631,66 @@ export default function DashboardShell({
               <button type="button" className={styles.logoutPrimaryButton} onClick={() => router.push("/login")}>Sair agora</button>
             </div>
           </div>
+        </div>
+      ) : null}
+
+      {notificationsOpen ? (
+        <div className={styles.notificationsBackdrop} role="presentation" onClick={() => setNotificationsOpen(false)}>
+          <aside
+            className={styles.notificationsPanel}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Notificacoes"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <header className={styles.notificationsHeader}>
+              <h2>Notificações</h2>
+              <button type="button" className={styles.notificationsClose} onClick={() => setNotificationsOpen(false)} aria-label="Fechar notificações">
+                ×
+              </button>
+            </header>
+
+            <div className={styles.notificationsTabs}>
+              <button type="button" className={`${styles.notificationsTab} ${notificationTab === "unread" ? styles.notificationsTabActive : ""}`.trim()} onClick={() => setNotificationTab("unread")}>
+                Não lidas (2)
+              </button>
+              <button type="button" className={`${styles.notificationsTab} ${notificationTab === "all" ? styles.notificationsTabActive : ""}`.trim()} onClick={() => setNotificationTab("all")}>
+                Todos
+              </button>
+              <button type="button" className={`${styles.notificationsTab} ${notificationTab === "trash" ? styles.notificationsTabActive : ""}`.trim()} onClick={() => setNotificationTab("trash")}>
+                Lixeira
+              </button>
+              <button type="button" className={styles.notificationsSettings} aria-label="Configurar notificações">
+                {getConfigIcon("notifications")}
+              </button>
+            </div>
+
+            <div className={styles.notificationsToolbar}>
+              <label className={styles.notificationsCheckbox}>
+                <input type="checkbox" />
+                <span>Selecionar tudo</span>
+              </label>
+              <div className={styles.notificationsFilter}>
+                <span>Tipo:</span>
+                <button type="button">Todos</button>
+              </div>
+            </div>
+
+            <div className={styles.notificationsList}>
+              {visibleNotifications.map((item) => (
+                <article key={item.id} className={styles.notificationRow}>
+                  <label className={styles.notificationsCheckbox}>
+                    <input type="checkbox" />
+                  </label>
+                  <div className={styles.notificationContent}>
+                    <strong>{item.title}</strong>
+                    {item.tag ? <span className={styles.notificationTag}>{item.tag}</span> : null}
+                  </div>
+                  <small>{item.age}</small>
+                </article>
+              ))}
+            </div>
+          </aside>
         </div>
       ) : null}
     </main>
