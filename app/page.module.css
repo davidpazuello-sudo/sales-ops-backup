@@ -1213,7 +1213,7 @@
   display: grid;
   grid-template-rows: auto min-content;
   gap: 12px;
-  min-height: 520px;
+  min-height: 360px;
   padding: calc(14px * var(--density-scale));
   border-radius: calc(var(--surface-radius) + 2px);
   background: linear-gradient(180deg, var(--panel), var(--panel-soft));
@@ -1244,7 +1244,9 @@
 
 .pipelineColumnHeader strong {
   color: var(--heading);
-  font-size: calc(18px * var(--font-scale));
+  font-size: calc(14px * var(--font-scale));
+  font-weight: 700;
+  line-height: 1.2;
 }
 
 .pipelineColumnHeader small {
@@ -1256,7 +1258,7 @@
 .pipelineColumnBody {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
   justify-content: flex-start;
 }
 
