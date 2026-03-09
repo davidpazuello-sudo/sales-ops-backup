@@ -810,9 +810,11 @@
 }
 
 .sellerDetailIdentity {
-  display: flex;
-  align-items: flex-start;
-  gap: 16px;
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr);
+  column-gap: 16px;
+  row-gap: 10px;
+  align-items: start;
 }
 
 .sellerDetailIdentity .settingsHeader h1 {
@@ -836,6 +838,11 @@
   gap: 10px;
   align-items: center;
   margin-top: 14px;
+}
+
+.sellerProfileMeetingActions {
+  grid-column: 1 / -1;
+  margin-top: 0;
 }
 
 .primaryActionButton,
@@ -958,6 +965,49 @@
   display: grid;
   gap: 14px;
   margin-top: 14px;
+}
+
+.meetingDetailActions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.meetingAiPanel,
+.meetingAudioPanel {
+  display: grid;
+  gap: 8px;
+  padding: calc(12px * var(--density-scale)) calc(14px * var(--density-scale));
+  border-radius: 14px;
+  background: linear-gradient(180deg, var(--panel), var(--panel-soft));
+  border: 1px solid color-mix(in srgb, var(--border) 88%, transparent);
+}
+
+.meetingAiPanel strong,
+.meetingAudioPanel strong {
+  color: var(--heading);
+  font-size: calc(12px * var(--font-scale));
+}
+
+.meetingAiPanel p,
+.meetingAudioPanel p {
+  margin: 0;
+  color: var(--muted);
+  font-size: calc(11px * var(--font-scale));
+  line-height: 1.6;
+}
+
+.meetingAudioPlayer {
+  display: grid;
+  gap: 8px;
+}
+
+.meetingAudioPlayer span {
+  color: var(--muted);
+  font-size: calc(11px * var(--font-scale));
+}
+
+.meetingAudioPlayer audio {
+  width: 100%;
 }
 
 .meetingFieldRow {
@@ -1124,8 +1174,44 @@
   align-items: start;
 }
 
+.dealsFilters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 14px 0 16px;
+}
+
+.dealsFilterField {
+  display: grid;
+  gap: 8px;
+  min-width: 220px;
+}
+
+.dealsFilterField span {
+  color: var(--muted);
+  font-size: calc(11px * var(--font-scale));
+  font-weight: 700;
+}
+
+.dealsFilterField select {
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--panel);
+  color: var(--text);
+  font: inherit;
+  outline: none;
+}
+
+.dealsFilterField select:focus {
+  border-color: rgba(222, 131, 0, 0.58);
+  box-shadow: 0 0 0 4px rgba(222, 131, 0, 0.08);
+}
+
 .pipelineColumn {
   display: grid;
+  grid-template-rows: auto min-content;
   gap: 12px;
   min-height: 520px;
   padding: calc(14px * var(--density-scale));
@@ -1168,9 +1254,10 @@
 }
 
 .pipelineColumnBody {
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 12px;
-  align-content: start;
+  justify-content: flex-start;
 }
 
 .pipelineDealCard {
@@ -1257,6 +1344,20 @@
   display: grid;
   gap: 8px;
   justify-items: center;
+  border: 0;
+  width: 100%;
+  background: transparent;
+  cursor: pointer;
+  padding: 6px 4px;
+  border-radius: 14px;
+  transition:
+    transform var(--motion-fast) ease,
+    background var(--motion-fast) ease;
+}
+
+.pipelineStageBarCard:hover {
+  transform: translateY(-1px);
+  background: color-mix(in srgb, var(--panel) 45%, var(--panel-soft));
 }
 
 .pipelineStageBarWrap {
@@ -1290,6 +1391,89 @@
   font-size: calc(11px * var(--font-scale));
   font-weight: 700;
   text-align: center;
+}
+
+.stageModalBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 110;
+  display: grid;
+  place-items: center;
+  background: rgba(15, 24, 39, 0.38);
+  backdrop-filter: blur(2px);
+  padding: 24px;
+}
+
+.stageModal {
+  width: min(860px, calc(100vw - 40px));
+  max-height: min(78vh, 720px);
+  display: grid;
+  grid-template-rows: auto 1fr;
+  gap: 14px;
+  padding: 16px;
+  border-radius: 20px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  box-shadow: 0 30px 60px rgba(17, 32, 58, 0.24);
+}
+
+.stageModalHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.stageModalHeader span {
+  color: var(--muted);
+  font-size: calc(11px * var(--font-scale));
+  font-weight: 700;
+}
+
+.stageModalHeader h3 {
+  margin: 4px 0 0;
+  color: var(--heading);
+  font-size: calc(21px * var(--font-scale));
+  line-height: 1.2;
+}
+
+.stageModalHeader p {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: calc(12px * var(--font-scale));
+}
+
+.stageModalList {
+  display: grid;
+  gap: 10px;
+  overflow: auto;
+  padding-right: 4px;
+}
+
+.stageModalItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: linear-gradient(180deg, var(--panel), var(--panel-soft));
+  border: 1px solid color-mix(in srgb, var(--border) 88%, transparent);
+}
+
+.stageModalItem div {
+  display: grid;
+  gap: 4px;
+}
+
+.stageModalItem strong {
+  color: var(--heading);
+  font-size: calc(13px * var(--font-scale));
+}
+
+.stageModalItem span {
+  color: var(--muted);
+  font-size: calc(11px * var(--font-scale));
 }
 
 .kanbanBoard {
@@ -1410,6 +1594,10 @@
   padding: calc(11px * var(--density-scale)) calc(13px * var(--density-scale));
   border-radius: 13px;
   background: linear-gradient(180deg, var(--panel), var(--panel-soft));
+}
+
+.sellerDealListItem {
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, 0.8fr) minmax(0, 0.8fr);
 }
 
 .dealIdentity,
