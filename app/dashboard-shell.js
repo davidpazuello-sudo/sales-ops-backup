@@ -257,6 +257,8 @@ function getInternalMeetingsForSeller(seller) {
       type: "Ritual semanal",
       owner: "Lider comercial",
       summary: "Revisao de forecast, riscos por conta e definicao de proximos passos no HubSpot.",
+      audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
+      audioLabel: "Audio da reuniao semanal",
       notes: [
         "Alinhar prioridades da semana com foco em propostas abertas.",
         "Revisar contas sem atividade acima do SLA.",
@@ -271,6 +273,8 @@ function getInternalMeetingsForSeller(seller) {
       type: "Coaching",
       owner: "Supervisor",
       summary: "Checkpoint individual sobre conversao, postura comercial e execucao do pipeline.",
+      audioUrl: "",
+      audioLabel: "",
       notes: [
         "Revisar postura em discovery e qualificacao.",
         "Mapear objecoes recorrentes nas ultimas oportunidades.",
@@ -285,6 +289,8 @@ function getInternalMeetingsForSeller(seller) {
       type: "Operacao",
       owner: "Sales Ops",
       summary: "Analise de gargalos operacionais, tempos de etapa e consistencia de atualizacao na HubSpot.",
+      audioUrl: "",
+      audioLabel: "",
       notes: [
         "Verificar tempo medio por etapa.",
         "Conferir campos obrigatorios pendentes.",
@@ -441,7 +447,13 @@ function Table({ head, rows, matrix = false }) {
 }
 
 function Metric({ title, value, note }) {
-  return <div className={styles.metric}><span>{title}</span><strong>{value}</strong><small>{note}</small></div>;
+  return (
+    <div className={styles.metric}>
+      <span>{title}</span>
+      <strong>{value}</strong>
+      {note ? <small>{note}</small> : null}
+    </div>
+  );
 }
 
 function OptionGroup({ title, options, value, onChange }) {
@@ -516,6 +528,8 @@ function ReportsContent({ dashboardData }) {
 function DealsContent({ dashboardData }) {
   const [boardDeals, setBoardDeals] = useState(dashboardData.deals);
   const [draggedDealId, setDraggedDealId] = useState("");
+  const [ownerFilter, setOwnerFilter] = useState("todos");
+  const [activityWeeksFilter, setActivityWeeksFilter] = useState("1");
   const stageOrder = ["Discovery", "Proposal", "Negotiation", "Commit", "Closed Won"];
 
   useEffect(() => {
@@ -538,10 +552,23 @@ function DealsContent({ dashboardData }) {
     }).format(numericValue);
   };
 
+  const parseStaleDays = (staleLabel) => {
+    const days = Number.parseInt(String(staleLabel), 10);
+    return Number.isNaN(days) ? 0 : days;
+  };
+
+  const ownerOptions = Array.from(new Set(boardDeals.map((deal) => deal.owner))).sort((a, b) => a.localeCompare(b));
+  const maxDays = Number(activityWeeksFilter) * 7;
+  const visibleDeals = boardDeals.filter((deal) => {
+    const ownerMatch = ownerFilter === "todos" || deal.owner === ownerFilter;
+    const activityMatch = parseStaleDays(deal.staleLabel) <= maxDays;
+    return ownerMatch && activityMatch;
+  });
+
   const stages = Array.from(new Set([...stageOrder, ...boardDeals.map((deal) => deal.stage)]));
 
   const boardColumns = stages.map((stage) => {
-    const stageDeals = boardDeals.filter((deal) => deal.stage === stage);
+    const stageDeals = visibleDeals.filter((deal) => deal.stage === stage);
     const totalValue = stageDeals.reduce((sum, deal) => {
       const numericValue = Number.parseFloat(
         String(deal.amountLabel).replace(/[^\d,]/g, "").replace(/\./g, "").replace(",", "."),
@@ -581,6 +608,28 @@ function DealsContent({ dashboardData }) {
       <header className={styles.settingsHeader}>
         <h1>Negócios</h1>
       </header>
+
+      <div className={styles.dealsFilters}>
+        <label className={styles.dealsFilterField}>
+          <span>Por proprietario</span>
+          <select value={ownerFilter} onChange={(event) => setOwnerFilter(event.target.value)}>
+            <option value="todos">Todos</option>
+            {ownerOptions.map((owner) => (
+              <option key={owner} value={owner}>{owner}</option>
+            ))}
+          </select>
+        </label>
+
+        <label className={styles.dealsFilterField}>
+          <span>Tempo da ultima atividade</span>
+          <select value={activityWeeksFilter} onChange={(event) => setActivityWeeksFilter(event.target.value)}>
+            <option value="1">1 semana</option>
+            <option value="2">2 semanas</option>
+            <option value="3">3 semanas</option>
+            <option value="4">4 semanas</option>
+          </select>
+        </label>
+      </div>
 
       <section className={styles.pipelineBoard}>
         {boardColumns.map((column) => (
@@ -645,17 +694,11 @@ function SellerMeetingsContent({ dashboardData, sellerSlug }) {
         <div className={styles.sellerMeetingActions}>
           <button
             type="button"
-            className={styles.secondaryActionButton}
-            onClick={() => router.push(`/vendedores/${sellerSlug}`)}
-          >
-            Voltar ao perfil
-          </button>
-          <button
-            type="button"
             className={styles.primaryActionButton}
             onClick={() => router.push(`/vendedores/${sellerSlug}/reunioes/nova`)}
           >
-            Registrar nova reuniao
+            <MeetingIcon />
+            <span>Registrar nova reuniao</span>
           </button>
         </div>
       </header>
@@ -690,6 +733,7 @@ function SellerMeetingsContent({ dashboardData, sellerSlug }) {
 function SellerMeetingDetailContent({ dashboardData, sellerSlug, meetingId }) {
   const router = useRouter();
   const [meetingAttachments, setMeetingAttachments] = useState([]);
+  const [showAiAnalysis, setShowAiAnalysis] = useState(false);
   const seller = dashboardData.sellers.find((item) => sellerToSlug(item.name) === sellerSlug) || dashboardData.sellers[0];
   const meetings = getInternalMeetingsForSeller(seller);
   const meeting = meetings.find((item) => meetingToSlug(item.id) === meetingId) || meetings[0];
@@ -728,15 +772,6 @@ function SellerMeetingDetailContent({ dashboardData, sellerSlug, meetingId }) {
               ? `Novo registro interno para ${seller.name}, preparado para posterior sincronizacao com a HubSpot.`
               : `${meeting.date} · ${meeting.time} · ${meeting.type}`}
           </p>
-        </div>
-        <div className={styles.sellerMeetingActions}>
-          <button
-            type="button"
-            className={styles.secondaryActionButton}
-            onClick={() => router.push(`/vendedores/${sellerSlug}/reunioes`)}
-          >
-            Voltar para lista
-          </button>
         </div>
       </header>
 
@@ -812,9 +847,42 @@ function SellerMeetingDetailContent({ dashboardData, sellerSlug, meetingId }) {
             </div>
           ) : (
             <div className={styles.meetingDetailStack}>
+              <div className={styles.meetingDetailActions}>
+                <button
+                  type="button"
+                  className={styles.primaryActionButton}
+                  onClick={() => setShowAiAnalysis((value) => !value)}
+                >
+                  <SparkIcon />
+                  <span>{showAiAnalysis ? "Ocultar analise da IA" : "Analisar com IA"}</span>
+                </button>
+              </div>
               <Row label="Responsavel" value={meeting.owner} />
               <Row label="Tipo" value={meeting.type} />
               <Row label="Resumo" value={meeting.summary} />
+              {showAiAnalysis ? (
+                <div className={styles.meetingAiPanel}>
+                  <strong>Analise da IA</strong>
+                  <p>
+                    A reuniao indica foco em previsibilidade de receita e em proximos passos por conta.
+                    Recomendacao: registrar todos os follow-ups no HubSpot em ate 24h e revisar negocios
+                    parados antes do proximo ritual.
+                  </p>
+                </div>
+              ) : null}
+              <div className={styles.meetingAudioPanel}>
+                <strong>Audio da reuniao</strong>
+                {meeting.audioUrl ? (
+                  <div className={styles.meetingAudioPlayer}>
+                    <span>{meeting.audioLabel || "Gravacao disponivel"}</span>
+                    <audio controls preload="none" src={meeting.audioUrl}>
+                      Seu navegador nao suporta audio.
+                    </audio>
+                  </div>
+                ) : (
+                  <p>Nenhum audio disponivel para esta reuniao.</p>
+                )}
+              </div>
             </div>
           )}
         </Card>
@@ -933,6 +1001,7 @@ function SellersContent({ dashboardData }) {
 
 function SellerProfileContent({ dashboardData, sellerSlug }) {
   const router = useRouter();
+  const [selectedStage, setSelectedStage] = useState("");
   const seller = dashboardData.sellers.find((item) => sellerToSlug(item.name) === sellerSlug) || dashboardData.sellers[0];
   const sellerDeals = dashboardData.deals.filter((deal) => deal.owner === seller.name);
   const conversionRate = seller.openDeals + seller.wonDeals > 0
@@ -963,6 +1032,11 @@ function SellerProfileContent({ dashboardData, sellerSlug }) {
   ];
   const maxKanbanCount = Math.max(1, ...kanbanColumns.map((column) => column.count));
 
+  const stageMatches = (dealStage, stageTitle) => dealStage.toLowerCase().includes(stageTitle.toLowerCase());
+  const stageDeals = selectedStage
+    ? sellerDeals.filter((deal) => stageMatches(deal.stage, selectedStage))
+    : [];
+
   return (
     <section className={styles.dashboardSection}>
       <header className={styles.sellerDetailHeader}>
@@ -971,16 +1045,16 @@ function SellerProfileContent({ dashboardData, sellerSlug }) {
           <div className={`${styles.settingsHeader} ${styles.sellerDetailHeaderBlock}`.trim()}>
             <h1>{seller.name}</h1>
             <p>{seller.team}</p>
-            <div className={styles.sellerMeetingActions}>
-              <button
-                type="button"
-                className={styles.primaryActionButton}
-                onClick={() => router.push(`/vendedores/${sellerSlug}/reunioes`)}
-              >
-                <MeetingIcon />
-                <span>Reunioes internas</span>
-              </button>
-            </div>
+          </div>
+          <div className={`${styles.sellerMeetingActions} ${styles.sellerProfileMeetingActions}`.trim()}>
+            <button
+              type="button"
+              className={styles.primaryActionButton}
+              onClick={() => router.push(`/vendedores/${sellerSlug}/reunioes`)}
+            >
+              <MeetingIcon />
+              <span>Reunioes internas</span>
+            </button>
           </div>
         </div>
       </header>
@@ -988,7 +1062,7 @@ function SellerProfileContent({ dashboardData, sellerSlug }) {
       <div className={styles.grid}>
         <Card eyebrow="GERAL" title="Visao geral do pipeline" wide>
           <div className={styles.metrics}>
-            <Metric title="Negocios abertos" value={`${seller.openDeals}`} note="Carteira ativa na HubSpot" />
+            <Metric title="Negocios abertos" value={`${seller.openDeals}`} />
             <Metric
               title="Valor total na pipeline"
               value={new Intl.NumberFormat("pt-BR", {
@@ -996,14 +1070,18 @@ function SellerProfileContent({ dashboardData, sellerSlug }) {
                 currency: "BRL",
                 maximumFractionDigits: 0,
               }).format(totalPipelineValue)}
-              note="Potencial financeiro atual"
             />
-            <Metric title="Tarefas a fazer" value={`${pendingTasks}`} note="Negocios sem proximo passo recente" />
-            <Metric title="Status motivacao" value={motivationStatus} note="Leitura geral de ritmo e desempenho" />
+            <Metric title="Tarefas a fazer" value={`${pendingTasks}`} />
+            <Metric title="Status motivacao" value={motivationStatus} />
           </div>
           <div className={styles.pipelineStageChart}>
             {kanbanColumns.map((column) => (
-              <article key={column.title} className={styles.pipelineStageBarCard}>
+              <button
+                key={column.title}
+                type="button"
+                className={styles.pipelineStageBarCard}
+                onClick={() => setSelectedStage(column.title)}
+              >
                 <div className={styles.pipelineStageBarWrap}>
                   <div
                     className={styles.pipelineStageBar}
@@ -1012,7 +1090,7 @@ function SellerProfileContent({ dashboardData, sellerSlug }) {
                 </div>
                 <strong>{column.count}</strong>
                 <span>{column.title}</span>
-              </article>
+              </button>
             ))}
           </div>
         </Card>
@@ -1069,10 +1147,14 @@ function SellerProfileContent({ dashboardData, sellerSlug }) {
         <Card eyebrow="NEGOCIOS" title="Pipeline do vendedor" wide>
           <div className={styles.dealList}>
             {sellerDeals.length ? sellerDeals.map((deal) => (
-              <article key={deal.id} className={styles.dealListItem}>
+              <article key={deal.id} className={`${styles.dealListItem} ${styles.sellerDealListItem}`.trim()}>
                 <div className={styles.dealIdentity}>
                   <strong>{deal.name}</strong>
-                  <span>{deal.stage}</span>
+                  <span>{deal.owner}</span>
+                </div>
+                <div className={styles.dealMeta}>
+                  <strong>{deal.stage}</strong>
+                  <span>Etapa da pipeline</span>
                 </div>
                 <div className={styles.dealMeta}>
                   <strong>{deal.amountLabel}</strong>
@@ -1087,6 +1169,53 @@ function SellerProfileContent({ dashboardData, sellerSlug }) {
           </div>
         </Card>
       </div>
+
+      {selectedStage ? (
+        <div
+          className={styles.stageModalBackdrop}
+          role="presentation"
+          onClick={() => setSelectedStage("")}
+        >
+          <div
+            className={styles.stageModal}
+            role="dialog"
+            aria-modal="true"
+            aria-label={`Negocios em ${selectedStage}`}
+            onClick={(event) => event.stopPropagation()}
+          >
+            <header className={styles.stageModalHeader}>
+              <div>
+                <span>ETAPA</span>
+                <h3>{selectedStage}</h3>
+                <p>{seller.name} · {stageDeals.length} negocio(s)</p>
+              </div>
+              <button
+                type="button"
+                className={styles.secondaryActionButton}
+                onClick={() => setSelectedStage("")}
+              >
+                Fechar
+              </button>
+            </header>
+            <div className={styles.stageModalList}>
+              {stageDeals.length ? stageDeals.map((deal) => (
+                <article key={deal.id} className={styles.stageModalItem}>
+                  <div>
+                    <strong>{deal.name}</strong>
+                    <span>{deal.owner}</span>
+                  </div>
+                  <div>
+                    <strong>{deal.amountLabel}</strong>
+                    <span>{deal.staleLabel}</span>
+                  </div>
+                </article>
+              )) : (
+                <p className={styles.sellerDetailNote}>Nenhum negocio nesta etapa para este vendedor.</p>
+              )}
+            </div>
+          </div>
+        </div>
+      ) : null}
     </section>
   );
 }
