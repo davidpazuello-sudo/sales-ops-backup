@@ -115,7 +115,8 @@ function BaseIcon({ children }) {
 function getNavIcon(id) {
   if (id === "reports") return <BaseIcon><path d="M6 18V11" /><path d="M11 18V7" /><path d="M16 18V13" /></BaseIcon>;
   if (id === "sellers") return <BaseIcon><circle cx="9" cy="8" r="3" /><path d="M4 17c0-2.4 2.2-4.3 5-4.3s5 1.9 5 4.3" /><circle cx="17" cy="9" r="2.3" /><path d="M14.6 16.2c.6-1.5 2-2.5 3.7-2.5.8 0 1.5.2 2.1.5" /></BaseIcon>;
-  return <BaseIcon><rect x="4" y="6" width="16" height="12" rx="1.5" /><path d="M12 6v12" /><path d="M4 10h16" /></BaseIcon>;
+  if (id === "deals") return <BaseIcon><rect x="4" y="6" width="16" height="12" rx="1.5" /><path d="M12 6v12" /><path d="M4 10h16" /></BaseIcon>;
+  return <BaseIcon><path d="M12 8.6A3.4 3.4 0 1 0 12 15.4A3.4 3.4 0 1 0 12 8.6z" /><path d="M19 12a7.2 7.2 0 0 0-.1-1l1.9-1.4-1.8-3.2-2.3 1a7.7 7.7 0 0 0-1.7-1l-.3-2.4H10l-.4 2.4a7.7 7.7 0 0 0-1.7 1l-2.3-1-1.8 3.2L5.7 11a7.2 7.2 0 0 0 0 2l-1.9 1.4 1.8 3.2 2.3-1c.5.4 1.1.7 1.7 1l.4 2.4h4.6l.3-2.4c.6-.2 1.2-.6 1.7-1l2.3 1 1.8-3.2L18.9 13c.1-.3.1-.7.1-1z" /></BaseIcon>;
 }
 
 export default function AIAgentPage() {
@@ -284,7 +285,7 @@ export default function AIAgentPage() {
         </div>
         <div>
           <button type="button" onClick={() => openMainView("settings")} className={`${styles.navItem} ${styles.settingsItem}`.trim()} title={collapsed ? "Configurações" : undefined}>
-            <span className={styles.navIcon}><SparkIcon /></span>
+            <span className={styles.navIcon}>{getNavIcon("settings")}</span>
             <span className={styles.navLabel}>Configurações</span>
           </button>
           <button type="button" className={styles.profileBox} onClick={() => openMainView("profile")}>
@@ -321,17 +322,15 @@ export default function AIAgentPage() {
             </aside>
 
             <section className={styles.chatPanel}>
-              <div className={styles.panelHeader}>
-                <h2>Chat do agente</h2>
-              </div>
-
-              <div className={styles.promptRow}>
-                {suggestedPrompts.map((prompt) => (
-                  <button key={prompt} type="button" className={styles.promptChip} onClick={() => submitQuestion(prompt)}>
-                    {prompt}
-                  </button>
-                ))}
-              </div>
+              {messages.length === 0 ? (
+                <div className={styles.promptRow}>
+                  {suggestedPrompts.map((prompt) => (
+                    <button key={prompt} type="button" className={styles.promptChip} onClick={() => submitQuestion(prompt)}>
+                      {prompt}
+                    </button>
+                  ))}
+                </div>
+              ) : null}
 
               <div className={styles.chatStream}>
                 {messages.map((message) => (

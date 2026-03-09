@@ -712,12 +712,11 @@ function DealsContent({ dashboardData }) {
             onDrop={() => handleDropStage(column.stage)}
           >
             <header className={styles.pipelineColumnHeader}>
-              <div>
+              <div className={styles.pipelineColumnTitleBlock}>
                 <span>{column.stage}</span>
-                {!collapsedStages[column.stage] ? <strong>{column.totalLabel}</strong> : null}
               </div>
               <div className={styles.pipelineColumnActions}>
-                <small>{column.count} negócio(s)</small>
+                <small>{column.count}</small>
                 <button
                   type="button"
                   className={styles.pipelineCollapseButton}
@@ -734,7 +733,6 @@ function DealsContent({ dashboardData }) {
             <div className={styles.pipelineColumnBody}>
               {collapsedStages[column.stage] ? (
                 <div className={styles.pipelineCollapsedSummary}>
-                  <span>{column.stage}</span>
                   <strong>{column.count}</strong>
                 </div>
               ) : null}
@@ -766,6 +764,10 @@ function DealsContent({ dashboardData }) {
                 </div>
               )}
             </div>
+            <footer className={styles.pipelineColumnFooter}>
+              <strong>{column.totalLabel}</strong>
+              <span>Valor total</span>
+            </footer>
           </article>
         ))}
       </section>
