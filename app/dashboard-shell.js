@@ -467,6 +467,33 @@ function MeetingIcon() {
   );
 }
 
+function AttachmentIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M9 12.5l6-6a3 3 0 1 1 4.2 4.2l-7.2 7.2a5 5 0 1 1-7.1-7.1l7.3-7.3" />
+    </svg>
+  );
+}
+
+function MicIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <rect x="9" y="3.5" width="6" height="11" rx="3" />
+      <path d="M6.5 11.5a5.5 5.5 0 0 0 11 0" />
+      <path d="M12 17v3.5" />
+    </svg>
+  );
+}
+
+function SendIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M3 11.5l17-8-5.3 17-2.4-6.8z" />
+      <path d="M12.3 13.7L20 3.5" />
+    </svg>
+  );
+}
+
 function BaseIcon({ children }) {
   return <svg viewBox="0 0 24 24" aria-hidden="true">{children}</svg>;
 }
@@ -932,7 +959,48 @@ function DealsContent({ dashboardData }) {
 
 function DealProfileContent({ dashboardData, dealId }) {
   const router = useRouter();
+  const [showAiSummary, setShowAiSummary] = useState(false);
+  const [dealAiMessage, setDealAiMessage] = useState("");
+  const [dealAiAttachments, setDealAiAttachments] = useState([]);
   const deal = findDealByRouteId(dashboardData.deals, dealId);
+
+  const completedTasks = [
+    { id: "sync", title: "Sincroniza\u00e7\u00e3o com HubSpot conclu\u00edda", when: "Hoje, 09:12" },
+    { id: "touch", title: "Atualiza\u00e7\u00e3o de etapa registrada", when: "Hoje, 10:40" },
+    { id: "contact", title: "Contato com decisor principal validado", when: "Ontem, 16:25" },
+  ];
+
+  const completedAttachments = [
+    { id: "a1", name: "gravacao-reuniao.mp3", note: "Grava\u00e7\u00e3o da \u00faltima call" },
+    { id: "a2", name: "resumo-comercial.pdf", note: "Resumo enviado para aprova\u00e7\u00e3o" },
+    { id: "a3", name: "proposta-v3.docx", note: "Vers\u00e3o final da proposta" },
+  ];
+
+  const upcomingTasks = [
+    { id: "n1", title: "Enviar follow-up com pr\u00f3ximos passos", due: "Hoje, 18:00" },
+    { id: "n2", title: "Revisar obje\u00e7\u00f5es comerciais com gestor", due: "Amanh\u00e3, 10:00" },
+    { id: "n3", title: "Agendar reuni\u00e3o de valida\u00e7\u00e3o final", due: "Quinta, 14:30" },
+  ];
+
+  const handleDealAiAttachments = (event) => {
+    const files = Array.from(event.target.files || []);
+    if (!files.length) return;
+
+    setDealAiAttachments((current) => [
+      ...current,
+      ...files.map((file) => ({
+        id: `${file.name}-${file.size}-${file.lastModified}`,
+        name: file.name,
+        sizeLabel: `${Math.max(1, Math.round(file.size / 1024))} KB`,
+      })),
+    ]);
+
+    event.target.value = "";
+  };
+
+  const removeDealAiAttachment = (attachmentId) => {
+    setDealAiAttachments((current) => current.filter((attachment) => attachment.id !== attachmentId));
+  };
 
   if (!deal) {
     return (
@@ -974,13 +1042,116 @@ function DealProfileContent({ dashboardData, dealId }) {
           <Row label="Navegação" value="Voltar ao pipeline" helper="Clique abaixo para retornar" />
           <button
             type="button"
+            className={styles.primaryActionButton}
+            onClick={() => setShowAiSummary(true)}
+          >
+            <SparkIcon />
+            <span>{"Resumo com IA"}</span>
+          </button>
+          <button
+            type="button"
             className={styles.secondaryActionButton}
             onClick={() => router.push("/negocios")}
           >
             Abrir Pipeline
           </button>
         </Card>
+
+        <Card eyebrow="REGISTROS" title={"Tarefas realizadas e anexos do negócio"}>
+          <div className={styles.dealTaskList}>
+            {completedTasks.map((task) => (
+              <div key={task.id} className={styles.dealTaskItem}>
+                <div className={styles.dealTaskMeta}>
+                  <strong>{task.title}</strong>
+                  <span>{task.when}</span>
+                </div>
+                <span className={styles.dealTaskStatus}>Concluída</span>
+              </div>
+            ))}
+          </div>
+
+          <div className={styles.dealAttachmentBlock}>
+            <strong>Anexos do negócio</strong>
+            <div className={styles.dealAttachmentList}>
+              {completedAttachments.map((attachment) => (
+                <div key={attachment.id} className={styles.dealAttachmentItem}>
+                  <div className={styles.dealAttachmentMeta}>
+                    <strong>{attachment.name}</strong>
+                    <span>{attachment.note}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </Card>
+
+        <Card eyebrow="PLANEJAMENTO" title={"Próximas tarefas"}>
+          <div className={styles.dealTaskList}>
+            {upcomingTasks.map((task) => (
+              <div key={task.id} className={styles.dealTaskItem}>
+                <div className={styles.dealTaskMeta}>
+                  <strong>{task.title}</strong>
+                  <span>{task.due}</span>
+                </div>
+                <span className={styles.dealTaskNext}>Pendente</span>
+              </div>
+            ))}
+          </div>
+        </Card>
       </div>
+
+      {showAiSummary ? (
+        <div className={styles.grid}>
+          <Card eyebrow="IA" title={"Resumo com IA"} wide>
+            <div className={styles.dealAiSummaryBox}>
+              <strong>Resumo pela IA</strong>
+              <p>
+                {"Negócio em andamento com boa aderência de escopo e evolução de etapa. Recomendação: reforçar próximo compromisso com decisor e registrar objeções finais para acelerar fechamento."}
+              </p>
+            </div>
+
+            <div className={styles.dealAiComposer}>
+              <label className={styles.dealAiComposerButton}>
+                <AttachmentIcon />
+                <input type="file" multiple className={styles.hiddenFileInput} onChange={handleDealAiAttachments} />
+              </label>
+              <button type="button" className={styles.dealAiComposerButton} aria-label={"Gravar áudio para IA"}>
+                <MicIcon />
+              </button>
+              <input
+                className={styles.dealAiInput}
+                value={dealAiMessage}
+                onChange={(event) => setDealAiMessage(event.target.value)}
+                placeholder={"Pergunte para IA sobre riscos, próximas ações e prioridades deste negócio..."}
+              />
+              <button type="button" className={styles.dealAiSendButton} aria-label={"Enviar mensagem para IA"}>
+                <SendIcon />
+                <span>Enviar</span>
+              </button>
+            </div>
+
+            {dealAiAttachments.length ? (
+              <div className={styles.dealAttachmentList}>
+                {dealAiAttachments.map((attachment) => (
+                  <div key={attachment.id} className={styles.dealAttachmentItem}>
+                    <div className={styles.dealAttachmentMeta}>
+                      <strong>{attachment.name}</strong>
+                      <span>{attachment.sizeLabel}</span>
+                    </div>
+                    <button
+                      type="button"
+                      className={styles.meetingAttachmentRemove}
+                      onClick={() => removeDealAiAttachment(attachment.id)}
+                    >
+                      Remover
+                    </button>
+                  </div>
+                ))}
+              </div>
+            ) : null}
+          </Card>
+        </div>
+      ) : null}
     </section>
   );
 }

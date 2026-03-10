@@ -1348,7 +1348,7 @@
   border-radius: 4px;
   background: #f9fbfd;
   border: 1px solid #d5dce6;
-  cursor: grab;
+  cursor: pointer;
   transition:
     transform var(--motion-fast) ease,
     box-shadow var(--motion-fast) ease,
@@ -1715,6 +1715,201 @@
   margin-top: 14px;
 }
 
+.dealTaskList {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.dealTaskItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid color-mix(in srgb, var(--border) 88%, transparent);
+  border-radius: 12px;
+  background: linear-gradient(180deg, var(--panel), var(--panel-soft));
+}
+
+.dealTaskMeta {
+  display: grid;
+  gap: 4px;
+}
+
+.dealTaskMeta strong {
+  color: var(--heading);
+  font-size: calc(12px * var(--font-scale));
+}
+
+.dealTaskMeta span {
+  color: var(--muted);
+  font-size: calc(11px * var(--font-scale));
+}
+
+.dealTaskStatus,
+.dealTaskNext {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 24px;
+  padding: 0 10px;
+  border-radius: 999px;
+  font-size: calc(10px * var(--font-scale));
+  font-weight: 800;
+}
+
+.dealTaskStatus {
+  background: rgba(31, 136, 61, 0.12);
+  color: #1f883d;
+}
+
+.dealTaskNext {
+  background: rgba(222, 131, 0, 0.16);
+  color: var(--accent);
+}
+
+.dealAttachmentBlock {
+  display: grid;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.dealAttachmentBlock > strong {
+  color: var(--heading);
+  font-size: calc(12px * var(--font-scale));
+}
+
+.dealAttachmentList {
+  display: grid;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.dealAttachmentItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--panel);
+  border: 1px solid color-mix(in srgb, var(--border) 88%, transparent);
+}
+
+.dealAttachmentMeta {
+  display: grid;
+  gap: 4px;
+}
+
+.dealAttachmentMeta strong {
+  color: var(--heading);
+  font-size: calc(12px * var(--font-scale));
+}
+
+.dealAttachmentMeta span {
+  color: var(--muted);
+  font-size: calc(11px * var(--font-scale));
+}
+
+.dealAiSummaryBox {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+  padding: calc(12px * var(--density-scale)) calc(14px * var(--density-scale));
+  border-radius: 14px;
+  background: linear-gradient(180deg, var(--panel), var(--panel-soft));
+  border: 1px solid color-mix(in srgb, var(--border) 88%, transparent);
+}
+
+.dealAiSummaryBox strong {
+  color: var(--heading);
+  font-size: calc(12px * var(--font-scale));
+}
+
+.dealAiSummaryBox p {
+  margin: 0;
+  color: var(--muted);
+  font-size: calc(12px * var(--font-scale));
+  line-height: 1.65;
+}
+
+.dealAiComposer {
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dealAiComposerButton {
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--panel);
+  color: var(--muted);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.dealAiComposerButton svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.dealAiInput {
+  flex: 1;
+  min-width: 0;
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--panel);
+  color: var(--text);
+  font: inherit;
+  outline: none;
+}
+
+.dealAiInput:focus {
+  border-color: rgba(222, 131, 0, 0.58);
+  box-shadow: 0 0 0 4px rgba(222, 131, 0, 0.08);
+}
+
+.dealAiSendButton {
+  height: 40px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 10px;
+  background: var(--accent);
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.dealAiSendButton svg {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.dealAiSendButton span {
+  font-size: calc(12px * var(--font-scale));
+  font-weight: 700;
+}
+
 .dealListItem {
   display: grid;
   grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr) minmax(0, 0.8fr);
@@ -2006,7 +2201,7 @@
   inset: 0;
   background: rgba(15, 23, 42, 0.12);
   backdrop-filter: blur(3px);
-  z-index: 35;
+  z-index: 220;
 }
 
 .notificationsPanel {
@@ -2020,6 +2215,7 @@
   box-shadow: -24px 0 44px rgba(15, 23, 42, 0.14);
   display: grid;
   grid-template-rows: auto auto auto 1fr;
+  z-index: 221;
 }
 
 .notificationsTopBar {
@@ -2476,7 +2672,10 @@
   .preferenceRow,
   .photoOption,
   .dealListItem,
-  .meetingRow {
+  .meetingRow,
+  .dealTaskItem,
+  .dealAttachmentItem,
+  .dealAiComposer {
     flex-direction: column;
     align-items: flex-start;
   }
@@ -2489,6 +2688,10 @@
   .detailValueBox {
     align-items: flex-start;
     text-align: left;
+  }
+
+  .dealAiInput {
+    width: 100%;
   }
 
   .photoAction,
