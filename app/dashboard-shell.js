@@ -1749,13 +1749,12 @@ export default function DashboardShell({
           </button>
           <button
             type="button"
-            className={styles.searchActionButton}
+            className={styles.topbarButton}
             aria-label="Pesquisa geral com IA"
             title="Pesquisa geral com IA"
             onClick={() => setGlobalSearchOpen(true)}
           >
             <SearchIcon />
-            <span>Pesquisa IA</span>
           </button>
           <button type="button" className={styles.aiButton} onClick={() => router.push("/ai-agent")} title="Agente de IA para análise completa do sistema respeitando perfil e acesso">
             <SparkIcon />

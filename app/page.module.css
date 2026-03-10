@@ -54,7 +54,6 @@
 
 .topbarButton,
 .aiButton,
-.searchActionButton,
 .logoutButton,
 .dropdownItem,
 .navItem,
@@ -106,21 +105,8 @@
   background: var(--accent-soft);
 }
 
-.searchActionButton {
-  height: 30px;
-  padding: 0 12px;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  color: var(--heading);
-  background: var(--panel);
-}
-
 .topbarButton:hover,
 .aiButton:hover,
-.searchActionButton:hover,
 .logoutButton:hover,
 .topbarButtonActive,
 .dropdownItem:hover,
@@ -131,7 +117,6 @@
 
 .topbarButton svg,
 .aiButton svg,
-.searchActionButton svg,
 .logoutButton svg,
 .navIcon svg,
 .settingsSidebarIcon svg,
@@ -165,8 +150,7 @@
   stroke-width: 1.9;
 }
 
-.aiButton span,
-.searchActionButton span {
+.aiButton span {
   font-size: calc(12px * var(--font-scale));
   font-weight: 700;
 }
@@ -2529,9 +2513,6 @@
     display: none;
   }
 
-  .searchActionButton span {
-    display: none;
-  }
 }
 
 @media (max-width: 640px) {
