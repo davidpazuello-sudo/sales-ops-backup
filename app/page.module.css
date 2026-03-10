@@ -1810,6 +1810,12 @@
   gap: 4px;
 }
 
+.dealAttachmentLink {
+  display: block;
+  width: 100%;
+  text-decoration: none;
+}
+
 .dealAttachmentMeta strong {
   color: var(--heading);
   font-size: calc(12px * var(--font-scale));

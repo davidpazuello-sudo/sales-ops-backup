@@ -971,9 +971,9 @@ function DealProfileContent({ dashboardData, dealId }) {
   ];
 
   const completedAttachments = [
-    { id: "a1", name: "gravacao-reuniao.mp3", note: "Grava\u00e7\u00e3o da \u00faltima call" },
-    { id: "a2", name: "resumo-comercial.pdf", note: "Resumo enviado para aprova\u00e7\u00e3o" },
-    { id: "a3", name: "proposta-v3.docx", note: "Vers\u00e3o final da proposta" },
+    { id: "a1", name: "gravacao-reuniao.mp3", note: "Grava\u00e7\u00e3o da \u00faltima call", url: "/anexos-negocio/gravacao-reuniao.html" },
+    { id: "a2", name: "resumo-comercial.pdf", note: "Resumo enviado para aprova\u00e7\u00e3o", url: "/anexos-negocio/resumo-comercial.html" },
+    { id: "a3", name: "proposta-v3.docx", note: "Vers\u00e3o final da proposta", url: "/anexos-negocio/proposta-v3.html" },
   ];
 
   const upcomingTasks = [
@@ -1129,10 +1129,12 @@ function DealProfileContent({ dashboardData, dealId }) {
             <div className={styles.dealAttachmentList}>
               {completedAttachments.map((attachment) => (
                 <div key={attachment.id} className={styles.dealAttachmentItem}>
-                  <div className={styles.dealAttachmentMeta}>
-                    <strong>{attachment.name}</strong>
-                    <span>{attachment.note}</span>
-                  </div>
+                  <a className={styles.dealAttachmentLink} href={attachment.url} target="_blank" rel="noreferrer">
+                    <div className={styles.dealAttachmentMeta}>
+                      <strong>{attachment.name}</strong>
+                      <span>{attachment.note}</span>
+                    </div>
+                  </a>
                 </div>
               ))}
             </div>
