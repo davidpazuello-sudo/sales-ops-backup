@@ -1879,9 +1879,20 @@ export default function DashboardShell({
             className={styles.notificationsPanel}
             role="dialog"
             aria-modal="true"
-            aria-label="Notificacoes"
+            aria-label={"Notifica\u00e7\u00f5es"}
             onClick={(event) => event.stopPropagation()}
           >
+            <div className={styles.notificationsTopBar}>
+              <h2>{"Notifica\u00e7\u00f5es"}</h2>
+              <button
+                type="button"
+                className={styles.notificationsClose}
+                onClick={() => setNotificationsOpen(false)}
+                aria-label={"Fechar notifica\u00e7\u00f5es"}
+              >
+                &times;
+              </button>
+            </div>
             <header className={styles.notificationsHeader}>
               <h2>Notificações</h2>
               <button type="button" className={styles.notificationsClose} onClick={() => setNotificationsOpen(false)} aria-label="Fechar notificações">

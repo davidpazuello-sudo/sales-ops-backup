@@ -2022,6 +2022,41 @@
   grid-template-rows: auto auto auto 1fr;
 }
 
+.notificationsTopBar {
+  min-height: 84px;
+  padding: 0 22px 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #10b7c3;
+  color: #ffffff;
+}
+
+.notificationsTopBar h2 {
+  margin: 0;
+  font-size: 2.05rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.notificationsTopBar .notificationsClose {
+  width: auto;
+  height: auto;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  background: transparent;
+  color: #ffffff;
+  font-size: 48px;
+  font-weight: 300;
+  line-height: 1;
+}
+
+.notificationsTopBar .notificationsClose:hover {
+  background: transparent;
+  opacity: 0.88;
+}
+
 .globalSearchBackdrop {
   position: fixed;
   inset: 0;
@@ -2159,21 +2194,7 @@
 }
 
 .notificationsHeader {
-  min-height: 68px;
-  padding: 0 20px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: linear-gradient(180deg, #0f2747 0%, #15375f 100%);
-  color: #f8fbff;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.notificationsHeader h2 {
-  margin: 0;
-  font-size: 1rem;
-  font-weight: 800;
-  letter-spacing: -0.02em;
+  display: none;
 }
 
 .notificationsClose {
