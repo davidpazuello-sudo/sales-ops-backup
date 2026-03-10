@@ -1268,7 +1268,7 @@
   flex: 0 0 272px;
   width: 272px;
   gap: 8px;
-  min-height: 360px;
+  min-height: 460px;
   padding: 0;
   border-radius: 6px;
   background: #eef2f6;
@@ -1283,7 +1283,7 @@
   width: 44px !important;
   min-width: 44px;
   max-width: 44px;
-  min-height: 360px;
+  min-height: 460px;
   padding: 0;
   justify-items: center;
   gap: 0;
@@ -2333,9 +2333,10 @@
 
 .notificationsTopBar h2 {
   margin: 0;
-  font-size: 2.05rem;
+  font-size: calc(2.05rem - 2px);
   font-weight: 800;
   letter-spacing: -0.02em;
+  color: #163d73;
 }
 
 .notificationsTopBar .notificationsClose {
