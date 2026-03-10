@@ -1235,9 +1235,30 @@
   outline: none;
 }
 
+.dealsFilterInput {
+  height: 36px;
+  padding: 0 10px;
+  border: 1px solid #c7d2df;
+  border-radius: 9px;
+  background: #f7f9fc;
+  color: var(--text);
+  font: inherit;
+  font-size: calc(12px * var(--font-scale));
+  outline: none;
+}
+
 .dealsFilterField select:focus {
   border-color: #a8bacf;
   box-shadow: 0 0 0 3px rgba(74, 105, 143, 0.12);
+}
+
+.dealsFilterInput:focus {
+  border-color: #a8bacf;
+  box-shadow: 0 0 0 3px rgba(74, 105, 143, 0.12);
+}
+
+.dealsFilterInput::placeholder {
+  color: color-mix(in srgb, var(--muted) 88%, white);
 }
 
 

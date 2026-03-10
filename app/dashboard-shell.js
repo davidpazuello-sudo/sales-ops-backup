@@ -1450,20 +1450,22 @@ function SellersContent({ dashboardData }) {
 
   return (
     <section className={styles.dashboardSection}>
-      <header className={styles.sellerPageHeader}>
-        <div className={styles.settingsHeader}>
-          <h1>Vendedores</h1>
-        </div>
-        <label className={styles.sellerFilterBox}>
+      <header className={styles.settingsHeader}>
+        <h1>Vendedores</h1>
+      </header>
+
+      <div className={styles.dealsFilters}>
+        <label className={styles.dealsFilterField}>
           <span>Filtrar por nome</span>
           <input
             type="text"
+            className={styles.dealsFilterInput}
             value={sellerFilter}
             onChange={(event) => setSellerFilter(event.target.value)}
             placeholder="Buscar vendedor"
           />
         </label>
-      </header>
+      </div>
 
       <div className={styles.sellerProfilesGrid}>
         {filteredSellers.map((seller) => {
