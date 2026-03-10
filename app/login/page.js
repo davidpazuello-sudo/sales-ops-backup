@@ -23,6 +23,13 @@ const qrCells = [
   "111111101111111",
 ];
 
+function hasClientSupabaseEnv() {
+  return Boolean(
+    process.env.NEXT_PUBLIC_SUPABASE_URL
+      && (process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY),
+  );
+}
+
 export default function LoginPage() {
   const router = useRouter();
   const [view, setView] = useState("login");
@@ -44,6 +51,7 @@ export default function LoginPage() {
 
   async function getSupabaseClientOrNull() {
     if (typeof window === "undefined") return null;
+    if (!hasClientSupabaseEnv()) return null;
 
     try {
       const { createClient } = await import("lib/supabase/client");
@@ -232,7 +240,7 @@ export default function LoginPage() {
 
     const supabase = await getSupabaseClientOrNull();
     if (!supabase) {
-      setLoginError("Supabase nao configurado neste ambiente.");
+      setLoginError("A autenticacao Supabase nao esta configurada corretamente neste ambiente publicado.");
       return;
     }
 
@@ -265,8 +273,10 @@ export default function LoginPage() {
         ? "Recuperar senha"
         : view === "firstAccess"
           ? "Primeiro acesso"
-          : view === "reset" && resetFlow === FIRST_ACCESS_MODE
-            ? "Defina sua senha"
+          : view === "reset"
+            ? resetFlow === FIRST_ACCESS_MODE
+              ? "Defina sua senha"
+              : "Redefinir senha"
             : "Boas-vindas de volta!";
 
   const pageDescription =
