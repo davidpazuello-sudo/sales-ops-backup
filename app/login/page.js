@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { createClient } from "lib/supabase/client";
 import styles from "./page.module.css";
 
 const qrCells = [
@@ -25,7 +24,6 @@ const qrCells = [
 
 export default function LoginPage() {
   const router = useRouter();
-  const supabase = createClient();
   const [view, setView] = useState("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -39,6 +37,17 @@ export default function LoginPage() {
   const [resetMessage, setResetMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [redirectPath, setRedirectPath] = useState("/relatorios");
+
+  async function getSupabaseClientOrNull() {
+    if (typeof window === "undefined") return null;
+
+    try {
+      const { createClient } = await import("lib/supabase/client");
+      return createClient();
+    } catch {
+      return null;
+    }
+  }
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -67,20 +76,33 @@ export default function LoginPage() {
   }, [redirectPath, router]);
 
   useEffect(() => {
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((event) => {
-      if (event === "PASSWORD_RECOVERY") {
-        setView("reset");
-        setLoginError("");
-        setForgotMessage("");
-      }
-    });
+    let subscription;
+    let cancelled = false;
+
+    async function bindRecoveryListener() {
+      const supabase = await getSupabaseClientOrNull();
+      if (!supabase || cancelled) return;
+
+      const {
+        data: { subscription: nextSubscription },
+      } = supabase.auth.onAuthStateChange((event) => {
+        if (event === "PASSWORD_RECOVERY") {
+          setView("reset");
+          setLoginError("");
+          setForgotMessage("");
+        }
+      });
+
+      subscription = nextSubscription;
+    }
+
+    bindRecoveryListener();
 
     return () => {
-      subscription.unsubscribe();
+      cancelled = true;
+      subscription?.unsubscribe();
     };
-  }, [supabase]);
+  }, []);
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -159,6 +181,12 @@ export default function LoginPage() {
     event.preventDefault();
     setResetMessage("");
     setLoginError("");
+
+    const supabase = await getSupabaseClientOrNull();
+    if (!supabase) {
+      setLoginError("Supabase nao configurado neste ambiente.");
+      return;
+    }
 
     if (!newPassword || newPassword.length < 8) {
       setLoginError("A nova senha precisa ter pelo menos 8 caracteres.");
