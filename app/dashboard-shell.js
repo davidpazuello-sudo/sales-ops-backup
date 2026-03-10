@@ -571,6 +571,7 @@ function DealsContent({ dashboardData }) {
   const [draggedDealId, setDraggedDealId] = useState("");
   const [ownerFilter, setOwnerFilter] = useState("todos");
   const [activityWeeksFilter, setActivityWeeksFilter] = useState("1");
+  const [dealSearch, setDealSearch] = useState("");
   const [collapsedStages, setCollapsedStages] = useState({});
   const skipCardClickRef = useRef(false);
   const stageOrder = [
@@ -642,7 +643,9 @@ function DealsContent({ dashboardData }) {
   const visibleDeals = boardDeals.filter((deal) => {
     const ownerMatch = ownerFilter === "todos" || deal.owner === ownerFilter;
     const activityMatch = parseStaleDays(deal.staleLabel) <= maxDays;
-    return ownerMatch && activityMatch;
+    const searchTarget = `${deal.name} ${deal.owner} ${deal.stage}`.toLowerCase();
+    const searchMatch = !dealSearch.trim() || searchTarget.includes(dealSearch.trim().toLowerCase());
+    return ownerMatch && activityMatch && searchMatch;
   });
 
   const stages = Array.from(new Set([...stageOrder, ...boardDeals.map((deal) => deal.stage)]));
@@ -724,6 +727,21 @@ function DealsContent({ dashboardData }) {
             <option value="4">4 semanas</option>
           </select>
         </label>
+      </div>
+
+      <div className={styles.pipelineToolbar}>
+        <div className={styles.pipelineSearchInputWrap}>
+          <input
+            type="text"
+            className={styles.pipelineSearchInput}
+            value={dealSearch}
+            onChange={(event) => setDealSearch(event.target.value)}
+            placeholder="Pesquisar nome ou descrição"
+          />
+        </div>
+        <button type="button" className={styles.pipelineToolbarButton}>
+          Opções do quadro
+        </button>
       </div>
 
       <section className={styles.pipelineBoard}>
