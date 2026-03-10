@@ -42,6 +42,8 @@ export default function LoginPage() {
   const [redirectPath, setRedirectPath] = useState("/relatorios");
   const [resetFlow, setResetFlow] = useState("password-recovery");
   const [supabaseConfig, setSupabaseConfig] = useState(null);
+  const [isPreparingRecovery, setIsPreparingRecovery] = useState(false);
+  const [isRecoverySessionReady, setIsRecoverySessionReady] = useState(false);
 
   async function getSupabaseClientOrNull() {
     if (typeof window === "undefined") return null;
@@ -79,6 +81,88 @@ export default function LoginPage() {
       setLoginError("Nao foi possivel validar a sessao agora. Tente novamente em instantes.");
     }
   }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function prepareRecoverySession() {
+      if (typeof window === "undefined" || !supabaseConfig) return;
+
+      const params = new URLSearchParams(window.location.search);
+      const hash = window.location.hash.startsWith("#")
+        ? new URLSearchParams(window.location.hash.slice(1))
+        : new URLSearchParams();
+      const hasRecoveryHash = hash.has("access_token") && hash.has("refresh_token");
+      const authCode = params.get("code");
+      const recoveryType = params.get("type") || hash.get("type");
+
+      if (!hasRecoveryHash && !authCode) {
+        return;
+      }
+
+      setIsPreparingRecovery(true);
+      setLoginError("");
+
+      const supabase = await getSupabaseClientOrNull();
+      if (!supabase || cancelled) {
+        setIsPreparingRecovery(false);
+        return;
+      }
+
+      try {
+        if (hasRecoveryHash) {
+          const { error } = await supabase.auth.setSession({
+            access_token: hash.get("access_token"),
+            refresh_token: hash.get("refresh_token"),
+          });
+
+          if (error) {
+            throw error;
+          }
+        } else if (authCode) {
+          const { error } = await supabase.auth.exchangeCodeForSession(authCode);
+          if (error) {
+            throw error;
+          }
+        }
+
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+
+        if (!session) {
+          throw new Error("Auth session missing!");
+        }
+
+        if (!cancelled) {
+          setIsRecoverySessionReady(true);
+          setView("reset");
+          setResetFlow(recoveryType === FIRST_ACCESS_MODE ? FIRST_ACCESS_MODE : "password-recovery");
+
+          const cleanUrl = new URL(window.location.href);
+          cleanUrl.hash = "";
+          cleanUrl.searchParams.delete("code");
+          cleanUrl.searchParams.delete("type");
+          window.history.replaceState({}, "", cleanUrl.toString());
+        }
+      } catch (error) {
+        if (!cancelled) {
+          setIsRecoverySessionReady(false);
+          setLoginError(error?.message || "Nao foi possivel validar o link de recuperacao.");
+        }
+      } finally {
+        if (!cancelled) {
+          setIsPreparingRecovery(false);
+        }
+      }
+    }
+
+    prepareRecoverySession();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [supabaseConfig]);
 
   useEffect(() => {
     let cancelled = false;
@@ -132,6 +216,7 @@ export default function LoginPage() {
       } = supabase.auth.onAuthStateChange((event) => {
         if (event === "PASSWORD_RECOVERY") {
           setView("reset");
+          setIsRecoverySessionReady(true);
           setLoginError("");
           setForgotMessage("");
           setFirstAccessMessage("");
@@ -255,6 +340,11 @@ export default function LoginPage() {
     const supabase = await getSupabaseClientOrNull();
     if (!supabase) {
       setLoginError("A autenticacao Supabase nao esta configurada corretamente neste ambiente publicado.");
+      return;
+    }
+
+    if (!isRecoverySessionReady) {
+      setLoginError("Ainda estamos validando o link de recuperacao. Aguarde alguns instantes e tente novamente.");
       return;
     }
 
@@ -447,9 +537,16 @@ export default function LoginPage() {
                 </label>
 
                 {loginError ? <div className={styles.formError}>{loginError}</div> : null}
+                {isPreparingRecovery ? (
+                  <div className={styles.formInfo}>Validando o link seguro para liberar a redefinicao...</div>
+                ) : null}
                 {resetMessage ? <div className={styles.formInfo}>{resetMessage}</div> : null}
 
-                <button type="submit" className={styles.primaryButton}>
+                <button
+                  type="submit"
+                  className={styles.primaryButton}
+                  disabled={isPreparingRecovery}
+                >
                   {resetFlow === FIRST_ACCESS_MODE ? "Definir senha de acesso" : "Redefinir senha"}
                 </button>
               </form>
