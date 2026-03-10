@@ -2169,17 +2169,11 @@
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.notificationsHeader::before {
-  content: "Notifica\00e7\00f5es";
+.notificationsHeader h2 {
   margin: 0;
   font-size: 1rem;
   font-weight: 800;
   letter-spacing: -0.02em;
-  color: #f8fbff;
-}
-
-.notificationsHeader h2 {
-  display: none;
 }
 
 .notificationsClose {
