@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "check:copy": "node scripts/validate-copy.mjs",
+    "build": "npm run check:copy && next build",
     "start": "next start",
     "lint": "next lint"
   },
