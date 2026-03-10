@@ -4,8 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import styles from "./page.module.css";
 
-const STORAGE_KEY = "salesops-personalization";
-const PROFILE_PHOTO_KEY = "salesops-profile-photo";
+const STORAGE_KEY = "sales-ops-backup-personalization";
+const PROFILE_PHOTO_KEY = "sales-ops-backup-profile-photo";
 
 const navItems = [
   { id: "reports", label: "Relatórios" },

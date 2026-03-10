@@ -1176,9 +1176,7 @@
 }
 
 .pipelineBoard {
-  display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: minmax(272px, 272px);
+  display: flex;
   gap: 14px;
   align-items: start;
   overflow-x: auto;
@@ -1225,6 +1223,8 @@
 .pipelineColumn {
   display: grid;
   grid-template-rows: auto 1fr auto;
+  flex: 0 0 272px;
+  width: 272px;
   gap: 8px;
   min-height: 360px;
   padding: 0;
@@ -1237,6 +1237,7 @@
 
 .pipelineColumnCollapsed {
   grid-template-rows: auto 1fr auto;
+  flex: 0 0 44px;
   width: 44px;
   min-height: 360px;
   padding: 0;

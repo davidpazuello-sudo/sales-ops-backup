@@ -38,8 +38,8 @@ const workSans = Work_Sans({
 });
 
 export const metadata = {
-  title: "SalesOps",
-  description: "Painel comercial SalesOps",
+  title: "sales-ops-backup",
+  description: "Painel comercial sales-ops-backup",
 };
 
 export default function RootLayout({ children }) {
