@@ -962,6 +962,7 @@ function DealProfileContent({ dashboardData, dealId }) {
   const [showAiSummary, setShowAiSummary] = useState(false);
   const [dealAiMessage, setDealAiMessage] = useState("");
   const [dealAiAttachments, setDealAiAttachments] = useState([]);
+  const [activeAttachment, setActiveAttachment] = useState(null);
   const deal = findDealByRouteId(dashboardData.deals, dealId);
 
   const completedTasks = [
@@ -1000,6 +1001,14 @@ function DealProfileContent({ dashboardData, dealId }) {
 
   const removeDealAiAttachment = (attachmentId) => {
     setDealAiAttachments((current) => current.filter((attachment) => attachment.id !== attachmentId));
+  };
+
+  const openDealAttachment = (attachment) => {
+    setActiveAttachment(attachment);
+  };
+
+  const closeDealAttachmentPopup = () => {
+    setActiveAttachment(null);
   };
 
   if (!deal) {
@@ -1129,12 +1138,17 @@ function DealProfileContent({ dashboardData, dealId }) {
             <div className={styles.dealAttachmentList}>
               {completedAttachments.map((attachment) => (
                 <div key={attachment.id} className={styles.dealAttachmentItem}>
-                  <a className={styles.dealAttachmentLink} href={attachment.url} target="_blank" rel="noreferrer">
+                  <button
+                    type="button"
+                    className={styles.dealAttachmentLink}
+                    onClick={() => openDealAttachment(attachment)}
+                    aria-label={`Abrir anexo ${attachment.name}`}
+                  >
                     <div className={styles.dealAttachmentMeta}>
                       <strong>{attachment.name}</strong>
                       <span>{attachment.note}</span>
                     </div>
-                  </a>
+                  </button>
                 </div>
               ))}
             </div>
@@ -1155,6 +1169,35 @@ function DealProfileContent({ dashboardData, dealId }) {
           </div>
         </Card>
       </div>
+
+      {activeAttachment ? (
+        <div className={styles.attachmentPopupBackdrop} role="presentation" onClick={closeDealAttachmentPopup}>
+          <div
+            className={styles.attachmentPopup}
+            role="dialog"
+            aria-modal="true"
+            aria-label={`Anexo ${activeAttachment.name}`}
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className={styles.attachmentPopupHeader}>
+              <div>
+                <strong>{activeAttachment.name}</strong>
+                <span>{activeAttachment.note}</span>
+              </div>
+              <button type="button" className={styles.secondaryActionButton} onClick={closeDealAttachmentPopup}>
+                Fechar
+              </button>
+            </div>
+            <div className={styles.attachmentPopupContent}>
+              <iframe
+                title={activeAttachment.name}
+                src={activeAttachment.url}
+                className={styles.attachmentPopupFrame}
+              />
+            </div>
+          </div>
+        </div>
+      ) : null}
 
     </section>
   );

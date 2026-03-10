@@ -1813,7 +1813,17 @@
 .dealAttachmentLink {
   display: block;
   width: 100%;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  text-align: left;
+  font: inherit;
   text-decoration: none;
+  cursor: pointer;
+}
+
+.dealAttachmentLink:hover .dealAttachmentMeta strong {
+  text-decoration: underline;
 }
 
 .dealAttachmentMeta strong {
@@ -1922,6 +1932,64 @@
 .dealAiSendButton span {
   font-size: calc(12px * var(--font-scale));
   font-weight: 700;
+}
+
+.attachmentPopupBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 260;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(15, 23, 42, 0.24);
+  backdrop-filter: blur(4px);
+}
+
+.attachmentPopup {
+  width: min(1040px, 100%);
+  max-height: calc(100vh - 40px);
+  display: grid;
+  grid-template-rows: auto 1fr;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--panel);
+  box-shadow: 0 24px 44px rgba(15, 23, 42, 0.22);
+}
+
+.attachmentPopupHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.attachmentPopupHeader strong {
+  color: var(--heading);
+  font-size: calc(15px * var(--font-scale));
+}
+
+.attachmentPopupHeader span {
+  display: block;
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: calc(12px * var(--font-scale));
+}
+
+.attachmentPopupContent {
+  min-height: 320px;
+  border: 1px solid color-mix(in srgb, var(--border) 88%, transparent);
+  border-radius: 10px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.attachmentPopupFrame {
+  width: 100%;
+  height: min(72vh, 760px);
+  border: 0;
+  background: #fff;
 }
 
 .dealListItem {
