@@ -247,6 +247,8 @@ const defaultDashboardData = {
     owners: sellerProfiles.length,
     deals: sellerPerformanceRows.length,
     pipelineAmount: 620000,
+    profileEmail: "",
+    profileRole: "",
   },
   summary: {
     sellersActive: 18,
@@ -553,7 +555,7 @@ function Card({ eyebrow, title, children, wide = false }) {
   return (
     <section className={`${styles.card} ${wide ? styles.cardWide : ""}`.trim()}>
       <span className={styles.cardEyebrow}>{eyebrow}</span>
-      <h2 className={styles.cardTitle}>{title}</h2>
+      {title ? <h2 className={styles.cardTitle}>{title}</h2> : null}
       {children}
     </section>
   );
@@ -618,7 +620,11 @@ function PreferenceTable({ rows, values, onToggle }) {
 }
 
 function SettingsContent({ section, personalization, updatePersonalization, profilePhoto, onPhotoChange, dashboardData }) {
-  if (section === "account") return <div className={styles.grid}><Card eyebrow="PERFIL" title="Conta & Acesso"><PhotoOption profilePhoto={profilePhoto} onPhotoChange={onPhotoChange} /><Row label="Nome" value="Usuário SalesOps" /><Row label="Senha" value="Última troca há 14 dias" /><Row label="2FA" value="Obrigatório para gestão" helper="SMS + autenticador" /><Row label="Sessões ativas" value="5 dispositivos" helper="2 navegadores e 3 mobile" /></Card><Card eyebrow="PERMISSÕES" title="Permissões por cargo"><Table head={["Cargo", "Acesso"]} rows={permissionRows} /></Card></div>;
+  const profileEmail = dashboardData.integration?.profileEmail || "";
+  const profileRole = dashboardData.integration?.profileRole || "";
+  const profileHelper = [profileEmail, profileRole].filter(Boolean).join(" • ") || "Email e cargo vindos da HubSpot aparecerao aqui";
+
+  if (section === "account") return <div className={styles.grid}><Card eyebrow="PERFIL"><PhotoOption profilePhoto={profilePhoto} onPhotoChange={onPhotoChange} /><Row label="Nome" value="Usuário SalesOps" helper={profileHelper} /><Row label="Senha" value="Última troca há 14 dias" /><Row label="2FA" value="Obrigatório para gestão" helper="SMS + autenticador" /><Row label="Sessões ativas" value="5 dispositivos" helper="2 navegadores e 3 mobile" /></Card><Card eyebrow="PERMISSÕES" title="Permissões por cargo"><Table head={["Cargo", "Acesso"]} rows={permissionRows} /></Card></div>;
   if (section === "hubspot") return <div className={styles.grid}><Card eyebrow="STATUS" title="Integração HubSpot"><Row label="Conexão" value={dashboardData.configured ? dashboardData.integration.status : "Pendente"} helper={dashboardData.configured ? `${dashboardData.integration.owners} proprietarios e ${dashboardData.integration.deals} negocios sincronizados` : "Configure o token para sincronizar com a HubSpot"} /><Row label="Origem dos dados" value="HubSpot API" helper="Private app access token" /><Row label="Pipeline ativo" value={`R$ ${Math.round((dashboardData.integration.pipelineAmount || 0) / 1000)}k`} /></Card><Card eyebrow="MAPEAMENTO" title="Campos sincronizados" wide><Table head={["SalesOps", "HubSpot", "Status"]} rows={mappingRows} /></Card><Card eyebrow="LOG" title="Erros recentes"><Table head={["Hora", "Erro", "Gravidade"]} rows={dashboardData.configured ? [["Agora", "Sincronizacao via API operando", "Baixo"]] : errorRows} /></Card></div>;
   if (section === "notifications") return <div className={styles.grid}><Card eyebrow="CANAIS" title="Notificações & Alertas"><Row label="Email" value="Ativo" helper="comercial@salesops.ai" /><Row label="Push" value="Ativo" helper="Chrome + mobile" /><Row label="Resumo automático" value="Diário" /></Card><Card eyebrow="THRESHOLDS" title="Metas e thresholds" wide><div className={styles.metrics}>{metricRows.map((item) => <Metric key={item[0]} title={item[0]} value={item[1]} note={item[2]} />)}</div></Card></div>;
   if (section === "ai") return <div className={styles.grid}><Card eyebrow="MODELO" title="IA & Diagnósticos"><Row label="Modelo ativo" value="GPT SalesOps Analyst" /><Row label="Assistente de voz" value="Habilitado" /><Row label="Sensibilidade" value="Moderada" helper="menos ruído, mais sinais de risco" /></Card><Card eyebrow="DADOS" title="Dados que alimentam a IA" wide><div className={styles.tags}><span>Negócios</span><span>Atividades</span><span>Calls gravadas</span><span>Sentimento do vendedor</span><span>Próximas tarefas</span></div></Card></div>;
