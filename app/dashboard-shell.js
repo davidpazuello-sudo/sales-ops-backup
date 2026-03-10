@@ -8,10 +8,10 @@ const STORAGE_KEY = "sales-ops-backup-personalization";
 const PROFILE_PHOTO_KEY = "sales-ops-backup-profile-photo";
 
 const navItems = [
-  { id: "reports", label: "RelatÃ³rios" },
+  { id: "reports", label: "Relatórios" },
   { id: "sellers", label: "Vendedores" },
-  { id: "deals", label: "NegÃ³cios" },
-  { id: "settings", label: "ConfiguraÃ§Ãµes" },
+  { id: "deals", label: "Negócios" },
+  { id: "settings", label: "Configurações" },
 ];
 
 const topMenuItems = ["Arquivo", "Editar", "Visualizar", "Ajuda"];
@@ -36,8 +36,8 @@ const configShortcuts = {
 const globalSearchIndex = [
   {
     id: "reports",
-    label: "RelatÃ³rios",
-    description: "KPIs comerciais, forecast e visÃ£o consolidada do time.",
+    label: "Relatórios",
+    description: "KPIs comerciais, forecast e visão consolidada do time.",
     keywords: "kpi metricas metas forecast receita relatorio pipeline",
     route: "/relatorios",
   },
@@ -50,36 +50,36 @@ const globalSearchIndex = [
   },
   {
     id: "deals",
-    label: "NegÃ³cios",
-    description: "Pipeline comercial com estÃ¡gios e movimentaÃ§Ã£o de deals.",
+    label: "Negócios",
+    description: "Pipeline comercial com estágios e movimentação de deals.",
     keywords: "negocios oportunidades funil pipeline etapa card",
     route: "/negocios",
   },
   {
     id: "ai",
     label: "Agente de IA",
-    description: "AnÃ¡lise inteligente e perguntas sobre dados do sistema.",
+    description: "Análise inteligente e perguntas sobre dados do sistema.",
     keywords: "ia ai agente pergunta analise risco insight",
     route: "/ai-agent",
   },
   {
     id: "settings",
-    label: "ConfiguraÃ§Ãµes",
-    description: "IntegraÃ§Ãµes, notificaÃ§Ãµes, personalizaÃ§Ã£o e preferÃªncias.",
+    label: "Configurações",
+    description: "Integrações, notificações, personalização e preferências.",
     keywords: "configuracoes hubspot notificacoes preferencia conta",
     route: "/configuracoes",
   },
   {
     id: "profile",
     label: "Perfil",
-    description: "Dados da conta, foto e acessos do usuÃ¡rio.",
+    description: "Dados da conta, foto e acessos do usuário.",
     keywords: "perfil conta usuario acesso foto",
     route: "/perfil",
   },
   {
     id: "notifications",
-    label: "NotificaÃ§Ãµes",
-    description: "Abrir painel de notificaÃ§Ãµes e alertas recentes.",
+    label: "Notificações",
+    description: "Abrir painel de notificações e alertas recentes.",
     keywords: "notificacao alerta aviso",
     route: "",
   },
@@ -88,24 +88,24 @@ const globalSearchIndex = [
 const accountSection = {
   id: "account",
   label: "Conta & Acesso",
-  description: "Perfil, senha, 2FA, sessÃµes ativas e permissÃµes por cargo.",
+  description: "Perfil, senha, 2FA, sessões ativas e permissões por cargo.",
 };
 
 const configSections = [
-  { id: "hubspot", label: "IntegraÃ§Ã£o HubSpot", description: "Status da conexÃ£o, chave, sync, mapeamento e log de erros." },
-  { id: "notifications", label: "NotificaÃ§Ãµes & Alertas", description: "Canais, thresholds, metas e resumos automÃ¡ticos." },
-  { id: "ai", label: "IA & DiagnÃ³sticos", description: "Modelo ativo, voz, dados de contexto e sensibilidade diagnÃ³stica." },
+  { id: "hubspot", label: "Integração HubSpot", description: "Status da conexão, chave, sync, mapeamento e log de erros." },
+  { id: "notifications", label: "Notificações & Alertas", description: "Canais, thresholds, metas e resumos automáticos." },
+  { id: "ai", label: "IA & Diagnósticos", description: "Modelo ativo, voz, dados de contexto e sensibilidade diagnóstica." },
   { id: "personalize", label: "Personalizar", description: "Tema, fonte, escala, contraste e comportamento visual da interface." },
-  { id: "exports", label: "RelatÃ³rios & ExportaÃ§Ã£o", description: "Agendamento, formato, marca d'Ã¡gua e templates por cargo." },
-  { id: "storage", label: "GestÃ£o de MÃ­dia & Storage", description: "Uso, retenÃ§Ã£o, STT, indexaÃ§Ã£o e provedor com LGPD." },
-  { id: "compliance", label: "Auditoria & Compliance", description: "Trilha imutÃ¡vel, masking visual e governanÃ§a LGPD." },
+  { id: "exports", label: "Relatórios & Exportação", description: "Agendamento, formato, marca d'água e templates por cargo." },
+  { id: "storage", label: "Gestão de Mídia & Storage", description: "Uso, retenção, STT, indexação e provedor com LGPD." },
+  { id: "compliance", label: "Auditoria & Compliance", description: "Trilha imutável, masking visual e governança LGPD." },
 ];
 
 const permissionRows = [
   ["Admin", "Total"],
-  ["Gestor", "Dashboards, sync e relatÃ³rios"],
+  ["Gestor", "Dashboards, sync e relatórios"],
   ["Supervisor", "Coaching e auditoria"],
-  ["Vendedor", "Carteira prÃ³pria"],
+  ["Vendedor", "Carteira própria"],
 ];
 
 const mappingRows = [
@@ -115,14 +115,14 @@ const mappingRows = [
 ];
 
 const errorRows = [
-  ["09:42", "Rate limit no lote 18", "MÃ©dio"],
-  ["08:15", "owner_id sem correspondÃªncia", "Alto"],
+  ["09:42", "Rate limit no lote 18", "Médio"],
+  ["08:15", "owner_id sem correspondência", "Alto"],
 ];
 
 const metricRows = [
-  ["EstagnaÃ§Ã£o", "36h", "alerta por negÃ³cio parado"],
+  ["Estagnação", "36h", "alerta por negócio parado"],
   ["Meta", "92%", "gatilho para resumo semanal"],
-  ["Resumo", "18:30", "envio automÃ¡tico diÃ¡rio"],
+  ["Resumo", "18:30", "envio automático diário"],
 ];
 
 const reportRows = [
@@ -132,21 +132,21 @@ const reportRows = [
 ];
 
 const queueRows = [
-  ["reuniao-seg.mp3", "Em transcriÃ§Ã£o", "74%"],
+  ["reuniao-seg.mp3", "Em transcrição", "74%"],
   ["coaching-lucas.wav", "Indexado", "100%"],
   ["weekly-review.mp4", "Na fila", "12%"],
 ];
 
 const auditRows = [
-  ["Ana Souza", "Alterou permissÃ£o do cargo Gestor", "Hoje, 10:14"],
+  ["Ana Souza", "Alterou permissão do cargo Gestor", "Hoje, 10:14"],
   ["Sistema", "Executou sync completo com HubSpot", "Hoje, 09:00"],
-  ["Carlos Lima", "Exportou relatÃ³rio consolidado", "Ontem, 18:42"],
+  ["Carlos Lima", "Exportou relatório consolidado", "Ontem, 18:42"],
 ];
 
 const maskingRows = [
-  ["Telefone", "âœ“", "âœ“", "âœ•"],
-  ["Email pessoal", "âœ“", "âœ•", "âœ•"],
-  ["Receita prevista", "âœ“", "âœ“", "âœ“"],
+  ["Telefone", "✓", "✓", "✕"],
+  ["Email pessoal", "✓", "✕", "✕"],
+  ["Receita prevista", "✓", "✓", "✓"],
 ];
 
 const sellerSummary = [
@@ -280,16 +280,16 @@ const defaultDashboardData = {
   reports: sellerPerformanceRows.map((row) => [row[0], row[1], row[2], row[4]]),
 };
 
-const themeOptions = ["Claro ativo", "Escuro", "AutomÃ¡tico"];
+const themeOptions = ["Claro ativo", "Escuro", "Automático"];
 const fontOptions = ["Manrope", "IBM Plex Sans", "Source Sans 3", "Montserrat", "Nunito Sans", "Work Sans"];
-const fontSizeOptions = ["Pequena", "MÃ©dia", "Grande"];
-const densityOptions = ["Compacta", "ConfortÃ¡vel", "Expandida"];
+const fontSizeOptions = ["Pequena", "Média", "Grande"];
+const densityOptions = ["Compacta", "Confortável", "Expandida"];
 
 const personalizationDefaults = {
   theme: "Claro ativo",
   font: "Manrope",
-  fontSize: "MÃ©dia",
-  density: "ConfortÃ¡vel",
+  fontSize: "Média",
+  density: "Confortável",
   highContrast: false,
   animations: true,
   collapseSidebarOnOpen: false,
@@ -300,11 +300,11 @@ const personalizationDefaults = {
 
 const personalizationToggles = [
   { id: "highContrast", label: "Contraste elevado", description: "Melhora a legibilidade de textos e bordas." },
-  { id: "animations", label: "AnimaÃ§Ãµes sutis", description: "Liga ou reduz transiÃ§Ãµes visuais do painel." },
-  { id: "collapseSidebarOnOpen", label: "Sidebar recolhida ao abrir", description: "Inicia a navegaÃ§Ã£o lateral recolhida." },
-  { id: "reinforcedCards", label: "Cards com borda reforÃ§ada", description: "DÃ¡ mais destaque visual aos containers." },
-  { id: "showShortcuts", label: "Mostrar atalhos de teclado", description: "Exibe dicas curtas de navegaÃ§Ã£o quando disponÃ­veis." },
-  { id: "instantPreview", label: "PrÃ©via instantÃ¢nea", description: "Aplica as alteraÃ§Ãµes assim que vocÃª seleciona." },
+  { id: "animations", label: "Animações sutis", description: "Liga ou reduz transições visuais do painel." },
+  { id: "collapseSidebarOnOpen", label: "Sidebar recolhida ao abrir", description: "Inicia a navegação lateral recolhida." },
+  { id: "reinforcedCards", label: "Cards com borda reforçada", description: "Dá mais destaque visual aos containers." },
+  { id: "showShortcuts", label: "Mostrar atalhos de teclado", description: "Exibe dicas curtas de navegação quando disponíveis." },
+  { id: "instantPreview", label: "Prévia instantânea", description: "Aplica as alterações assim que você seleciona." },
 ];
 
 function sellerToSlug(name) {
@@ -512,7 +512,7 @@ function PhotoOption({ profilePhoto, onPhotoChange }) {
       </div>
       <div className={styles.photoMeta}>
         <strong>Foto do perfil</strong>
-        <span>JPG ou PNG, atÃ© 5 MB.</span>
+        <span>JPG ou PNG, até 5 MB.</span>
       </div>
       <label className={styles.photoAction}>
         <input type="file" accept="image/png,image/jpeg,image/jpg,image/webp" className={styles.hiddenFileInput} onChange={onPhotoChange} />
@@ -591,22 +591,22 @@ function PreferenceTable({ rows, values, onToggle }) {
 }
 
 function SettingsContent({ section, personalization, updatePersonalization, profilePhoto, onPhotoChange, dashboardData }) {
-  if (section === "account") return <div className={styles.grid}><Card eyebrow="PERFIL" title="Conta & Acesso"><PhotoOption profilePhoto={profilePhoto} onPhotoChange={onPhotoChange} /><Row label="Nome" value="UsuÃ¡rio SalesOps" /><Row label="Senha" value="Ãšltima troca hÃ¡ 14 dias" /><Row label="2FA" value="ObrigatÃ³rio para gestÃ£o" helper="SMS + autenticador" /><Row label="SessÃµes ativas" value="5 dispositivos" helper="2 navegadores e 3 mobile" /></Card><Card eyebrow="PERMISSÃ•ES" title="PermissÃµes por cargo"><Table head={["Cargo", "Acesso"]} rows={permissionRows} /></Card></div>;
-  if (section === "hubspot") return <div className={styles.grid}><Card eyebrow="STATUS" title="IntegraÃ§Ã£o HubSpot"><Row label="ConexÃ£o" value={dashboardData.configured ? dashboardData.integration.status : "Pendente"} helper={dashboardData.configured ? `${dashboardData.integration.owners} proprietarios e ${dashboardData.integration.deals} negocios sincronizados` : "Configure o token para sincronizar com a HubSpot"} /><Row label="Origem dos dados" value="HubSpot API" helper="Private app access token" /><Row label="Pipeline ativo" value={`R$ ${Math.round((dashboardData.integration.pipelineAmount || 0) / 1000)}k`} /></Card><Card eyebrow="MAPEAMENTO" title="Campos sincronizados" wide><Table head={["SalesOps", "HubSpot", "Status"]} rows={mappingRows} /></Card><Card eyebrow="LOG" title="Erros recentes"><Table head={["Hora", "Erro", "Gravidade"]} rows={dashboardData.configured ? [["Agora", "Sincronizacao via API operando", "Baixo"]] : errorRows} /></Card></div>;
-  if (section === "notifications") return <div className={styles.grid}><Card eyebrow="CANAIS" title="NotificaÃ§Ãµes & Alertas"><Row label="Email" value="Ativo" helper="comercial@salesops.ai" /><Row label="Push" value="Ativo" helper="Chrome + mobile" /><Row label="Resumo automÃ¡tico" value="DiÃ¡rio" /></Card><Card eyebrow="THRESHOLDS" title="Metas e thresholds" wide><div className={styles.metrics}>{metricRows.map((item) => <Metric key={item[0]} title={item[0]} value={item[1]} note={item[2]} />)}</div></Card></div>;
-  if (section === "ai") return <div className={styles.grid}><Card eyebrow="MODELO" title="IA & DiagnÃ³sticos"><Row label="Modelo ativo" value="GPT SalesOps Analyst" /><Row label="Assistente de voz" value="Habilitado" /><Row label="Sensibilidade" value="Moderada" helper="menos ruÃ­do, mais sinais de risco" /></Card><Card eyebrow="DADOS" title="Dados que alimentam a IA" wide><div className={styles.tags}><span>NegÃ³cios</span><span>Atividades</span><span>Calls gravadas</span><span>Sentimento do vendedor</span><span>PrÃ³ximas tarefas</span></div></Card></div>;
-  if (section === "personalize") return <div className={styles.grid}><Card eyebrow="APARÃŠNCIA" title="Tema e tipografia"><OptionGroup title="Tema" options={themeOptions} value={personalization.theme} onChange={(value) => updatePersonalization("theme", value)} /><OptionGroup title="Fonte principal" options={fontOptions} value={personalization.font} onChange={(value) => updatePersonalization("font", value)} /><OptionGroup title="Tamanho das letras" options={fontSizeOptions} value={personalization.fontSize} onChange={(value) => updatePersonalization("fontSize", value)} /></Card><Card eyebrow="INTERFACE" title="Densidade e leitura"><OptionGroup title="Densidade" options={densityOptions} value={personalization.density} onChange={(value) => updatePersonalization("density", value)} /><PreferenceTable rows={personalizationToggles} values={personalization} onToggle={(id) => updatePersonalization(id, !personalization[id])} /></Card><Card eyebrow="VISUAL" title="PrÃ©via das personalizaÃ§Ãµes" wide><div className={styles.previewPanel}><div className={styles.previewCard}><span>Cards</span><strong>{personalization.reinforcedCards ? "Borda reforÃ§ada" : "Borda padrÃ£o"}</strong><small>{personalization.reinforcedCards ? "SuperfÃ­cies com mais destaque visual." : "SuperfÃ­cies leves e discretas."}</small></div><div className={styles.previewCard}><span>Texto</span><strong>{personalization.fontSize}</strong><small>{personalization.font} com escala {personalization.fontSize.toLowerCase()}.</small></div><div className={styles.previewCard}><span>NavegaÃ§Ã£o</span><strong>{personalization.density}</strong><small>{personalization.collapseSidebarOnOpen ? "Sidebar inicia recolhida." : "Sidebar inicia expandida."}</small></div></div></Card></div>;
-  if (section === "exports") return <div className={styles.grid}><Card eyebrow="AGENDAMENTO" title="RelatÃ³rios & ExportaÃ§Ã£o"><Row label="Envio semanal" value="Segunda, 07:30" /><Row label="Formato" value="PDF + XLSX" /><Row label="Marca d'Ã¡gua" value="Confidencial" /></Card><Card eyebrow="TEMPLATES" title="Templates por cargo" wide><Table head={["Cargo", "Template", "Formato"]} rows={reportRows} /></Card></div>;
-  if (section === "storage") return <div className={styles.grid}><Card eyebrow="USO" title="GestÃ£o de MÃ­dia & Storage"><div className={styles.usage}><div className={styles.usageTop}><strong>38.4 / 100 GB</strong><span>38%</span></div><div className={styles.usageBar}><span style={{ width: "38.4%" }} /></div><p>GravaÃ§Ãµes semanais, Ã¡udios e anexos operacionais.</p></div><Row label="Hot storage" value="45 dias" /><Row label="Cold storage" value="365 dias" helper="arquivamento automÃ¡tico" /></Card><Card eyebrow="STT" title="Fila de transcriÃ§Ã£o em tempo real" wide><Table head={["Arquivo", "Status", "Progresso"]} rows={queueRows} /></Card><Card eyebrow="PROVEDOR" title="IndexaÃ§Ã£o e provedor"><Row label="Provedor" value="Azure Blob Storage" /><Row label="RegiÃ£o" value="Brazil South" helper="aderÃªncia LGPD" /><Row label="IndexaÃ§Ã£o IA" value="Ativa" /></Card></div>;
-  return <div className={styles.grid}><Card eyebrow="AUDITORIA" title="Eventos recentes" wide><Table head={["Quem", "O quÃª", "Quando"]} rows={auditRows} /></Card><Card eyebrow="MASKING" title="Matriz visual por campo e cargo"><Table head={["Campo", "Admin", "Gestor", "Vendedor"]} rows={maskingRows} matrix /></Card><Card eyebrow="LGPD" title="Consentimento e conformidade"><Row label="Consentimento" value="Registrado por contato" /><Row label="Esquecimento" value="Fluxo habilitado" helper="remoÃ§Ã£o em atÃ© 7 dias" /><Row label="RelatÃ³rio" value="Atualizado hoje" /></Card></div>;
+  if (section === "account") return <div className={styles.grid}><Card eyebrow="PERFIL" title="Conta & Acesso"><PhotoOption profilePhoto={profilePhoto} onPhotoChange={onPhotoChange} /><Row label="Nome" value="Usuário SalesOps" /><Row label="Senha" value="Última troca há 14 dias" /><Row label="2FA" value="Obrigatório para gestão" helper="SMS + autenticador" /><Row label="Sessões ativas" value="5 dispositivos" helper="2 navegadores e 3 mobile" /></Card><Card eyebrow="PERMISSÕES" title="Permissões por cargo"><Table head={["Cargo", "Acesso"]} rows={permissionRows} /></Card></div>;
+  if (section === "hubspot") return <div className={styles.grid}><Card eyebrow="STATUS" title="Integração HubSpot"><Row label="Conexão" value={dashboardData.configured ? dashboardData.integration.status : "Pendente"} helper={dashboardData.configured ? `${dashboardData.integration.owners} proprietarios e ${dashboardData.integration.deals} negocios sincronizados` : "Configure o token para sincronizar com a HubSpot"} /><Row label="Origem dos dados" value="HubSpot API" helper="Private app access token" /><Row label="Pipeline ativo" value={`R$ ${Math.round((dashboardData.integration.pipelineAmount || 0) / 1000)}k`} /></Card><Card eyebrow="MAPEAMENTO" title="Campos sincronizados" wide><Table head={["SalesOps", "HubSpot", "Status"]} rows={mappingRows} /></Card><Card eyebrow="LOG" title="Erros recentes"><Table head={["Hora", "Erro", "Gravidade"]} rows={dashboardData.configured ? [["Agora", "Sincronizacao via API operando", "Baixo"]] : errorRows} /></Card></div>;
+  if (section === "notifications") return <div className={styles.grid}><Card eyebrow="CANAIS" title="Notificações & Alertas"><Row label="Email" value="Ativo" helper="comercial@salesops.ai" /><Row label="Push" value="Ativo" helper="Chrome + mobile" /><Row label="Resumo automático" value="Diário" /></Card><Card eyebrow="THRESHOLDS" title="Metas e thresholds" wide><div className={styles.metrics}>{metricRows.map((item) => <Metric key={item[0]} title={item[0]} value={item[1]} note={item[2]} />)}</div></Card></div>;
+  if (section === "ai") return <div className={styles.grid}><Card eyebrow="MODELO" title="IA & Diagnósticos"><Row label="Modelo ativo" value="GPT SalesOps Analyst" /><Row label="Assistente de voz" value="Habilitado" /><Row label="Sensibilidade" value="Moderada" helper="menos ruído, mais sinais de risco" /></Card><Card eyebrow="DADOS" title="Dados que alimentam a IA" wide><div className={styles.tags}><span>Negócios</span><span>Atividades</span><span>Calls gravadas</span><span>Sentimento do vendedor</span><span>Próximas tarefas</span></div></Card></div>;
+  if (section === "personalize") return <div className={styles.grid}><Card eyebrow="APARÊNCIA" title="Tema e tipografia"><OptionGroup title="Tema" options={themeOptions} value={personalization.theme} onChange={(value) => updatePersonalization("theme", value)} /><OptionGroup title="Fonte principal" options={fontOptions} value={personalization.font} onChange={(value) => updatePersonalization("font", value)} /><OptionGroup title="Tamanho das letras" options={fontSizeOptions} value={personalization.fontSize} onChange={(value) => updatePersonalization("fontSize", value)} /></Card><Card eyebrow="INTERFACE" title="Densidade e leitura"><OptionGroup title="Densidade" options={densityOptions} value={personalization.density} onChange={(value) => updatePersonalization("density", value)} /><PreferenceTable rows={personalizationToggles} values={personalization} onToggle={(id) => updatePersonalization(id, !personalization[id])} /></Card><Card eyebrow="VISUAL" title="Prévia das personalizações" wide><div className={styles.previewPanel}><div className={styles.previewCard}><span>Cards</span><strong>{personalization.reinforcedCards ? "Borda reforçada" : "Borda padrão"}</strong><small>{personalization.reinforcedCards ? "Superfícies com mais destaque visual." : "Superfícies leves e discretas."}</small></div><div className={styles.previewCard}><span>Texto</span><strong>{personalization.fontSize}</strong><small>{personalization.font} com escala {personalization.fontSize.toLowerCase()}.</small></div><div className={styles.previewCard}><span>Navegação</span><strong>{personalization.density}</strong><small>{personalization.collapseSidebarOnOpen ? "Sidebar inicia recolhida." : "Sidebar inicia expandida."}</small></div></div></Card></div>;
+  if (section === "exports") return <div className={styles.grid}><Card eyebrow="AGENDAMENTO" title="Relatórios & Exportação"><Row label="Envio semanal" value="Segunda, 07:30" /><Row label="Formato" value="PDF + XLSX" /><Row label="Marca d'água" value="Confidencial" /></Card><Card eyebrow="TEMPLATES" title="Templates por cargo" wide><Table head={["Cargo", "Template", "Formato"]} rows={reportRows} /></Card></div>;
+  if (section === "storage") return <div className={styles.grid}><Card eyebrow="USO" title="Gestão de Mídia & Storage"><div className={styles.usage}><div className={styles.usageTop}><strong>38.4 / 100 GB</strong><span>38%</span></div><div className={styles.usageBar}><span style={{ width: "38.4%" }} /></div><p>Gravações semanais, áudios e anexos operacionais.</p></div><Row label="Hot storage" value="45 dias" /><Row label="Cold storage" value="365 dias" helper="arquivamento automático" /></Card><Card eyebrow="STT" title="Fila de transcrição em tempo real" wide><Table head={["Arquivo", "Status", "Progresso"]} rows={queueRows} /></Card><Card eyebrow="PROVEDOR" title="Indexação e provedor"><Row label="Provedor" value="Azure Blob Storage" /><Row label="Região" value="Brazil South" helper="aderência LGPD" /><Row label="Indexação IA" value="Ativa" /></Card></div>;
+  return <div className={styles.grid}><Card eyebrow="AUDITORIA" title="Eventos recentes" wide><Table head={["Quem", "O quê", "Quando"]} rows={auditRows} /></Card><Card eyebrow="MASKING" title="Matriz visual por campo e cargo"><Table head={["Campo", "Admin", "Gestor", "Vendedor"]} rows={maskingRows} matrix /></Card><Card eyebrow="LGPD" title="Consentimento e conformidade"><Row label="Consentimento" value="Registrado por contato" /><Row label="Esquecimento" value="Fluxo habilitado" helper="remoção em até 7 dias" /><Row label="Relatório" value="Atualizado hoje" /></Card></div>;
 }
 
 function ReportsContent({ dashboardData }) {
   return (
     <section className={styles.dashboardSection}>
       <header className={styles.settingsHeader}>
-        <h1>RelatÃ³rios</h1>
-        <p>Resumo executivo puxado da HubSpot, com visÃ£o por vendedor e pipeline aberto.</p>
+        <h1>Relatórios</h1>
+        <p>Resumo executivo puxado da HubSpot, com visão por vendedor e pipeline aberto.</p>
       </header>
 
       <div className={styles.grid}>
@@ -618,7 +618,7 @@ function ReportsContent({ dashboardData }) {
           </div>
         </Card>
 
-        <Card eyebrow="TIME" title="VisÃ£o por vendedor" wide>
+        <Card eyebrow="TIME" title="Visão por vendedor" wide>
           <Table head={["Vendedor", "Meta", "Pipeline", "Status"]} rows={dashboardData.reports} />
         </Card>
       </div>
@@ -650,18 +650,18 @@ function getAiSearchHint(query, results) {
     return "Digite um tema (ex.: pipeline, vendedor, alertas) para a IA sugerir o melhor atalho.";
   }
   if (!results.length) {
-    return "NÃ£o achei um atalho direto. Tente termos como: pipeline, vendedores, relatÃ³rios ou integraÃ§Ã£o.";
+    return "Não achei um atalho direto. Tente termos como: pipeline, vendedores, relatórios ou integração.";
   }
   if (normalizedQuery.includes("risco") || normalizedQuery.includes("estagn")) {
-    return "SugestÃ£o IA: abra Agente de IA para diagnÃ³stico e depois valide no quadro de NegÃ³cios.";
+    return "Sugestão IA: abra Agente de IA para diagnóstico e depois valide no quadro de Negócios.";
   }
   if (normalizedQuery.includes("meta") || normalizedQuery.includes("kpi") || normalizedQuery.includes("receita")) {
-    return "SugestÃ£o IA: comece por RelatÃ³rios para visÃ£o macro, depois detalhe por Vendedores.";
+    return "Sugestão IA: comece por Relatórios para visão macro, depois detalhe por Vendedores.";
   }
   if (normalizedQuery.includes("alert") || normalizedQuery.includes("notifica")) {
-    return "SugestÃ£o IA: abra NotificaÃ§Ãµes para triagem rÃ¡pida e priorize os itens nÃ£o lidos.";
+    return "Sugestão IA: abra Notificações para triagem rápida e priorize os itens não lidos.";
   }
-  return `SugestÃ£o IA: o melhor ponto de entrada agora Ã© "${results[0].label}".`;
+  return `Sugestão IA: o melhor ponto de entrada agora é "${results[0].label}".`;
 }
 
 function DealsContent({ dashboardData }) {
@@ -674,30 +674,30 @@ function DealsContent({ dashboardData }) {
   const skipCardClickRef = useRef(false);
   const stageOrder = [
     "Oportunidade",
-    "Primeira ReuniÃ£o",
-    "AvaliaÃ§Ã£o TÃ©cnica Feita",
-    "CriaÃ§Ã£o de Tabela de PreÃ§o",
-    "Tabela de PreÃ§o Criada",
-    "AvaliaÃ§Ã£o da Tabela Feita",
-    "Tabela de PreÃ§o Enviada",
-    "Tabela de PreÃ§o Aceita",
-    "ElaboraÃ§Ã£o de DOT",
+    "Primeira Reunião",
+    "Avaliação Técnica Feita",
+    "Criação de Tabela de Preço",
+    "Tabela de Preço Criada",
+    "Avaliação da Tabela Feita",
+    "Tabela de Preço Enviada",
+    "Tabela de Preço Aceita",
+    "Elaboração de DOT",
     "DOT Criado",
-    "AvaliaÃ§Ã£o de DOT",
+    "Avaliação de DOT",
     "DOT Aprovado",
     "DOT Entregue",
-    "ElaboraÃ§Ã£o da Proposta",
+    "Elaboração da Proposta",
     "Proposta Criada",
-    "AvaliaÃ§Ã£o da Proposta Feita",
+    "Avaliação da Proposta Feita",
     "Proposta Enviada",
     "Proposta Aceita",
-    "ElaboraÃ§Ã£o do Acordo de CooperaÃ§Ã£o",
-    "Acordo de CooperaÃ§Ã£o Criado",
-    "Acordo de CooperaÃ§Ã£o Assinado",
-    "ElaboraÃ§Ã£o do Contrato",
+    "Elaboração do Acordo de Cooperação",
+    "Acordo de Cooperação Criado",
+    "Acordo de Cooperação Assinado",
+    "Elaboração do Contrato",
     "Contrato Enviado",
-    "NegÃ³cio Fechado",
-    "NegÃ³cio Perdido",
+    "Negócio Fechado",
+    "Negócio Perdido",
   ];
 
   useEffect(() => {
@@ -708,8 +708,8 @@ function DealsContent({ dashboardData }) {
     setBoardDeals((currentDeals) =>
       currentDeals.map((deal) => {
         if (deal.id === "1") return { ...deal, stage: "Proposta Enviada" };
-        if (deal.id === "2") return { ...deal, stage: "AvaliaÃ§Ã£o de DOT" };
-        if (deal.id === "3") return { ...deal, stage: "Primeira ReuniÃ£o" };
+        if (deal.id === "2") return { ...deal, stage: "Avaliação de DOT" };
+        if (deal.id === "3") return { ...deal, stage: "Primeira Reunião" };
         return deal;
       }),
     );
@@ -800,7 +800,7 @@ function DealsContent({ dashboardData }) {
   return (
     <section className={styles.dashboardSection}>
       <header className={styles.settingsHeader}>
-        <h1>NegÃ³cios</h1>
+        <h1>Negócios</h1>
       </header>
 
       <div className={styles.dealsFilters}>
@@ -908,13 +908,13 @@ function DealsContent({ dashboardData }) {
                     <span>{deal.owner}</span>
                     <span>{deal.staleLabel}</span>
                   </div>
-                  <small>Sincronizado com HubSpot. Arraste para atualizar o estÃ¡gio.</small>
+                  <small>Sincronizado com HubSpot. Arraste para atualizar o estágio.</small>
                     </>
                   )}
                 </article>
               )) : (
                 <div className={styles.pipelineEmptyState}>
-                  <span>Sem negÃ³cios neste estÃ¡gio.</span>
+                  <span>Sem negócios neste estágio.</span>
                 </div>
               )}
             </div>
@@ -938,15 +938,15 @@ function DealProfileContent({ dashboardData, dealId }) {
     return (
       <section className={styles.dashboardSection}>
         <header className={styles.settingsHeader}>
-          <h1>NegÃ³cio nÃ£o encontrado</h1>
-          <p>NÃ£o localizamos esse negÃ³cio no pipeline atual.</p>
+          <h1>Negócio não encontrado</h1>
+          <p>Não localizamos esse negócio no pipeline atual.</p>
         </header>
         <button
           type="button"
           className={styles.secondaryActionButton}
           onClick={() => router.push("/negocios")}
         >
-          Voltar para NegÃ³cios
+          Voltar para Negócios
         </button>
       </section>
     );
@@ -956,22 +956,22 @@ function DealProfileContent({ dashboardData, dealId }) {
     <section className={styles.dashboardSection}>
       <header className={styles.settingsHeader}>
         <h1>{deal.name}</h1>
-        <p>Perfil completo do negÃ³cio e status atual no pipeline.</p>
+        <p>Perfil completo do negócio e status atual no pipeline.</p>
       </header>
 
       <div className={styles.grid}>
-        <Card eyebrow="NEGOCIO" title="Resumo do NegÃ³cio">
+        <Card eyebrow="NEGOCIO" title="Resumo do Negócio">
           <Row label="Nome" value={deal.name} />
-          <Row label="ResponsÃ¡vel" value={deal.owner} />
+          <Row label="Responsável" value={deal.owner} />
           <Row label="Etapa atual" value={deal.stage} />
           <Row label="Valor" value={deal.amountLabel} />
-          <Row label="Ãšltima atualizaÃ§Ã£o" value={deal.staleLabel} />
+          <Row label="Última atualização" value={deal.staleLabel} />
         </Card>
 
-        <Card eyebrow="AÃ‡Ã•ES" title="PrÃ³ximos Passos">
-          <Row label="SincronizaÃ§Ã£o" value="HubSpot ativa" helper="NegÃ³cio vinculado ao pipeline principal" />
-          <Row label="MovimentaÃ§Ã£o" value="Arraste no quadro de NegÃ³cios" helper="Pressione e arraste o card para mudar de etapa" />
-          <Row label="NavegaÃ§Ã£o" value="Voltar ao pipeline" helper="Clique abaixo para retornar" />
+        <Card eyebrow="AÇÕES" title="Próximos Passos">
+          <Row label="Sincronização" value="HubSpot ativa" helper="Negócio vinculado ao pipeline principal" />
+          <Row label="Movimentação" value="Arraste no quadro de Negócios" helper="Pressione e arraste o card para mudar de etapa" />
+          <Row label="Navegação" value="Voltar ao pipeline" helper="Clique abaixo para retornar" />
           <button
             type="button"
             className={styles.secondaryActionButton}
@@ -995,7 +995,7 @@ function SellerMeetingsContent({ dashboardData, sellerSlug }) {
       <header className={styles.sellerDetailHeader}>
         <div className={styles.settingsHeader}>
           <h1>Reunioes internas</h1>
-          <p>{seller.name} Â· Lista consolidada de alinhamentos internos e rituais de acompanhamento.</p>
+          <p>{seller.name} · Lista consolidada de alinhamentos internos e rituais de acompanhamento.</p>
         </div>
         <div className={styles.sellerMeetingActions}>
           <button
@@ -1076,7 +1076,7 @@ function SellerMeetingDetailContent({ dashboardData, sellerSlug, meetingId }) {
           <p>
             {isNewMeeting
               ? `Novo registro interno para ${seller.name}, preparado para posterior sincronizacao com a HubSpot.`
-              : `${meeting.date} Â· ${meeting.time} Â· ${meeting.type}`}
+              : `${meeting.date} · ${meeting.time} · ${meeting.type}`}
           </p>
         </div>
       </header>
@@ -1493,7 +1493,7 @@ function SellerProfileContent({ dashboardData, sellerSlug }) {
               <div>
                 <span>ETAPA</span>
                 <h3>{selectedStage}</h3>
-                <p>{seller.name} Â· {stageDeals.length} negocio(s)</p>
+                <p>{seller.name} · {stageDeals.length} negocio(s)</p>
               </div>
               <button
                 type="button"
@@ -1625,7 +1625,7 @@ export default function DashboardShell({
   useEffect(() => {
     const root = document.documentElement;
     const systemDark = window.matchMedia?.("(prefers-color-scheme: dark)")?.matches;
-    const theme = personalization.theme === "AutomÃ¡tico" ? (systemDark ? "dark" : "light") : (personalization.theme === "Escuro" ? "dark" : "light");
+    const theme = personalization.theme === "Automático" ? (systemDark ? "dark" : "light") : (personalization.theme === "Escuro" ? "dark" : "light");
     const fontMap = {
       Manrope: "manrope",
       "IBM Plex Sans": "ibm-plex-sans",
@@ -1644,12 +1644,12 @@ export default function DashboardShell({
     };
     const fontSizeMap = {
       Pequena: "small",
-      "MÃ©dia": "medium",
+      "Média": "medium",
       Grande: "large",
     };
     const densityMap = {
       Compacta: "compact",
-      "ConfortÃ¡vel": "comfortable",
+      "Confortável": "comfortable",
       Expandida: "expanded",
     };
 
@@ -1735,7 +1735,7 @@ export default function DashboardShell({
           </div>
           <button type="button" className={styles.topbarButton} aria-label="Recolher barra lateral" onClick={() => setCollapsed((value) => !value)}><PanelsIcon /></button>
           <button type="button" className={styles.topbarButton} aria-label="Voltar" onClick={() => window.history.back()}><SimpleArrow /></button>
-          <button type="button" className={styles.topbarButton} aria-label="AvanÃ§ar" onClick={() => window.history.forward()}><SimpleArrow right /></button>
+          <button type="button" className={styles.topbarButton} aria-label="Avançar" onClick={() => window.history.forward()}><SimpleArrow right /></button>
         </div>
         <div className={styles.topbarActions}>
           <button
@@ -1783,9 +1783,9 @@ export default function DashboardShell({
           </nav>
         </div>
         <div>
-          <button type="button" onClick={() => navigateToMainSection("settings")} className={`${styles.navItem} ${styles.settingsItem} ${activeNav === "settings" && !profileViewOpen ? styles.navItemActive : ""}`.trim()} title={collapsed ? "ConfiguraÃ§Ãµes" : undefined}>
+          <button type="button" onClick={() => navigateToMainSection("settings")} className={`${styles.navItem} ${styles.settingsItem} ${activeNav === "settings" && !profileViewOpen ? styles.navItemActive : ""}`.trim()} title={collapsed ? "Configurações" : undefined}>
             <span className={styles.navIcon}>{getNavIcon("settings")}</span>
-            <span className={styles.navLabel}>ConfiguraÃ§Ãµes</span>
+            <span className={styles.navLabel}>Configurações</span>
           </button>
           <button
             type="button"
@@ -1798,7 +1798,7 @@ export default function DashboardShell({
             >
               {profilePhoto ? null : "?"}
             </div>
-            <div className={styles.profileText}><div className={styles.profileName}>UsuÃ¡rio</div><div className={styles.profileRole}>Cargo</div></div>
+            <div className={styles.profileText}><div className={styles.profileName}>Usuário</div><div className={styles.profileRole}>Cargo</div></div>
           </button>
         </div>
       </aside>
@@ -1808,7 +1808,7 @@ export default function DashboardShell({
           <section className={styles.settingsLayout}>
             {!profileViewOpen ? (
               <aside className={styles.settingsSidebar}>
-                <div className={styles.settingsSidebarTitle}>CONFIGURAÃ‡Ã•ES</div>
+                <div className={styles.settingsSidebarTitle}>CONFIGURAÇÕES</div>
                 <div className={styles.settingsSidebarList}>
                   {configSections.map((item) => (
                     <button key={item.id} type="button" onClick={() => { setActiveConfig(item.id); setProfileViewOpen(false); }} className={`${styles.settingsSidebarItem} ${activeConfig === item.id ? styles.settingsSidebarItemActive : ""}`.trim()}>
@@ -1864,7 +1864,7 @@ export default function DashboardShell({
           <div className={styles.logoutModal} role="dialog" aria-modal="true" aria-labelledby="logout-title" onClick={(event) => event.stopPropagation()}>
             <span className={styles.logoutEyebrow}>ENCERRAR SESSAO</span>
             <h2 id="logout-title">Deseja sair mesmo?</h2>
-            <p>Ao continuar, vocÃª serÃ¡ redirecionado para a tela de login do SalesOps.</p>
+            <p>Ao continuar, você será redirecionado para a tela de login do SalesOps.</p>
             <div className={styles.logoutActions}>
               <button type="button" className={styles.logoutSecondaryButton} onClick={() => setLogoutPromptOpen(false)}>Cancelar</button>
               <button type="button" className={styles.logoutPrimaryButton} onClick={() => router.push("/login")}>Sair agora</button>
@@ -1883,15 +1883,15 @@ export default function DashboardShell({
             onClick={(event) => event.stopPropagation()}
           >
             <header className={styles.notificationsHeader}>
-              <h2>NotificaÃ§Ãµes</h2>
-              <button type="button" className={styles.notificationsClose} onClick={() => setNotificationsOpen(false)} aria-label="Fechar notificaÃ§Ãµes">
-                Ã—
+              <h2>Notificações</h2>
+              <button type="button" className={styles.notificationsClose} onClick={() => setNotificationsOpen(false)} aria-label="Fechar notificações">
+                ×
               </button>
             </header>
 
             <div className={styles.notificationsTabs}>
               <button type="button" className={`${styles.notificationsTab} ${notificationTab === "unread" ? styles.notificationsTabActive : ""}`.trim()} onClick={() => setNotificationTab("unread")}>
-                NÃ£o lidas (2)
+                Não lidas (2)
               </button>
               <button type="button" className={`${styles.notificationsTab} ${notificationTab === "all" ? styles.notificationsTabActive : ""}`.trim()} onClick={() => setNotificationTab("all")}>
                 Todos
@@ -1899,7 +1899,7 @@ export default function DashboardShell({
               <button type="button" className={`${styles.notificationsTab} ${notificationTab === "trash" ? styles.notificationsTabActive : ""}`.trim()} onClick={() => setNotificationTab("trash")}>
                 Lixeira
               </button>
-              <button type="button" className={styles.notificationsSettings} aria-label="Configurar notificaÃ§Ãµes">
+              <button type="button" className={styles.notificationsSettings} aria-label="Configurar notificações">
                 {getConfigIcon("notifications")}
               </button>
             </div>
