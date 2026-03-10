@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import styles from "./page.module.css";
 
 const STORAGE_KEY = "sales-ops-backup-personalization";
@@ -1756,6 +1756,8 @@ export default function DashboardShell({
   dealId = "",
 }) {
   const router = useRouter();
+  const pathname = usePathname();
+  const lastPathnameRef = useRef(pathname);
   const [personalization, setPersonalization] = useState(personalizationDefaults);
   const [dashboardData, setDashboardData] = useState(defaultDashboardData);
   const [hubspotMessage, setHubspotMessage] = useState("Carregando dados da HubSpot...");
@@ -1771,6 +1773,14 @@ export default function DashboardShell({
   const [globalSearchOpen, setGlobalSearchOpen] = useState(false);
   const [globalSearchQuery, setGlobalSearchQuery] = useState("");
   const menuRef = useRef(null);
+
+  useEffect(() => {
+    if (!pathname) return;
+    if (lastPathnameRef.current === pathname) return;
+
+    lastPathnameRef.current = pathname;
+    window.location.reload();
+  }, [pathname]);
 
   useEffect(() => {
     function closeOnOutside(event) {
