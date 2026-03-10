@@ -1644,12 +1644,12 @@ export default function DashboardShell({
     };
     const fontSizeMap = {
       Pequena: "small",
-      MÃ©dia: "medium",
+      "MÃ©dia": "medium",
       Grande: "large",
     };
     const densityMap = {
       Compacta: "compact",
-      ConfortÃ¡vel: "comfortable",
+      "ConfortÃ¡vel": "comfortable",
       Expandida: "expanded",
     };
 
