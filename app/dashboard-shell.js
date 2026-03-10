@@ -1028,6 +1028,68 @@ function DealProfileContent({ dashboardData, dealId }) {
       </header>
 
       <div className={styles.grid}>
+        <div className={styles.dealProfileActions}>
+          <button
+            type="button"
+            className={styles.primaryActionButton}
+            onClick={() => setShowAiSummary(true)}
+          >
+            <SparkIcon />
+            <span>{"Resumo com IA"}</span>
+          </button>
+        </div>
+
+        {showAiSummary ? (
+          <Card eyebrow="IA" title={"Resumo com IA"} wide>
+            <div className={styles.dealAiSummaryBox}>
+              <strong>Resumo pela IA</strong>
+              <p>
+                {"Negócio em andamento com boa aderência de escopo e evolução de etapa. Recomendação: reforçar próximo compromisso com decisor e registrar objeções finais para acelerar fechamento."}
+              </p>
+            </div>
+
+            <div className={styles.dealAiComposer}>
+              <label className={styles.dealAiComposerButton}>
+                <AttachmentIcon />
+                <input type="file" multiple className={styles.hiddenFileInput} onChange={handleDealAiAttachments} />
+              </label>
+              <button type="button" className={styles.dealAiComposerButton} aria-label={"Gravar áudio para IA"}>
+                <MicIcon />
+              </button>
+              <input
+                className={styles.dealAiInput}
+                value={dealAiMessage}
+                onChange={(event) => setDealAiMessage(event.target.value)}
+                placeholder={"Pergunte para IA sobre riscos, próximas ações e prioridades deste negócio..."}
+              />
+              <button type="button" className={styles.dealAiSendButton} aria-label={"Enviar mensagem para IA"}>
+                <SendIcon />
+                <span>Enviar</span>
+              </button>
+            </div>
+
+            {dealAiAttachments.length ? (
+              <div className={styles.dealAttachmentList}>
+                {dealAiAttachments.map((attachment) => (
+                  <div key={attachment.id} className={styles.dealAttachmentItem}>
+                    <div className={styles.dealAttachmentMeta}>
+                      <strong>{attachment.name}</strong>
+                      <span>{attachment.sizeLabel}</span>
+                    </div>
+                    <button
+                      type="button"
+                      className={styles.meetingAttachmentRemove}
+                      onClick={() => removeDealAiAttachment(attachment.id)}
+                    >
+                      Remover
+                    </button>
+                  </div>
+                ))}
+              </div>
+            ) : null}
+          </Card>
+        ) : null}
+
         <Card eyebrow="NEGOCIO" title="Resumo do Negócio">
           <Row label="Nome" value={deal.name} />
           <Row label="Responsável" value={deal.owner} />
@@ -1040,14 +1102,6 @@ function DealProfileContent({ dashboardData, dealId }) {
           <Row label="Sincronização" value="HubSpot ativa" helper="Negócio vinculado ao pipeline principal" />
           <Row label="Movimentação" value="Arraste no quadro de Negócios" helper="Pressione e arraste o card para mudar de etapa" />
           <Row label="Navegação" value="Voltar ao pipeline" helper="Clique abaixo para retornar" />
-          <button
-            type="button"
-            className={styles.primaryActionButton}
-            onClick={() => setShowAiSummary(true)}
-          >
-            <SparkIcon />
-            <span>{"Resumo com IA"}</span>
-          </button>
           <button
             type="button"
             className={styles.secondaryActionButton}
@@ -1100,58 +1154,6 @@ function DealProfileContent({ dashboardData, dealId }) {
         </Card>
       </div>
 
-      {showAiSummary ? (
-        <div className={styles.grid}>
-          <Card eyebrow="IA" title={"Resumo com IA"} wide>
-            <div className={styles.dealAiSummaryBox}>
-              <strong>Resumo pela IA</strong>
-              <p>
-                {"Negócio em andamento com boa aderência de escopo e evolução de etapa. Recomendação: reforçar próximo compromisso com decisor e registrar objeções finais para acelerar fechamento."}
-              </p>
-            </div>
-
-            <div className={styles.dealAiComposer}>
-              <label className={styles.dealAiComposerButton}>
-                <AttachmentIcon />
-                <input type="file" multiple className={styles.hiddenFileInput} onChange={handleDealAiAttachments} />
-              </label>
-              <button type="button" className={styles.dealAiComposerButton} aria-label={"Gravar áudio para IA"}>
-                <MicIcon />
-              </button>
-              <input
-                className={styles.dealAiInput}
-                value={dealAiMessage}
-                onChange={(event) => setDealAiMessage(event.target.value)}
-                placeholder={"Pergunte para IA sobre riscos, próximas ações e prioridades deste negócio..."}
-              />
-              <button type="button" className={styles.dealAiSendButton} aria-label={"Enviar mensagem para IA"}>
-                <SendIcon />
-                <span>Enviar</span>
-              </button>
-            </div>
-
-            {dealAiAttachments.length ? (
-              <div className={styles.dealAttachmentList}>
-                {dealAiAttachments.map((attachment) => (
-                  <div key={attachment.id} className={styles.dealAttachmentItem}>
-                    <div className={styles.dealAttachmentMeta}>
-                      <strong>{attachment.name}</strong>
-                      <span>{attachment.sizeLabel}</span>
-                    </div>
-                    <button
-                      type="button"
-                      className={styles.meetingAttachmentRemove}
-                      onClick={() => removeDealAiAttachment(attachment.id)}
-                    >
-                      Remover
-                    </button>
-                  </div>
-                ))}
-              </div>
-            ) : null}
-          </Card>
-        </div>
-      ) : null}
     </section>
   );
 }

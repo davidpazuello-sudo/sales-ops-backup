@@ -857,6 +857,14 @@
   margin-top: 14px;
 }
 
+.dealProfileActions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-top: 0;
+  grid-column: 1 / -1;
+}
+
 .sellerProfileMeetingActions {
   grid-column: 1 / -1;
   margin-top: 0;
