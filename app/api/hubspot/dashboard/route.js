@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
 import { getHubSpotDashboardData } from "lib/hubspot";
+import { assertDashboardData } from "lib/dashboard-contracts";
 
 export async function GET() {
   try {
-    const data = await getHubSpotDashboardData();
+    const data = assertDashboardData(await getHubSpotDashboardData());
     return NextResponse.json(data);
   } catch (error) {
     const message = error instanceof Error ? error.message : "UNKNOWN_ERROR";

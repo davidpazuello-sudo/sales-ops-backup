@@ -7,7 +7,8 @@
     "check:copy": "node scripts/validate-copy.mjs",
     "build": "npm run check:copy && next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test": "vitest run"
   },
   "dependencies": {
     "@supabase/ssr": "^0.5.2",
@@ -15,5 +16,10 @@
     "next": "15.2.6",
     "react": "19.0.0",
     "react-dom": "19.0.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.57.1",
+    "eslint-config-next": "^15.2.6",
+    "vitest": "^4.0.18"
   }
 }
