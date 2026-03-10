@@ -1457,13 +1457,11 @@
 }
 
 .pipelineEmptyState {
-  display: grid;
-  place-items: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   min-height: 110px;
-  padding: 18px;
-  border-radius: 4px;
-  border: 1px dashed #d5dce6;
-  background: #f8fafc;
+  padding: 8px 0;
   text-align: center;
 }
 
