@@ -619,12 +619,12 @@ function PreferenceTable({ rows, values, onToggle }) {
   );
 }
 
-function SettingsContent({ section, personalization, updatePersonalization, profilePhoto, onPhotoChange, dashboardData }) {
+function SettingsContent({ section, personalization, updatePersonalization, profilePhoto, onPhotoChange, dashboardData, sessionUser }) {
   const profileEmail = dashboardData.integration?.profileEmail || "";
   const profileRole = dashboardData.integration?.profileRole || "";
-  const profileHelper = [profileEmail, profileRole].filter(Boolean).join(" • ") || "Email e cargo vindos da HubSpot aparecerao aqui";
+  const profileHelper = [profileEmail, profileRole || sessionUser?.role].filter(Boolean).join(" • ") || "Email e cargo vindos da HubSpot aparecerao aqui";
 
-  if (section === "account") return <div className={styles.grid}><Card eyebrow="PERFIL"><PhotoOption profilePhoto={profilePhoto} onPhotoChange={onPhotoChange} /><Row label="Nome" value="Usuário SalesOps" helper={profileHelper} /><Row label="Senha" value="Última troca há 14 dias" /><Row label="2FA" value="Obrigatório para gestão" helper="SMS + autenticador" /><Row label="Sessões ativas" value="5 dispositivos" helper="2 navegadores e 3 mobile" /></Card><Card eyebrow="PERMISSÕES" title="Permissões por cargo"><Table head={["Cargo", "Acesso"]} rows={permissionRows} /></Card></div>;
+  if (section === "account") return <div className={styles.grid}><Card eyebrow="PERFIL"><PhotoOption profilePhoto={profilePhoto} onPhotoChange={onPhotoChange} /><Row label="Nome" value={sessionUser?.name || "Usuario SalesOps"} helper={profileHelper} /><Row label="Senha" value="Última troca há 14 dias" /><Row label="2FA" value="Obrigatório para gestão" helper="SMS + autenticador" /><Row label="Sessões ativas" value="5 dispositivos" helper="2 navegadores e 3 mobile" /></Card><Card eyebrow="PERMISSÕES" title="Permissões por cargo"><Table head={["Cargo", "Acesso"]} rows={permissionRows} /></Card></div>;
   if (section === "hubspot") return <div className={styles.grid}><Card eyebrow="STATUS" title="Integração HubSpot"><Row label="Conexão" value={dashboardData.configured ? dashboardData.integration.status : "Pendente"} helper={dashboardData.configured ? `${dashboardData.integration.owners} proprietarios e ${dashboardData.integration.deals} negocios sincronizados` : "Configure o token para sincronizar com a HubSpot"} /><Row label="Origem dos dados" value="HubSpot API" helper="Private app access token" /><Row label="Pipeline ativo" value={`R$ ${Math.round((dashboardData.integration.pipelineAmount || 0) / 1000)}k`} /></Card><Card eyebrow="MAPEAMENTO" title="Campos sincronizados" wide><Table head={["SalesOps", "HubSpot", "Status"]} rows={mappingRows} /></Card><Card eyebrow="LOG" title="Erros recentes"><Table head={["Hora", "Erro", "Gravidade"]} rows={dashboardData.configured ? [["Agora", "Sincronizacao via API operando", "Baixo"]] : errorRows} /></Card></div>;
   if (section === "notifications") return <div className={styles.grid}><Card eyebrow="CANAIS" title="Notificações & Alertas"><Row label="Email" value="Ativo" helper="comercial@salesops.ai" /><Row label="Push" value="Ativo" helper="Chrome + mobile" /><Row label="Resumo automático" value="Diário" /></Card><Card eyebrow="THRESHOLDS" title="Metas e thresholds" wide><div className={styles.metrics}>{metricRows.map((item) => <Metric key={item[0]} title={item[0]} value={item[1]} note={item[2]} />)}</div></Card></div>;
   if (section === "ai") return <div className={styles.grid}><Card eyebrow="MODELO" title="IA & Diagnósticos"><Row label="Modelo ativo" value="GPT SalesOps Analyst" /><Row label="Assistente de voz" value="Habilitado" /><Row label="Sensibilidade" value="Moderada" helper="menos ruído, mais sinais de risco" /></Card><Card eyebrow="DADOS" title="Dados que alimentam a IA" wide><div className={styles.tags}><span>Negócios</span><span>Atividades</span><span>Calls gravadas</span><span>Sentimento do vendedor</span><span>Próximas tarefas</span></div></Card></div>;
@@ -1778,6 +1778,7 @@ export default function DashboardShell({
   const [notificationTab, setNotificationTab] = useState("unread");
   const [globalSearchOpen, setGlobalSearchOpen] = useState(false);
   const [globalSearchQuery, setGlobalSearchQuery] = useState("");
+  const [sessionUser, setSessionUser] = useState({ name: "Usuario", role: "Cargo" });
   const menuRef = useRef(null);
 
   useEffect(() => {
@@ -1853,6 +1854,28 @@ export default function DashboardShell({
 
     loadHubSpotData();
 
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadSessionUser() {
+      const response = await fetch("/api/auth/session", { cache: "no-store" }).catch(() => null);
+      if (!response?.ok || cancelled) return;
+
+      const payload = await response.json().catch(() => null);
+      if (!payload?.user || cancelled) return;
+
+      setSessionUser({
+        name: payload.user.name || "Usuario",
+        role: payload.user.role || "Cargo",
+      });
+    }
+
+    loadSessionUser();
     return () => {
       cancelled = true;
     };
@@ -1961,6 +1984,11 @@ export default function DashboardShell({
     setGlobalSearchQuery("");
   };
 
+  const handleLogout = async () => {
+    await fetch("/api/auth/logout", { method: "POST" }).catch(() => null);
+    router.replace("/login");
+  };
+
   return (
     <main className={`${styles.appShell} ${collapsed ? styles.appShellCollapsed : ""}`.trim()}>
       <header className={styles.topbar}>
@@ -2034,7 +2062,7 @@ export default function DashboardShell({
             >
               {profilePhoto ? null : "?"}
             </div>
-            <div className={styles.profileText}><div className={styles.profileName}>Usuário</div><div className={styles.profileRole}>Cargo</div></div>
+            <div className={styles.profileText}><div className={styles.profileName}>{sessionUser.name}</div><div className={styles.profileRole}>{sessionUser.role}</div></div>
           </button>
         </div>
       </aside>
@@ -2061,7 +2089,7 @@ export default function DashboardShell({
                 <p>{currentSection?.description}</p>
               </header>
               {!dashboardData.configured && activeConfig === "hubspot" ? <div className={styles.integrationNotice}>{hubspotMessage}</div> : null}
-              <SettingsContent section={activeConfig} personalization={personalization} updatePersonalization={updatePersonalization} profilePhoto={profilePhoto} onPhotoChange={handlePhotoChange} dashboardData={dashboardData} />
+              <SettingsContent section={activeConfig} personalization={personalization} updatePersonalization={updatePersonalization} profilePhoto={profilePhoto} onPhotoChange={handlePhotoChange} dashboardData={dashboardData} sessionUser={sessionUser} />
             </div>
           </section>
         ) : activeNav === "profile" ? (
@@ -2072,7 +2100,7 @@ export default function DashboardShell({
                 <p>{accountSection.description}</p>
               </header>
               <div className={styles.profileStandalone}>
-                <SettingsContent section="account" personalization={personalization} updatePersonalization={updatePersonalization} profilePhoto={profilePhoto} onPhotoChange={handlePhotoChange} dashboardData={dashboardData} />
+                <SettingsContent section="account" personalization={personalization} updatePersonalization={updatePersonalization} profilePhoto={profilePhoto} onPhotoChange={handlePhotoChange} dashboardData={dashboardData} sessionUser={sessionUser} />
               </div>
             </div>
           </section>
@@ -2103,7 +2131,7 @@ export default function DashboardShell({
             <p>Ao continuar, você será redirecionado para a tela de login do SalesOps.</p>
             <div className={styles.logoutActions}>
               <button type="button" className={styles.logoutSecondaryButton} onClick={() => setLogoutPromptOpen(false)}>Cancelar</button>
-              <button type="button" className={styles.logoutPrimaryButton} onClick={() => router.push("/login")}>Sair agora</button>
+              <button type="button" className={styles.logoutPrimaryButton} onClick={handleLogout}>Sair agora</button>
             </div>
           </div>
         </div>

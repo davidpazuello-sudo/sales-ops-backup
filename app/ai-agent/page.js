@@ -127,9 +127,15 @@ export default function AIAgentPage() {
   const [isListening, setIsListening] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [sessionUser, setSessionUser] = useState({ name: "Usuario", role: "Cargo" });
   const menuRef = useRef(null);
   const fileInputRef = useRef(null);
   const recognitionRef = useRef(null);
+
+  async function handleLogout() {
+    await fetch("/api/auth/logout", { method: "POST" }).catch(() => null);
+    router.replace("/login");
+  }
 
   useEffect(() => {
     function closeOnOutside(event) {
@@ -143,6 +149,28 @@ export default function AIAgentPage() {
     return () => {
       document.removeEventListener("mousedown", closeOnOutside);
       document.removeEventListener("keydown", closeOnEscape);
+    };
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadSessionUser() {
+      const response = await fetch("/api/auth/session", { cache: "no-store" }).catch(() => null);
+      if (!response?.ok || cancelled) return;
+
+      const payload = await response.json().catch(() => null);
+      if (!payload?.user || cancelled) return;
+
+      setSessionUser({
+        name: payload.user.name || "Usuario",
+        role: payload.user.role || "Cargo",
+      });
+    }
+
+    loadSessionUser();
+    return () => {
+      cancelled = true;
     };
   }, []);
 
@@ -264,7 +292,7 @@ export default function AIAgentPage() {
             <SparkIcon />
             <span>Agente de IA</span>
           </button>
-          <button type="button" className={styles.logoutButton} onClick={() => router.push("/login")}>
+          <button type="button" className={styles.logoutButton} onClick={handleLogout}>
             <LogoutIcon />
             <span>Sair</span>
           </button>
@@ -290,7 +318,7 @@ export default function AIAgentPage() {
           </button>
           <button type="button" className={styles.profileBox} onClick={() => openMainView("profile")}>
             <div className={styles.profileAvatar}>?</div>
-            <div className={styles.profileText}><div className={styles.profileName}>Usuário</div><div className={styles.profileRole}>Cargo</div></div>
+            <div className={styles.profileText}><div className={styles.profileName}>{sessionUser.name}</div><div className={styles.profileRole}>{sessionUser.role}</div></div>
           </button>
         </div>
       </aside>

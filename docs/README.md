@@ -8,7 +8,8 @@ Este diretorio concentra a documentacao tecnica e de produto do sistema.
 2. [UI e UX](UI-UX.md)
 3. [Layout e Interface](LAYOUT-INTERFACE.md)
 4. [Deploy e Operacao](DEPLOY-OPERACAO.md)
-5. [Melhorias e Sugestoes](MELHORIAS-E-SUGESTOES.md)
+5. [Publicacao para Usuarios Reais](PUBLICACAO-USUARIOS-REAIS.md)
+6. [Melhorias e Sugestoes](MELHORIAS-E-SUGESTOES.md)
 
 ## Publico alvo
 

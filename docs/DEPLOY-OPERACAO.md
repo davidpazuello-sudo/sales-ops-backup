@@ -47,3 +47,16 @@ Recomendacoes:
 - manter backup remoto em repo espelho
 - gerar backup bundle periodico (`git bundle`)
 - armazenar bundles em local seguro com versionamento de data
+
+## 7) Publicacao para usuarios reais
+
+Guia operacional completo:
+- ver `PUBLICACAO-USUARIOS-REAIS.md`
+
+Esse documento cobre:
+- preparacao tecnica
+- QA pre go-live
+- publicacao no Vercel
+- dominio
+- piloto com usuarios reais
+- checklist de entrada em producao

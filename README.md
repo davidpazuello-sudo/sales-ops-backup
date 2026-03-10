@@ -21,6 +21,7 @@ Principais documentos:
 - [`docs/UI-UX.md`](docs/UI-UX.md)
 - [`docs/LAYOUT-INTERFACE.md`](docs/LAYOUT-INTERFACE.md)
 - [`docs/DEPLOY-OPERACAO.md`](docs/DEPLOY-OPERACAO.md)
+- [`docs/PUBLICACAO-USUARIOS-REAIS.md`](docs/PUBLICACAO-USUARIOS-REAIS.md)
 - [`docs/MELHORIAS-E-SUGESTOES.md`](docs/MELHORIAS-E-SUGESTOES.md)
 
 ## Ambiente
@@ -29,7 +30,21 @@ Crie um arquivo `.env.local` com:
 
 ```bash
 HUBSPOT_ACCESS_TOKEN=seu_token_de_private_app_hubspot
+NEXT_PUBLIC_SUPABASE_URL=https://seu-projeto.supabase.co
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sua_publishable_key
+NEXT_PUBLIC_SUPABASE_ANON_KEY=sua_anon_key_legada_opcional
+NEXT_PUBLIC_APP_URL=https://seu-dominio.com
 ```
+
+## Autenticacao
+
+O sistema agora usa autenticacao real com Supabase Auth e sessao HTTP-only.
+
+Variaveis esperadas:
+- `NEXT_PUBLIC_SUPABASE_URL`: URL do projeto no Supabase
+- `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`: chave publica do projeto
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`: fallback para projetos antigos
+- `NEXT_PUBLIC_APP_URL`: URL publica usada na recuperacao de senha
 
 ## Rodando local
 

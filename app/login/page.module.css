@@ -154,6 +154,26 @@
   cursor: pointer;
 }
 
+.formError {
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 122, 122, 0.32);
+  border-radius: 12px;
+  background: rgba(112, 33, 49, 0.28);
+  color: #ffd2d2;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.formInfo {
+  padding: 10px 12px;
+  border: 1px solid rgba(118, 181, 255, 0.26);
+  border-radius: 12px;
+  background: rgba(35, 76, 130, 0.24);
+  color: #d7e8ff;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
 .primaryButton,
 .secondaryButton {
   height: 40px;
@@ -163,6 +183,12 @@
   font-weight: 700;
   cursor: pointer;
   transition: transform 160ms ease, box-shadow 160ms ease, opacity 160ms ease;
+}
+
+.primaryButton:disabled,
+.secondaryButton:disabled {
+  opacity: 0.72;
+  cursor: wait;
 }
 
 .primaryButton {
