@@ -1236,12 +1236,15 @@
 }
 
 .pipelineColumnCollapsed {
-  grid-template-rows: auto 1fr auto;
-  flex: 0 0 44px;
-  width: 44px;
+  grid-template-rows: auto;
+  flex: 0 0 44px !important;
+  width: 44px !important;
+  min-width: 44px;
+  max-width: 44px;
   min-height: 360px;
   padding: 0;
   justify-items: center;
+  gap: 0;
 }
 
 .pipelineColumnHeader {
