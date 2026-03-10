@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { FIRST_ACCESS_MODE } from "lib/auth-flows";
 import styles from "./page.module.css";
 
 const qrCells = [
@@ -27,16 +28,19 @@ export default function LoginPage() {
   const [view, setView] = useState("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [firstAccessEmail, setFirstAccessEmail] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loginError, setLoginError] = useState("");
   const [requestEmail, setRequestEmail] = useState("");
   const [forgotEmail, setForgotEmail] = useState("");
+  const [firstAccessMessage, setFirstAccessMessage] = useState("");
   const [requestMessage, setRequestMessage] = useState("");
   const [forgotMessage, setForgotMessage] = useState("");
   const [resetMessage, setResetMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [redirectPath, setRedirectPath] = useState("/relatorios");
+  const [resetFlow, setResetFlow] = useState("password-recovery");
 
   async function getSupabaseClientOrNull() {
     if (typeof window === "undefined") return null;
@@ -54,7 +58,18 @@ export default function LoginPage() {
 
     const params = new URLSearchParams(window.location.search);
     const nextRedirect = params.get("redirect") || "/relatorios";
+    const nextResetFlow =
+      params.get("mode") === FIRST_ACCESS_MODE ? FIRST_ACCESS_MODE : "password-recovery";
+    const hasRecoveryToken = window.location.hash.includes("access_token");
+
     setRedirectPath(nextRedirect);
+    setResetFlow(nextResetFlow);
+
+    if (hasRecoveryToken) {
+      setView("reset");
+    } else if (nextResetFlow === FIRST_ACCESS_MODE) {
+      setView("firstAccess");
+    }
 
     if (params.get("config") === "supabase") {
       setLoginError("Supabase ainda nao esta configurado no ambiente publicado.");
@@ -97,6 +112,7 @@ export default function LoginPage() {
           setView("reset");
           setLoginError("");
           setForgotMessage("");
+          setFirstAccessMessage("");
         }
       });
 
@@ -161,6 +177,31 @@ export default function LoginPage() {
       });
   }
 
+  function handleFirstAccess(event) {
+    event.preventDefault();
+    setFirstAccessMessage("");
+    setLoginError("");
+
+    fetch("/api/auth/first-access", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: firstAccessEmail }),
+    })
+      .then(async (response) => {
+        const payload = await response.json().catch(() => null);
+        if (!response.ok) {
+          setFirstAccessMessage(payload?.error || "Nao foi possivel iniciar o primeiro acesso.");
+          return;
+        }
+        setFirstAccessMessage(
+          payload?.message || "Enviamos o link para definir sua senha de primeiro acesso.",
+        );
+      })
+      .catch(() => {
+        setFirstAccessMessage("Nao foi possivel iniciar o primeiro acesso.");
+      });
+  }
+
   function handleForgotPassword(event) {
     event.preventDefault();
     setForgotMessage("");
@@ -217,6 +258,30 @@ export default function LoginPage() {
     setView("login");
   }
 
+  const pageTitle =
+    view === "request"
+      ? "Solicitar acesso"
+      : view === "forgot"
+        ? "Recuperar senha"
+        : view === "firstAccess"
+          ? "Primeiro acesso"
+          : view === "reset" && resetFlow === FIRST_ACCESS_MODE
+            ? "Defina sua senha"
+            : "Boas-vindas de volta!";
+
+  const pageDescription =
+    view === "request"
+      ? "Informe seu email corporativo para pedir acesso ao workspace autenticado via Supabase."
+      : view === "forgot"
+        ? "Digite seu email corporativo para receber as instrucoes de redefinicao de senha."
+        : view === "firstAccess"
+          ? "Se sua conta ja foi habilitada, enviamos um link seguro para voce criar a senha do primeiro acesso."
+          : view === "reset" && resetFlow === FIRST_ACCESS_MODE
+            ? "Conclua o primeiro acesso definindo a senha que sera usada nas proximas entradas."
+            : view === "reset"
+              ? "Defina sua nova senha para concluir a recuperacao da conta."
+              : "Estamos muito animados em te ver novamente!";
+
   return (
     <main className={styles.loginShell}>
       <div className={styles.brandMark}>
@@ -227,22 +292,8 @@ export default function LoginPage() {
       <div className={styles.loginCard}>
         <section className={styles.formSide}>
           <div className={styles.welcomeBlock}>
-            <h1>
-              {view === "request"
-                ? "Solicitar acesso"
-                : view === "forgot"
-                  ? "Recuperar senha"
-                  : "Boas-vindas de volta!"}
-            </h1>
-            <p>
-              {view === "request"
-                ? "Informe seu email corporativo para pedir acesso ao workspace autenticado via Supabase."
-                : view === "forgot"
-                  ? "Digite seu email corporativo para receber as instrucoes de redefinicao de senha."
-                  : view === "reset"
-                    ? "Defina sua nova senha para concluir a recuperacao da conta."
-                  : "Estamos muito animados em te ver novamente!"}
-            </p>
+            <h1>{pageTitle}</h1>
+            <p>{pageDescription}</p>
           </div>
 
           {view === "request" ? (
@@ -269,6 +320,39 @@ export default function LoginPage() {
 
               <div className={styles.footerNote}>
                 <span>Ja tem uma conta?</span>
+                <button
+                  type="button"
+                  className={styles.inlineAction}
+                  onClick={() => setView("login")}
+                >
+                  Voltar para login
+                </button>
+              </div>
+            </>
+          ) : view === "firstAccess" ? (
+            <>
+              <form className={styles.form} onSubmit={handleFirstAccess}>
+                <label className={styles.field}>
+                  <span>Email corporativo</span>
+                  <input
+                    type="email"
+                    value={firstAccessEmail}
+                    onChange={(event) => setFirstAccessEmail(event.target.value)}
+                    placeholder="voce@empresa.com"
+                    autoComplete="email"
+                    required
+                  />
+                </label>
+
+                {firstAccessMessage ? <div className={styles.formInfo}>{firstAccessMessage}</div> : null}
+
+                <button type="submit" className={styles.primaryButton}>
+                  Enviar link de primeiro acesso
+                </button>
+              </form>
+
+              <div className={styles.footerNote}>
+                <span>Ja recebeu a liberacao?</span>
                 <button
                   type="button"
                   className={styles.inlineAction}
@@ -342,7 +426,7 @@ export default function LoginPage() {
                 {resetMessage ? <div className={styles.formInfo}>{resetMessage}</div> : null}
 
                 <button type="submit" className={styles.primaryButton}>
-                  Redefinir senha
+                  {resetFlow === FIRST_ACCESS_MODE ? "Definir senha de acesso" : "Redefinir senha"}
                 </button>
               </form>
 
@@ -351,7 +435,10 @@ export default function LoginPage() {
                 <button
                   type="button"
                   className={styles.inlineAction}
-                  onClick={() => setView("login")}
+                  onClick={() => {
+                    setResetFlow("password-recovery");
+                    setView("login");
+                  }}
                 >
                   Ir para login
                 </button>
@@ -400,7 +487,14 @@ export default function LoginPage() {
               </form>
 
               <div className={styles.footerNote}>
-                <span>Precisando de uma conta?</span>
+                <span>Primeiro acesso ou sem conta?</span>
+                <button
+                  type="button"
+                  className={styles.inlineAction}
+                  onClick={() => setView("firstAccess")}
+                >
+                  Primeiro acesso
+                </button>
                 <button
                   type="button"
                   className={styles.inlineAction}

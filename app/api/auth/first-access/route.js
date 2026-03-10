@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { buildLoginRedirectUrl, normalizeEmail } from "lib/auth-flows";
+import { buildLoginRedirectUrl, FIRST_ACCESS_MODE, normalizeEmail } from "lib/auth-flows";
 import { createClient } from "lib/supabase/server";
 
 export async function POST(request) {
@@ -15,18 +15,18 @@ export async function POST(request) {
 
   const supabase = await createClient();
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: buildLoginRedirectUrl(request),
+    redirectTo: buildLoginRedirectUrl(request, FIRST_ACCESS_MODE),
   });
 
   if (error) {
     return NextResponse.json(
-      { ok: false, error: error.message || "Nao foi possivel enviar o link de recuperacao." },
+      { ok: false, error: error.message || "Nao foi possivel iniciar o primeiro acesso." },
       { status: 400 },
     );
   }
 
   return NextResponse.json({
     ok: true,
-    message: "Link de recuperacao enviado. Verifique seu email.",
+    message: "Se o email estiver habilitado, voce recebera um link para definir a senha do primeiro acesso.",
   });
 }
