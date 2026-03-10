@@ -1195,7 +1195,7 @@
 .pipelineBoard {
   display: flex;
   gap: 14px;
-  align-items: start;
+  align-items: flex-start;
   overflow-x: auto;
   overflow-y: hidden;
   padding-bottom: 10px;

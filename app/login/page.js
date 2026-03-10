@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { createClient } from "lib/supabase/client";
 import styles from "./page.module.css";
 
@@ -25,7 +25,6 @@ const qrCells = [
 
 export default function LoginPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const supabase = createClient();
   const [view, setView] = useState("login");
   const [email, setEmail] = useState("");
@@ -39,6 +38,14 @@ export default function LoginPage() {
   const [forgotMessage, setForgotMessage] = useState("");
   const [resetMessage, setResetMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [redirectPath, setRedirectPath] = useState("/relatorios");
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const nextRedirect = new URLSearchParams(window.location.search).get("redirect") || "/relatorios";
+    setRedirectPath(nextRedirect);
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -49,7 +56,7 @@ export default function LoginPage() {
 
       const payload = await response.json().catch(() => null);
       if (payload?.authenticated) {
-        router.replace(searchParams.get("redirect") || "/relatorios");
+        router.replace(redirectPath);
       }
     }
 
@@ -57,7 +64,7 @@ export default function LoginPage() {
     return () => {
       cancelled = true;
     };
-  }, [router, searchParams]);
+  }, [redirectPath, router]);
 
   useEffect(() => {
     const {
@@ -99,7 +106,7 @@ export default function LoginPage() {
       return;
     }
 
-    router.replace(searchParams.get("redirect") || "/relatorios");
+    router.replace(redirectPath);
   }
 
   function handleRequestAccess(event) {
