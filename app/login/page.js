@@ -52,8 +52,15 @@ export default function LoginPage() {
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    const nextRedirect = new URLSearchParams(window.location.search).get("redirect") || "/relatorios";
+    const params = new URLSearchParams(window.location.search);
+    const nextRedirect = params.get("redirect") || "/relatorios";
     setRedirectPath(nextRedirect);
+
+    if (params.get("config") === "supabase") {
+      setLoginError("Supabase ainda nao esta configurado no ambiente publicado.");
+    } else if (params.get("authError") === "middleware") {
+      setLoginError("Nao foi possivel validar a sessao agora. Tente novamente em instantes.");
+    }
   }, []);
 
   useEffect(() => {
