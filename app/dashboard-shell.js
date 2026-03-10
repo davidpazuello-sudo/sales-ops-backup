@@ -264,6 +264,19 @@ function sellerToSlug(name) {
     .replace(/^-+|-+$/g, "");
 }
 
+function dealToSlug(deal) {
+  return `${sellerToSlug(deal?.name)}-${deal?.id}`;
+}
+
+function findDealByRouteId(deals, routeId) {
+  const normalizedRoute = String(routeId || "").toLowerCase();
+  return deals.find((deal) => {
+    if (String(deal.id).toLowerCase() === normalizedRoute) return true;
+    if (sellerToSlug(deal.name) === normalizedRoute) return true;
+    return dealToSlug(deal) === normalizedRoute;
+  });
+}
+
 function meetingToSlug(title) {
   return sellerToSlug(title);
 }
@@ -553,11 +566,13 @@ function ReportsContent({ dashboardData }) {
 }
 
 function DealsContent({ dashboardData }) {
+  const router = useRouter();
   const [boardDeals, setBoardDeals] = useState(dashboardData.deals);
   const [draggedDealId, setDraggedDealId] = useState("");
   const [ownerFilter, setOwnerFilter] = useState("todos");
   const [activityWeeksFilter, setActivityWeeksFilter] = useState("1");
   const [collapsedStages, setCollapsedStages] = useState({});
+  const skipCardClickRef = useRef(false);
   const stageOrder = [
     "Oportunidade",
     "Primeira Reunião",
@@ -668,6 +683,14 @@ function DealsContent({ dashboardData }) {
     setDraggedDealId("");
   };
 
+  const openDealProfile = (deal) => {
+    if (skipCardClickRef.current) {
+      skipCardClickRef.current = false;
+      return;
+    }
+    router.push(`/negocios/${dealToSlug(deal)}`);
+  };
+
   const toggleStageCollapse = (stage) => {
     setCollapsedStages((current) => ({
       ...current,
@@ -757,8 +780,24 @@ function DealsContent({ dashboardData }) {
                   key={deal.id}
                   className={styles.pipelineDealCard}
                   draggable
-                  onDragStart={() => setDraggedDealId(deal.id)}
-                  onDragEnd={() => setDraggedDealId("")}
+                  tabIndex={0}
+                  onClick={() => openDealProfile(deal)}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter" || event.key === " ") {
+                      event.preventDefault();
+                      openDealProfile(deal);
+                    }
+                  }}
+                  onDragStart={() => {
+                    skipCardClickRef.current = true;
+                    setDraggedDealId(deal.id);
+                  }}
+                  onDragEnd={() => {
+                    setDraggedDealId("");
+                    window.setTimeout(() => {
+                      skipCardClickRef.current = false;
+                    }, 0);
+                  }}
                 >
                   {collapsedStages[column.stage] ? null : (
                     <>
@@ -788,6 +827,61 @@ function DealsContent({ dashboardData }) {
           );
         })}
       </section>
+    </section>
+  );
+}
+
+function DealProfileContent({ dashboardData, dealId }) {
+  const router = useRouter();
+  const deal = findDealByRouteId(dashboardData.deals, dealId);
+
+  if (!deal) {
+    return (
+      <section className={styles.dashboardSection}>
+        <header className={styles.settingsHeader}>
+          <h1>Negócio não encontrado</h1>
+          <p>Não localizamos esse negócio no pipeline atual.</p>
+        </header>
+        <button
+          type="button"
+          className={styles.secondaryActionButton}
+          onClick={() => router.push("/negocios")}
+        >
+          Voltar para Negócios
+        </button>
+      </section>
+    );
+  }
+
+  return (
+    <section className={styles.dashboardSection}>
+      <header className={styles.settingsHeader}>
+        <h1>{deal.name}</h1>
+        <p>Perfil completo do negócio e status atual no pipeline.</p>
+      </header>
+
+      <div className={styles.grid}>
+        <Card eyebrow="NEGOCIO" title="Resumo do Negócio">
+          <Row label="Nome" value={deal.name} />
+          <Row label="Responsável" value={deal.owner} />
+          <Row label="Etapa atual" value={deal.stage} />
+          <Row label="Valor" value={deal.amountLabel} />
+          <Row label="Última atualização" value={deal.staleLabel} />
+        </Card>
+
+        <Card eyebrow="AÇÕES" title="Próximos Passos">
+          <Row label="Sincronização" value="HubSpot ativa" helper="Negócio vinculado ao pipeline principal" />
+          <Row label="Movimentação" value="Arraste no quadro de Negócios" helper="Pressione e arraste o card para mudar de etapa" />
+          <Row label="Navegação" value="Voltar ao pipeline" helper="Clique abaixo para retornar" />
+          <button
+            type="button"
+            className={styles.secondaryActionButton}
+            onClick={() => router.push("/negocios")}
+          >
+            Abrir Pipeline
+          </button>
+        </Card>
+      </div>
     </section>
   );
 }
@@ -1340,6 +1434,7 @@ export default function DashboardShell({
   sellerSlug = "",
   sellerMeetingsView = false,
   sellerMeetingId = "",
+  dealId = "",
 }) {
   const router = useRouter();
   const [personalization, setPersonalization] = useState(personalizationDefaults);
@@ -1622,6 +1717,8 @@ export default function DashboardShell({
               </div>
             </div>
           </section>
+        ) : dealId ? (
+          <DealProfileContent dashboardData={dashboardData} dealId={dealId} />
         ) : sellerMeetingId ? (
           <SellerMeetingDetailContent dashboardData={dashboardData} sellerSlug={sellerSlug} meetingId={sellerMeetingId} />
         ) : sellerMeetingsView ? (
