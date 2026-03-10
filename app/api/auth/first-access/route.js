@@ -1,8 +1,16 @@
 import { NextResponse } from "next/server";
 import { buildLoginRedirectUrl, FIRST_ACCESS_MODE, normalizeEmail } from "lib/auth-flows";
 import { createClient } from "lib/supabase/server";
+import { hasSupabaseEnv } from "lib/supabase/shared";
 
 export async function POST(request) {
+  if (!hasSupabaseEnv()) {
+    return NextResponse.json(
+      { ok: false, error: "Supabase nao configurado neste ambiente." },
+      { status: 503 },
+    );
+  }
+
   const body = await request.json().catch(() => null);
   const email = normalizeEmail(body?.email);
 
@@ -13,20 +21,27 @@ export async function POST(request) {
     );
   }
 
-  const supabase = await createClient();
-  const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: buildLoginRedirectUrl(request, FIRST_ACCESS_MODE),
-  });
+  try {
+    const supabase = await createClient();
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: buildLoginRedirectUrl(request, FIRST_ACCESS_MODE),
+    });
 
-  if (error) {
+    if (error) {
+      return NextResponse.json(
+        { ok: false, error: error.message || "Nao foi possivel iniciar o primeiro acesso." },
+        { status: 400 },
+      );
+    }
+
+    return NextResponse.json({
+      ok: true,
+      message: "Se o email estiver habilitado, voce recebera um link para definir a senha do primeiro acesso.",
+    });
+  } catch {
     return NextResponse.json(
-      { ok: false, error: error.message || "Nao foi possivel iniciar o primeiro acesso." },
-      { status: 400 },
+      { ok: false, error: "Nao foi possivel iniciar o primeiro acesso neste ambiente." },
+      { status: 503 },
     );
   }
-
-  return NextResponse.json({
-    ok: true,
-    message: "Se o email estiver habilitado, voce recebera um link para definir a senha do primeiro acesso.",
-  });
 }

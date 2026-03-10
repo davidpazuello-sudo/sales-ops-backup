@@ -23,13 +23,6 @@ const qrCells = [
   "111111101111111",
 ];
 
-function hasClientSupabaseEnv() {
-  return Boolean(
-    process.env.NEXT_PUBLIC_SUPABASE_URL
-      && (process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY),
-  );
-}
-
 export default function LoginPage() {
   const router = useRouter();
   const [view, setView] = useState("login");
@@ -48,14 +41,15 @@ export default function LoginPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [redirectPath, setRedirectPath] = useState("/relatorios");
   const [resetFlow, setResetFlow] = useState("password-recovery");
+  const [supabaseConfig, setSupabaseConfig] = useState(null);
 
   async function getSupabaseClientOrNull() {
     if (typeof window === "undefined") return null;
-    if (!hasClientSupabaseEnv()) return null;
+    if (!supabaseConfig) return null;
 
     try {
       const { createClient } = await import("lib/supabase/client");
-      return createClient();
+      return createClient(supabaseConfig);
     } catch {
       return null;
     }
@@ -84,6 +78,26 @@ export default function LoginPage() {
     } else if (params.get("authError") === "middleware") {
       setLoginError("Nao foi possivel validar a sessao agora. Tente novamente em instantes.");
     }
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadSupabaseConfig() {
+      const response = await fetch("/api/auth/config", { cache: "no-store" }).catch(() => null);
+      if (cancelled || !response?.ok) return;
+
+      const payload = await response.json().catch(() => null);
+      if (cancelled || !payload?.supabase) return;
+
+      setSupabaseConfig(payload.supabase);
+    }
+
+    loadSupabaseConfig();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   useEffect(() => {
@@ -133,7 +147,7 @@ export default function LoginPage() {
       cancelled = true;
       subscription?.unsubscribe();
     };
-  }, []);
+  }, [supabaseConfig]);
 
   async function handleSubmit(event) {
     event.preventDefault();
