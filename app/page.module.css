@@ -1295,6 +1295,13 @@
   font-weight: 700;
 }
 
+.pipelineCountBadge {
+  min-width: 24px;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+}
+
 .pipelineCollapseButton {
   width: 22px;
   height: 22px;
@@ -1376,14 +1383,15 @@
 }
 
 .pipelineColumnCollapsed .pipelineColumnHeader {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  gap: 10px;
   width: 100%;
-  min-height: 120px;
-  padding: 10px 4px 8px;
-  border-bottom: 1px solid #d8dee8;
+  min-height: 0;
+  padding: 10px 4px;
+  border-bottom: 0;
+  background: transparent;
 }
 
 .pipelineColumnCollapsed .pipelineColumnHeader span {
@@ -1395,41 +1403,11 @@
   font-weight: 700;
 }
 
-.pipelineColumnCollapsed .pipelineColumnActions {
-  flex-direction: column-reverse;
-  justify-content: center;
-}
-
 .pipelineColumnCollapsed .pipelineColumnBody {
-  width: 100%;
-  align-items: center;
-  padding: 8px 0;
+  display: none;
 }
 
-.pipelineColumnCollapsed .pipelineCollapsedSummary {
-  display: grid;
-  gap: 8px;
-  justify-items: center;
-  width: 100%;
-  min-height: 180px;
-  padding: 0;
-}
-
-.pipelineColumnCollapsed .pipelineCollapsedSummary strong {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 24px;
-  min-height: 24px;
-  padding: 0 4px;
-  border-radius: 6px;
-  background: #efe6d7;
-  color: #b67b00;
-  font-size: calc(10px * var(--font-scale));
-}
-
-.pipelineColumnCollapsed .pipelineDealCard,
-.pipelineColumnCollapsed .pipelineEmptyState {
+.pipelineColumnCollapsed .pipelineColumnFooter {
   display: none;
 }
 
@@ -1461,26 +1439,6 @@
 .pipelineColumnFooter span {
   color: #607690;
   font-size: calc(11px * var(--font-scale));
-}
-
-.pipelineColumnCollapsed .pipelineColumnFooter {
-  padding: 8px 4px 10px;
-  justify-items: center;
-}
-
-.pipelineColumnCollapsed .pipelineColumnFooter strong,
-.pipelineColumnCollapsed .pipelineColumnFooter span {
-  writing-mode: vertical-rl;
-  text-orientation: mixed;
-  white-space: nowrap;
-}
-
-.pipelineColumnCollapsed .pipelineColumnFooter strong {
-  font-size: calc(10px * var(--font-scale));
-}
-
-.pipelineColumnCollapsed .pipelineColumnFooter span {
-  font-size: calc(9px * var(--font-scale));
 }
 
 .pipelineStageChart {

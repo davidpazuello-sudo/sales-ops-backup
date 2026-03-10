@@ -704,38 +704,54 @@ function DealsContent({ dashboardData }) {
       </div>
 
       <section className={styles.pipelineBoard}>
-        {boardColumns.map((column) => (
-          <article
-            key={column.stage}
-            className={`${styles.pipelineColumn} ${collapsedStages[column.stage] ? styles.pipelineColumnCollapsed : ""}`.trim()}
-            onDragOver={(event) => event.preventDefault()}
-            onDrop={() => handleDropStage(column.stage)}
-          >
-            <header className={styles.pipelineColumnHeader}>
-              <div className={styles.pipelineColumnTitleBlock}>
-                <span>{column.stage}</span>
-              </div>
-              <div className={styles.pipelineColumnActions}>
-                <small>{column.count}</small>
-                <button
-                  type="button"
-                  className={styles.pipelineCollapseButton}
-                  onClick={() => toggleStageCollapse(column.stage)}
-                  aria-expanded={!collapsedStages[column.stage]}
-                  aria-label={collapsedStages[column.stage] ? `Expandir etapa ${column.stage}` : `Recolher etapa ${column.stage}`}
-                  title={collapsedStages[column.stage] ? "Expandir etapa" : "Recolher etapa"}
-                >
-                  {collapsedStages[column.stage] ? ">" : "<"}
-                </button>
-              </div>
-            </header>
+        {boardColumns.map((column) => {
+          const isCollapsed = Boolean(collapsedStages[column.stage]);
+          return (
+            <article
+              key={column.stage}
+              className={`${styles.pipelineColumn} ${isCollapsed ? styles.pipelineColumnCollapsed : ""}`.trim()}
+              onDragOver={(event) => event.preventDefault()}
+              onDrop={() => handleDropStage(column.stage)}
+            >
+              {isCollapsed ? (
+                <header className={styles.pipelineColumnHeader}>
+                  <button
+                    type="button"
+                    className={styles.pipelineCollapseButton}
+                    onClick={() => toggleStageCollapse(column.stage)}
+                    aria-expanded={!isCollapsed}
+                    aria-label={`Expandir etapa ${column.stage}`}
+                    title="Expandir etapa"
+                  >
+                    {">"}
+                  </button>
+                  <div className={styles.pipelineColumnTitleBlock}>
+                    <span>{column.stage}</span>
+                  </div>
+                  <small className={styles.pipelineCountBadge}>{column.count}</small>
+                </header>
+              ) : (
+                <header className={styles.pipelineColumnHeader}>
+                  <div className={styles.pipelineColumnTitleBlock}>
+                    <span>{column.stage}</span>
+                  </div>
+                  <div className={styles.pipelineColumnActions}>
+                    <small>{column.count}</small>
+                    <button
+                      type="button"
+                      className={styles.pipelineCollapseButton}
+                      onClick={() => toggleStageCollapse(column.stage)}
+                      aria-expanded={!isCollapsed}
+                      aria-label={`Recolher etapa ${column.stage}`}
+                      title="Recolher etapa"
+                    >
+                      {"<"}
+                    </button>
+                  </div>
+                </header>
+              )}
 
             <div className={styles.pipelineColumnBody}>
-              {collapsedStages[column.stage] ? (
-                <div className={styles.pipelineCollapsedSummary}>
-                  <strong>{column.count}</strong>
-                </div>
-              ) : null}
               {column.deals.length ? column.deals.map((deal) => (
                 <article
                   key={deal.id}
@@ -768,8 +784,9 @@ function DealsContent({ dashboardData }) {
               <strong>{column.totalLabel}</strong>
               <span>Valor total</span>
             </footer>
-          </article>
-        ))}
+            </article>
+          );
+        })}
       </section>
     </section>
   );
