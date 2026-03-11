@@ -129,13 +129,17 @@ export default function AIAgentPage() {
   const [attachments, setAttachments] = useState([]);
   const [isListening, setIsListening] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
+  const [historyCollapsed, setHistoryCollapsed] = useState(true);
   const [menuOpen, setMenuOpen] = useState(false);
   const [sessionUser, setSessionUser] = useState({ name: "Usuario", role: "Cargo", isSuperAdmin: false });
   const [dashboardData, setDashboardData] = useState(null);
   const [accessRequests, setAccessRequests] = useState([]);
+  const [notificationCount, setNotificationCount] = useState(0);
   const menuRef = useRef(null);
   const fileInputRef = useRef(null);
   const recognitionRef = useRef(null);
+  const chatEndRef = useRef(null);
+  const notificationBadge = notificationCount > 99 ? "99+" : String(notificationCount);
 
   async function handleLogout() {
     await fetch("/api/auth/logout", { method: "POST" }).catch(() => null);
@@ -224,6 +228,25 @@ export default function AIAgentPage() {
   }, [sessionUser.isSuperAdmin]);
 
   useEffect(() => {
+    let cancelled = false;
+
+    async function loadNotifications() {
+      const response = await fetch("/api/notifications", { cache: "no-store" }).catch(() => null);
+      const payload = await response?.json().catch(() => null);
+      if (cancelled) return;
+
+      const notifications = Array.isArray(payload?.notifications) ? payload.notifications : [];
+      const unreadCount = notifications.filter((item) => !item?.read && !item?.trash).length;
+      setNotificationCount(unreadCount);
+    }
+
+    loadNotifications();
+    return () => {
+      cancelled = true;
+    };
+  }, [sessionUser.isSuperAdmin]);
+
+  useEffect(() => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) return;
 
@@ -249,6 +272,10 @@ export default function AIAgentPage() {
 
     recognitionRef.current = recognition;
   }, []);
+
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: messages.length > 1 ? "smooth" : "auto", block: "end" });
+  }, [messages]);
 
   function submitQuestion(question) {
     const trimmed = question.trim();
@@ -342,6 +369,7 @@ export default function AIAgentPage() {
         <div className={styles.topbarActions}>
           <button type="button" className={`${styles.topbarButton} ${styles.notificationButton}`.trim()} aria-label="Notificações" title="Notificações">
             <BellIcon />
+            <span className={styles.notificationBadge} aria-hidden="true">{notificationBadge}</span>
           </button>
           <button type="button" className={styles.aiButton} title="NORA">
             <SparkIcon />
@@ -405,8 +433,26 @@ export default function AIAgentPage() {
             </section>
           ) : null}
 
-          <div className={styles.agentPanels}>
-            <aside className={styles.historyPanel}>
+          <div className={`${styles.agentPanels} ${historyCollapsed ? styles.agentPanelsHistoryCollapsed : ""}`.trim()}>
+            <aside className={`${styles.historySidebar} ${historyCollapsed ? styles.historySidebarCollapsed : ""}`.trim()} aria-label={"Hist\u00F3rico de perguntas"}>
+              <div className={styles.historySidebarToggleRow}>
+                <button
+                  type="button"
+                  className={`${styles.historySidebarToggle} ${historyCollapsed ? styles.historySidebarToggleCollapsed : ""}`.trim()}
+                  onClick={() => setHistoryCollapsed((value) => !value)}
+                  aria-expanded={!historyCollapsed}
+                  aria-label={historyCollapsed ? "Expandir historico" : "Recolher historico"}
+                  title={historyCollapsed ? "Expandir historico" : "Recolher historico"}
+                >
+                  <PanelsIcon />
+                </button>
+              </div>
+              {historyCollapsed ? (
+                <div className={styles.historySidebarRail}>
+                  <span className={styles.historySidebarRailLabel}>{"Hist\u00F3rico"}</span>
+                </div>
+              ) : (
+                <>
               <div className={styles.panelHeader}>
                 <h2>Histórico</h2>
                 <p>Perguntas recentes feitas à NORA sobre todo o sistema.</p>
@@ -421,9 +467,12 @@ export default function AIAgentPage() {
                   </button>
                 ))}
               </div>
+                </>
+              )}
             </aside>
 
             <section className={styles.chatPanel}>
+              <div className={styles.chatWorkspace}>
               {messages.length === 0 ? (
                 <div className={styles.promptRow}>
                   {suggestedPrompts.map((prompt) => (
@@ -465,6 +514,8 @@ export default function AIAgentPage() {
                     ) : null}
                   </article>
                 ))}
+                <div ref={chatEndRef} />
+              </div>
               </div>
 
               <form className={styles.chatComposer} onSubmit={handleSubmit}>

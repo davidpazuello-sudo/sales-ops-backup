@@ -76,12 +76,34 @@
 
 .notificationButton {
   order: -1;
+  position: relative;
+  overflow: visible;
 }
 
 .notificationButton svg {
   width: 20px;
   height: 20px;
   stroke-width: 2;
+}
+
+.notificationBadge {
+  position: absolute;
+  top: -6px;
+  right: -7px;
+  min-width: 17px;
+  height: 17px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: #dc2626;
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1;
+  box-shadow: 0 0 0 2px var(--panel);
+  pointer-events: none;
 }
 
 .logoutButton {
@@ -1548,6 +1570,62 @@
   cursor: not-allowed;
 }
 
+:global(html[data-theme="dark"]) .dealsFilterField select,
+:global(html[data-theme="dark"]) .dealsFilterInput,
+:global(html[data-theme="dark"]) .sellerFilterBox input,
+:global(html[data-theme="dark"]) .meetingField input,
+:global(html[data-theme="dark"]) .meetingField textarea,
+:global(html[data-theme="dark"]) .twoFactorField input,
+:global(html[data-theme="dark"]) .aiAssistantBox input,
+:global(html[data-theme="dark"]) .pageAgentComposer input,
+:global(html[data-theme="dark"]) .dealAiInput,
+:global(html[data-theme="dark"]) .globalSearchInput,
+:global(html[data-theme="dark"]) .systemUserRoleSelect {
+  border-color: #31445f;
+  background: #182436;
+  color: #eef4ff;
+}
+
+:global(html[data-theme="dark"]) .dealsFilterSelect {
+  background-color: #182436 !important;
+  background-image:
+    linear-gradient(45deg, transparent 50%, #9eb4d2 50%),
+    linear-gradient(135deg, #9eb4d2 50%, transparent 50%);
+  color: #eef4ff !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+}
+
+:global(html[data-theme="dark"]) .dealsFilterSelect option,
+:global(html[data-theme="dark"]) .systemUserRoleSelect option {
+  background: #182436;
+  color: #eef4ff;
+}
+
+:global(html[data-theme="dark"]) .systemUserRoleSelect {
+  background-color: #182436;
+  background-image:
+    linear-gradient(45deg, transparent 50%, #9eb4d2 50%),
+    linear-gradient(135deg, #9eb4d2 50%, transparent 50%);
+  color: #eef4ff;
+}
+
+:global(html[data-theme="dark"]) .systemUserRoleSelect:disabled {
+  background-color: #141f2f;
+  color: #7f93af;
+}
+
+:global(html[data-theme="dark"]) .dealsFilterInput::placeholder,
+:global(html[data-theme="dark"]) .globalSearchInput::placeholder,
+:global(html[data-theme="dark"]) .dealAiInput::placeholder,
+:global(html[data-theme="dark"]) .pageAgentComposer input::placeholder,
+:global(html[data-theme="dark"]) .aiAssistantBox input::placeholder,
+:global(html[data-theme="dark"]) .meetingField input::placeholder,
+:global(html[data-theme="dark"]) .meetingField textarea::placeholder,
+:global(html[data-theme="dark"]) .sellerFilterBox input::placeholder,
+:global(html[data-theme="dark"]) .twoFactorField input::placeholder {
+  color: #8fa4c2;
+}
+
 .systemUserActions {
   display: flex;
   min-height: 38px;
@@ -2993,7 +3071,7 @@
   right: 0;
   width: min(100%, 396px);
   height: 100%;
-  background: #f8fafc;
+  background: color-mix(in srgb, var(--panel) 98%, #f8fafc);
   border-left: 1px solid color-mix(in srgb, var(--border) 88%, #c8d3e1);
   box-shadow: -24px 0 44px rgba(15, 23, 42, 0.14);
   display: grid;
@@ -3007,7 +3085,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: #10b7c3;
+  background: linear-gradient(135deg, #20becd 0%, #18a8cb 100%);
   color: #ffffff;
 }
 
@@ -3209,7 +3287,7 @@
   grid-template-columns: 1fr 1fr 1fr auto;
   align-items: center;
   gap: 0;
-  background: #fdfefe;
+  background: color-mix(in srgb, var(--panel) 96%, #fdfefe);
   border-bottom: 1px solid color-mix(in srgb, var(--border) 92%, #d5dde8);
 }
 
@@ -3251,9 +3329,9 @@
   gap: 12px;
   min-height: 46px;
   padding: 0 16px;
-  background: #fdfefe;
+  background: color-mix(in srgb, var(--panel) 96%, #fdfefe);
   border-bottom: 1px solid color-mix(in srgb, var(--border) 92%, #d5dde8);
-  color: #6f8198;
+  color: var(--muted);
   font-size: 12px;
 }
 
@@ -3263,7 +3341,7 @@
   justify-content: space-between;
   gap: 14px;
   padding: 14px 16px;
-  background: linear-gradient(180deg, #fdfefe 0%, #f5f8fc 100%);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--panel) 98%, #fdfefe) 0%, color-mix(in srgb, var(--panel-soft) 92%, #f5f8fc) 100%);
   border-bottom: 1px solid color-mix(in srgb, var(--border) 92%, #d5dde8);
 }
 
@@ -3347,7 +3425,7 @@
 
 .notificationsList {
   overflow: auto;
-  background: #fbfcfe;
+  background: color-mix(in srgb, var(--panel) 98%, #fbfcfe);
 }
 
 .notificationRow {
@@ -3365,7 +3443,7 @@
 }
 
 .notificationRow:hover {
-  background: #f4f7fb;
+  background: color-mix(in srgb, var(--panel-soft) 88%, #f4f7fb);
 }
 
 .notificationRowButton {
@@ -3463,6 +3541,142 @@
   margin: 0;
   font-size: 13px;
   line-height: 1.55;
+}
+
+:global(html[data-theme="dark"]) .notificationsBackdrop {
+  background: rgba(5, 10, 18, 0.38);
+}
+
+:global(html[data-theme="dark"]) .notificationsPanel {
+  background: #121b29;
+  border-left-color: #27364d;
+  box-shadow: -24px 0 44px rgba(3, 8, 16, 0.46);
+}
+
+:global(html[data-theme="dark"]) .notificationsTopBar {
+  background: linear-gradient(180deg, #172334 0%, #132031 100%);
+  border-bottom: 1px solid #243247;
+}
+
+:global(html[data-theme="dark"]) .notificationsTopBar h2 {
+  color: #f5f7fb;
+}
+
+:global(html[data-theme="dark"]) .notificationsTopBar .notificationsClose {
+  border-color: rgba(143, 164, 194, 0.2);
+  background: rgba(255, 255, 255, 0.04);
+  color: #e8edf7;
+}
+
+:global(html[data-theme="dark"]) .notificationsTopBar .notificationsClose:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(143, 164, 194, 0.28);
+}
+
+:global(html[data-theme="dark"]) .notificationsTabs,
+:global(html[data-theme="dark"]) .notificationsToolbar {
+  background: #162132;
+  border-bottom-color: #243247;
+}
+
+:global(html[data-theme="dark"]) .notificationsTab,
+:global(html[data-theme="dark"]) .notificationsSettings,
+:global(html[data-theme="dark"]) .notificationsToolbar {
+  color: #99a9c2;
+}
+
+:global(html[data-theme="dark"]) .notificationsTabActive {
+  color: #f5f7fb;
+  box-shadow: inset 0 -2px 0 #de8300;
+}
+
+:global(html[data-theme="dark"]) .notificationsPermissionCard {
+  background: linear-gradient(180deg, #182436 0%, #162132 100%);
+  border-bottom-color: #243247;
+}
+
+:global(html[data-theme="dark"]) .notificationsPermissionCopy strong {
+  color: #f5f7fb;
+}
+
+:global(html[data-theme="dark"]) .notificationsPermissionCopy p {
+  color: #99a9c2;
+}
+
+:global(html[data-theme="dark"]) .notificationsPermissionButton {
+  border-color: #31445f;
+  background: #1b273a;
+  color: #eef4ff;
+}
+
+:global(html[data-theme="dark"]) .notificationsPermissionBadge {
+  border-color: #31445f;
+  background: #1b273a;
+  color: #99a9c2;
+}
+
+:global(html[data-theme="dark"]) .notificationsPermissionBadgeActive {
+  border-color: rgba(34, 197, 94, 0.3);
+  background: rgba(34, 197, 94, 0.14);
+  color: #a7f3d0;
+}
+
+:global(html[data-theme="dark"]) .notificationsCheckbox input {
+  accent-color: #de8300;
+}
+
+:global(html[data-theme="dark"]) .notificationsFilter button {
+  color: #8ec5ff;
+}
+
+:global(html[data-theme="dark"]) .notificationsList {
+  background: #121b29;
+}
+
+:global(html[data-theme="dark"]) .notificationRow {
+  border-bottom-color: #243247;
+}
+
+:global(html[data-theme="dark"]) .notificationRow:hover {
+  background: #182436;
+}
+
+:global(html[data-theme="dark"]) .notificationContent strong {
+  color: #f5f7fb;
+}
+
+:global(html[data-theme="dark"]) .notificationBody {
+  color: #99a9c2;
+}
+
+:global(html[data-theme="dark"]) .notificationSide small,
+:global(html[data-theme="dark"]) .notificationRow small {
+  color: #7f93af;
+}
+
+:global(html[data-theme="dark"]) .notificationArrow {
+  border-color: #31445f;
+  background: #1b273a;
+  color: #eef4ff;
+}
+
+:global(html[data-theme="dark"]) .notificationRowButton:hover .notificationArrow {
+  border-color: #3b5271;
+  background: #22314a;
+}
+
+:global(html[data-theme="dark"]) .notificationTag {
+  border-color: #31445f;
+  background: #1b273a;
+  color: #99a9c2;
+}
+
+:global(html[data-theme="dark"]) .notificationsEmptyState {
+  color: #99a9c2;
+}
+
+:global(html[data-theme="dark"]) .notificationsEmptyState strong {
+  color: #f5f7fb;
 }
 
 .logoutModal {

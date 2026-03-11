@@ -90,6 +90,7 @@ export default function DashboardShell({
     initialConfig,
     initialProfileView,
   });
+  const notificationBadge = unreadNotificationsCount > 99 ? "99+" : String(unreadNotificationsCount);
   const settingsHeaderAgentId = activeNav === "profile" || profileViewOpen ? "profile" : "settings";
 
   useEffect(() => {
@@ -140,6 +141,7 @@ export default function DashboardShell({
             onClick={() => setNotificationsOpen(true)}
           >
             <BellIcon />
+            <span className={styles.notificationBadge} aria-hidden="true">{notificationBadge}</span>
           </button>
           <button
             type="button"

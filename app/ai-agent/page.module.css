@@ -67,10 +67,35 @@
   color: var(--muted);
 }
 
+.notificationButton {
+  position: relative;
+  overflow: visible;
+}
+
 .notificationButton svg {
   width: 17px;
   height: 17px;
   stroke-width: 2;
+}
+
+.notificationBadge {
+  position: absolute;
+  top: -6px;
+  right: -7px;
+  min-width: 17px;
+  height: 17px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: #dc2626;
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px * var(--font-scale));
+  font-weight: 800;
+  line-height: 1;
+  box-shadow: 0 0 0 2px var(--panel);
+  pointer-events: none;
 }
 
 .aiButton,
@@ -303,10 +328,14 @@
 .content {
   min-width: 0;
   height: calc(100vh - 60px);
-  overflow: auto;
+  overflow: hidden;
 }
 
 .agentContent {
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
   padding: calc(28px * var(--density-scale)) calc(30px * var(--density-scale)) calc(34px * var(--density-scale));
 }
 
@@ -338,6 +367,12 @@
   gap: 20px;
   margin-top: 24px;
   align-items: start;
+  flex: 1;
+  min-height: 0;
+}
+
+.agentPanelsHistoryCollapsed {
+  grid-template-columns: 72px minmax(0, 1fr);
 }
 
 .agentDirectory {
@@ -400,21 +435,113 @@
   line-height: 1.5;
 }
 
-.historyPanel,
+.historySidebar,
 .chatPanel {
   border-radius: var(--surface-radius);
   background: color-mix(in srgb, var(--panel) 94%, transparent);
   box-shadow: var(--surface-shadow);
 }
 
-.historyPanel {
+.historySidebar {
   position: sticky;
   top: 24px;
-  padding: calc(22px * var(--density-scale));
+  min-height: 520px;
+  padding: calc(18px * var(--density-scale));
+  display: grid;
+  grid-template-rows: auto 1fr;
+  align-self: stretch;
+  overflow: hidden;
+  transition:
+    padding var(--motion-fast) ease,
+    min-height var(--motion-fast) ease,
+    background var(--motion-fast) ease,
+    border-radius var(--motion-fast) ease;
+}
+
+.historySidebarCollapsed {
+  min-height: 520px;
+  padding: 12px 10px;
+  justify-items: center;
+}
+
+.historySidebarCollapsed .historySidebarToggleRow {
+  width: 100%;
+  justify-content: center;
+  margin-bottom: 18px;
+}
+
+.historySidebarToggleRow {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 12px;
+}
+
+.historySidebarToggle {
+  width: 40px;
+  height: 40px;
+  border: 1px solid color-mix(in srgb, var(--heading) 18%, var(--border));
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--panel-soft) 82%, transparent);
+  color: var(--muted);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition:
+    border-color var(--motion-fast) ease,
+    background var(--motion-fast) ease,
+    color var(--motion-fast) ease,
+    transform var(--motion-fast) ease;
+}
+
+.historySidebarToggle:hover {
+  border-color: color-mix(in srgb, var(--accent) 38%, var(--border));
+  background: color-mix(in srgb, var(--accent-soft) 52%, var(--panel-soft));
+  color: var(--heading);
+  transform: translateY(-1px);
+}
+
+.historySidebarToggle svg {
+  width: 15px;
+  height: 15px;
+}
+
+.historySidebarToggleCollapsed {
+  background: color-mix(in srgb, var(--accent-soft) 48%, var(--panel-soft));
+  color: var(--heading);
+}
+
+.historySidebarRail {
+  height: 100%;
+  display: grid;
+  place-items: center;
+  padding: 8px 0 12px;
+}
+
+.historySidebarRailLabel {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  color: var(--muted);
+  font-size: calc(11px * var(--font-scale));
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
 }
 
 .chatPanel {
+  min-height: 0;
   padding: calc(22px * var(--density-scale));
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.chatWorkspace {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .panelHeader h2 {
@@ -465,7 +592,8 @@
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
-  margin-top: 18px;
+  margin-top: 4px;
+  margin-bottom: 20px;
 }
 
 .promptChip {
@@ -480,28 +608,30 @@
 .chatStream {
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  margin-top: 18px;
+  gap: 24px;
+  flex: 1;
+  min-height: 0;
+  padding-right: 10px;
+  padding-bottom: 18px;
+  overflow: auto;
+  scroll-behavior: smooth;
 }
 
 .messageBubble {
-  max-width: 82%;
-  padding: calc(14px * var(--density-scale)) calc(16px * var(--density-scale));
-  border-radius: 18px;
-  box-shadow: inset 0 0 0 1px var(--border);
+  max-width: 100%;
+  padding: 0 0 18px;
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 76%, transparent);
   font-size: calc(13px * var(--font-scale));
+  display: grid;
+  gap: 10px;
 }
 
 .messageAssistant {
-  background: var(--panel);
   color: var(--text);
 }
 
 .messageUser {
-  margin-left: auto;
-  background: linear-gradient(135deg, var(--accent), #f3a43d);
-  color: #fff;
-  box-shadow: none;
+  color: var(--heading);
 }
 
 .messageRole {
@@ -517,6 +647,7 @@
 .messageBubble p {
   margin: 0;
   line-height: 1.55;
+  white-space: pre-wrap;
 }
 
 .messageAttachments {
@@ -568,13 +699,18 @@
 .chatComposer {
   display: grid;
   gap: 10px;
-  margin-top: 22px;
+  margin-top: auto;
+  padding-top: 18px;
+  border-top: 1px solid color-mix(in srgb, var(--border) 72%, transparent);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--panel) 12%, transparent) 0%, color-mix(in srgb, var(--panel) 96%, transparent) 22%);
 }
 
 .composerRow {
   display: grid;
   grid-template-columns: auto auto 1fr auto;
   gap: 10px;
+  align-items: center;
 }
 
 .chatComposer input {
@@ -712,12 +848,29 @@
 
 @media (max-width: 1080px) {
   .agentDirectoryGrid,
-  .agentPanels {
+  .agentPanels,
+  .agentPanelsHistoryCollapsed {
     grid-template-columns: 1fr;
   }
 
-  .historyPanel {
+  .historySidebar,
+  .historySidebarCollapsed {
     position: static;
+    min-height: 0;
+  }
+
+  .historySidebarCollapsed {
+    padding: calc(18px * var(--density-scale));
+  }
+
+  .historySidebarRail {
+    min-height: 64px;
+  }
+
+  .historySidebarRailLabel {
+    writing-mode: initial;
+    transform: none;
+    letter-spacing: 0.08em;
   }
 }
 
