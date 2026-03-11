@@ -1,13 +1,24 @@
 import { NextResponse } from "next/server";
-import {
-  buildLoginRedirectUrl,
-  FIRST_ACCESS_MODE,
-  isAlreadyRegisteredError,
-  normalizeEmail,
-} from "lib/auth-flows";
-import { createClient } from "lib/supabase/server";
+import { normalizeEmail } from "lib/auth-flows";
+import { logAuthRouteError } from "lib/auth-logging";
+import { queueAccessRequest } from "lib/access-requests-store";
+import { getSuperAdminEmails, hasSupabaseEnv } from "lib/supabase/shared";
 
 export async function POST(request) {
+  if (!hasSupabaseEnv()) {
+    return NextResponse.json(
+      { ok: false, error: "Supabase nao configurado neste ambiente." },
+      { status: 503 },
+    );
+  }
+
+  if (!getSuperAdminEmails().length) {
+    return NextResponse.json(
+      { ok: false, error: "Nao ha super admin configurado para aprovar acessos." },
+      { status: 503 },
+    );
+  }
+
   const body = await request.json().catch(() => null);
   const email = normalizeEmail(body?.email);
 
@@ -18,38 +29,23 @@ export async function POST(request) {
     );
   }
 
-  const supabase = await createClient();
-  const tempPassword = `SalesOps!${Math.random().toString(36).slice(2, 10)}A1`;
-  const { error: signUpError } = await supabase.auth.signUp({
-    email,
-    password: tempPassword,
-    options: {
-      data: {
-        role: "Equipe comercial",
-      },
-    },
-  });
+  try {
+    const { created } = await queueAccessRequest({
+      email,
+      type: "request-access",
+    });
 
-  if (signUpError && !isAlreadyRegisteredError(signUpError)) {
+    return NextResponse.json({
+      ok: true,
+      message: created
+        ? "Solicitacao enviada para aprovacao do super admin. Apos a aprovacao, enviaremos o link do primeiro acesso."
+        : "Ja existe uma solicitacao pendente para este email. Aguarde a aprovacao do super admin.",
+    });
+  } catch (error) {
+    logAuthRouteError("api/auth/request-access", "queue-request", error, { email });
     return NextResponse.json(
-      { ok: false, error: signUpError.message || "Nao foi possivel solicitar acesso." },
-      { status: 400 },
+      { ok: false, error: "Nao foi possivel solicitar acesso neste ambiente." },
+      { status: 503 },
     );
   }
-
-  const { error: firstAccessError } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: buildLoginRedirectUrl(request, FIRST_ACCESS_MODE),
-  });
-
-  if (firstAccessError) {
-    return NextResponse.json(
-      { ok: false, error: firstAccessError.message || "Nao foi possivel enviar o link de primeiro acesso." },
-      { status: 400 },
-    );
-  }
-
-  return NextResponse.json({
-    ok: true,
-    message: "Solicitacao recebida. Se o email estiver habilitado, voce recebera um link para concluir o primeiro acesso e definir sua senha.",
-  });
 }

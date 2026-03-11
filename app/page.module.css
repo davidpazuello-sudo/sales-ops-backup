@@ -1299,6 +1299,48 @@
   font-size: calc(12px * var(--font-scale));
 }
 
+.accessRequestList {
+  display: grid;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.accessRequestCard {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 14px;
+  align-items: center;
+  padding: calc(14px * var(--density-scale));
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: linear-gradient(180deg, var(--panel), var(--panel-soft));
+}
+
+.accessRequestMeta {
+  display: grid;
+  gap: 4px;
+}
+
+.accessRequestMeta strong {
+  color: var(--heading);
+  font-size: calc(15px * var(--font-scale));
+}
+
+.accessRequestMeta span,
+.accessRequestMeta small {
+  color: var(--muted);
+}
+
+.accessRequestMeta small {
+  font-size: calc(11px * var(--font-scale));
+}
+
+.accessRequestActions {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
 
 .pipelineColumn {
   display: grid;

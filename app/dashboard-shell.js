@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { createDashboardFallbackData } from "lib/dashboard-fallback";
 import styles from "./page.module.css";
@@ -12,6 +12,7 @@ const navItems = [
   { id: "reports", label: "Relatórios" },
   { id: "sellers", label: "Vendedores" },
   { id: "deals", label: "Negócios" },
+  { id: "access", label: "Permissões e Acessos" },
   { id: "settings", label: "Configurações" },
 ];
 
@@ -83,6 +84,13 @@ const globalSearchIndex = [
     description: "Abrir painel de notificações e alertas recentes.",
     keywords: "notificacao alerta aviso",
     route: "",
+  },
+  {
+    id: "access",
+    label: "Permissões e Acessos",
+    description: "Solicitacoes pendentes, aprovacoes e recusas para o super admin.",
+    keywords: "permissoes acessos aprovacao primeiro acesso solicitar acesso admin",
+    route: "/permissoes-e-acessos",
   },
 ];
 
@@ -169,7 +177,7 @@ const sellerAttentionRows = [
   ["Bruno Melo", "Forecast sem proximo passo definido", "Alta"],
 ];
 
-const notificationItems = [
+const defaultNotificationItems = [
   {
     id: "1",
     title: "Joseph Israel tornou voce o Prospectante do contrato JN Corte - Manaus (AM).",
@@ -468,6 +476,7 @@ function getNavIcon(id) {
   if (id === "reports") return <BaseIcon><path d="M6 18V11" /><path d="M11 18V7" /><path d="M16 18V13" /></BaseIcon>;
   if (id === "sellers") return <BaseIcon><circle cx="9" cy="8" r="3" /><path d="M4 17c0-2.4 2.2-4.3 5-4.3s5 1.9 5 4.3" /><circle cx="17" cy="9" r="2.3" /><path d="M14.6 16.2c.6-1.5 2-2.5 3.7-2.5.8 0 1.5.2 2.1.5" /></BaseIcon>;
   if (id === "deals") return <BaseIcon><rect x="4" y="6" width="16" height="12" rx="1.5" /><path d="M12 6v12" /><path d="M4 10h16" /></BaseIcon>;
+  if (id === "access") return <BaseIcon><path d="M7 12a3 3 0 1 1 0-6 3 3 0 0 1 0 6z" /><path d="M13 10h7" /><path d="M17 6v8" /><path d="M5 12v6h4v-3h2v3h4v-4" /></BaseIcon>;
   return <BaseIcon><path d="M12 8.6A3.4 3.4 0 1 0 12 15.4A3.4 3.4 0 1 0 12 8.6z" /><path d="M19 12a7.2 7.2 0 0 0-.1-1l1.9-1.4-1.8-3.2-2.3 1a7.7 7.7 0 0 0-1.7-1l-.3-2.4H10l-.4 2.4a7.7 7.7 0 0 0-1.7 1l-2.3-1-1.8 3.2L5.7 11a7.2 7.2 0 0 0 0 2l-1.9 1.4 1.8 3.2 2.3-1c.5.4 1.1.7 1.7 1l.4 2.4h4.6l.3-2.4c.6-.2 1.2-.6 1.7-1l2.3 1 1.8-3.2L18.9 13c.1-.3.1-.7.1-1z" /></BaseIcon>;
 }
 
@@ -596,6 +605,132 @@ function SettingsContent({ section, personalization, updatePersonalization, prof
   if (section === "exports") return <div className={styles.grid}><Card eyebrow="AGENDAMENTO" title="Relatórios & Exportação"><Row label="Envio semanal" value="Segunda, 07:30" /><Row label="Formato" value="PDF + XLSX" /><Row label="Marca d'água" value="Confidencial" /></Card><Card eyebrow="TEMPLATES" title="Templates por cargo" wide><Table head={["Cargo", "Template", "Formato"]} rows={reportRows} /></Card></div>;
   if (section === "storage") return <div className={styles.grid}><Card eyebrow="USO" title="Gestão de Mídia & Storage"><div className={styles.usage}><div className={styles.usageTop}><strong>38.4 / 100 GB</strong><span>38%</span></div><div className={styles.usageBar}><span style={{ width: "38.4%" }} /></div><p>Gravações semanais, áudios e anexos operacionais.</p></div><Row label="Hot storage" value="45 dias" /><Row label="Cold storage" value="365 dias" helper="arquivamento automático" /></Card><Card eyebrow="STT" title="Fila de transcrição em tempo real" wide><Table head={["Arquivo", "Status", "Progresso"]} rows={queueRows} /></Card><Card eyebrow="PROVEDOR" title="Indexação e provedor"><Row label="Provedor" value="Azure Blob Storage" /><Row label="Região" value="Brazil South" helper="aderência LGPD" /><Row label="Indexação IA" value="Ativa" /></Card></div>;
   return <div className={styles.grid}><Card eyebrow="AUDITORIA" title="Eventos recentes" wide><Table head={["Quem", "O quê", "Quando"]} rows={auditRows} /></Card><Card eyebrow="MASKING" title="Matriz visual por campo e cargo"><Table head={["Campo", "Admin", "Gestor", "Vendedor"]} rows={maskingRows} matrix /></Card><Card eyebrow="LGPD" title="Consentimento e conformidade"><Row label="Consentimento" value="Registrado por contato" /><Row label="Esquecimento" value="Fluxo habilitado" helper="remoção em até 7 dias" /><Row label="Relatório" value="Atualizado hoje" /></Card></div>;
+}
+
+function AccessPermissionsContent({ sessionUser, onNotificationsRefresh }) {
+  const [requests, setRequests] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [message, setMessage] = useState("");
+  const [busyRequestId, setBusyRequestId] = useState("");
+
+  async function loadRequests() {
+    setLoading(true);
+    const response = await fetch("/api/admin/access-requests", { cache: "no-store" }).catch(() => null);
+    const payload = await response?.json().catch(() => null);
+
+    if (!response?.ok) {
+      setRequests([]);
+      setMessage(payload?.error || "Nao foi possivel carregar as solicitacoes pendentes.");
+      setLoading(false);
+      return;
+    }
+
+    setRequests(payload?.requests || []);
+    setMessage("");
+    setLoading(false);
+  }
+
+  useEffect(() => {
+    if (!sessionUser?.isSuperAdmin) {
+      setLoading(false);
+      return;
+    }
+
+    loadRequests();
+  }, [sessionUser?.isSuperAdmin]);
+
+  async function handleDecision(requestId, decision) {
+    setBusyRequestId(requestId);
+    const response = await fetch("/api/admin/access-requests", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ requestId, decision }),
+    }).catch(() => null);
+
+    const payload = await response?.json().catch(() => null);
+    setBusyRequestId("");
+
+    if (!response?.ok) {
+      setMessage(payload?.error || "Nao foi possivel concluir a solicitacao.");
+      return;
+    }
+
+    setMessage(payload?.message || "Solicitacao atualizada com sucesso.");
+    await loadRequests();
+    await onNotificationsRefresh?.();
+  }
+
+  if (!sessionUser?.isSuperAdmin) {
+    return (
+      <section className={styles.dashboardSection}>
+        <header className={styles.settingsHeader}>
+          <h1>Permissões e Acessos</h1>
+          <p>Esta area e restrita aos super admins do sistema.</p>
+        </header>
+        <div className={styles.sectionEmptyPanel}>
+          <strong>Acesso restrito</strong>
+          <p>Entre com uma conta de super admin para revisar solicitacoes pendentes.</p>
+        </div>
+      </section>
+    );
+  }
+
+  return (
+    <section className={styles.dashboardSection}>
+      <header className={styles.settingsHeader}>
+        <h1>Permissões e Acessos</h1>
+        <p>Revise as solicitacoes pendentes e aprove ou recuse o envio do primeiro acesso.</p>
+      </header>
+
+      {message ? <div className={styles.sectionNotice}>{message}</div> : null}
+
+      <div className={styles.grid}>
+        <Card eyebrow="PENDENTES" title="Solicitações em aberto" wide>
+          {loading ? (
+            <div className={styles.sectionEmptyPanel}>
+              <strong>Carregando solicitações</strong>
+              <p>Buscando pedidos abertos para aprovação.</p>
+            </div>
+          ) : requests.length ? (
+            <div className={styles.accessRequestList}>
+              {requests.map((item) => (
+                <article key={item.id} className={styles.accessRequestCard}>
+                  <div className={styles.accessRequestMeta}>
+                    <strong>{item.email}</strong>
+                    <span>{item.type === "request-access" ? "Solicitação de acesso" : "Pedido de primeiro acesso"}</span>
+                    <small>{new Date(item.requestedAt).toLocaleString("pt-BR")}</small>
+                  </div>
+                  <div className={styles.accessRequestActions}>
+                    <button
+                      type="button"
+                      className={styles.secondaryActionButton}
+                      onClick={() => handleDecision(item.id, "rejected")}
+                      disabled={busyRequestId === item.id}
+                    >
+                      Recusar
+                    </button>
+                    <button
+                      type="button"
+                      className={styles.primaryActionButton}
+                      onClick={() => handleDecision(item.id, "approved")}
+                      disabled={busyRequestId === item.id}
+                    >
+                      Aprovar
+                    </button>
+                  </div>
+                </article>
+              ))}
+            </div>
+          ) : (
+            <div className={styles.sectionEmptyPanel}>
+              <strong>Nenhuma solicitação pendente</strong>
+              <p>Quando um usuario solicitar acesso ou primeiro acesso, ele aparecera aqui.</p>
+            </div>
+          )}
+        </Card>
+      </div>
+    </section>
+  );
 }
 
 function ReportsContent({ dashboardData }) {
@@ -1778,7 +1913,8 @@ export default function DashboardShell({
   const [notificationTab, setNotificationTab] = useState("unread");
   const [globalSearchOpen, setGlobalSearchOpen] = useState(false);
   const [globalSearchQuery, setGlobalSearchQuery] = useState("");
-  const [sessionUser, setSessionUser] = useState({ name: "Usuario", role: "Cargo" });
+  const [sessionUser, setSessionUser] = useState({ name: "Usuario", role: "Cargo", email: "", isSuperAdmin: false });
+  const [adminNotifications, setAdminNotifications] = useState([]);
   const menuRef = useRef(null);
 
   useEffect(() => {
@@ -1886,6 +2022,8 @@ export default function DashboardShell({
       setSessionUser({
         name: payload.user.name || "Usuario",
         role: payload.user.role || "Cargo",
+        email: payload.user.email || "",
+        isSuperAdmin: Boolean(payload.user.isSuperAdmin),
       });
     }
 
@@ -1894,6 +2032,21 @@ export default function DashboardShell({
       cancelled = true;
     };
   }, []);
+
+  const refreshNotifications = useCallback(async (currentUser = sessionUser) => {
+    if (!currentUser?.isSuperAdmin) {
+      setAdminNotifications([]);
+      return;
+    }
+
+    const response = await fetch("/api/notifications", { cache: "no-store" }).catch(() => null);
+    const payload = await response?.json().catch(() => null);
+    setAdminNotifications(Array.isArray(payload?.notifications) ? payload.notifications : []);
+  }, [sessionUser]);
+
+  useEffect(() => {
+    refreshNotifications();
+  }, [refreshNotifications]);
 
   useEffect(() => {
     const root = document.documentElement;
@@ -1970,6 +2123,7 @@ export default function DashboardShell({
       reports: "/relatorios",
       sellers: "/vendedores",
       deals: "/negocios",
+      access: "/permissoes-e-acessos",
       settings: "/configuracoes",
       profile: "/perfil",
     };
@@ -1980,7 +2134,14 @@ export default function DashboardShell({
   const currentSection = activeNav === "profile"
     ? accountSection
     : configSections.find((item) => item.id === activeConfig);
-  const visibleNotifications = notificationItems.filter((item) => {
+  const allNotifications = [
+    ...(sessionUser.isSuperAdmin ? adminNotifications.map((item) => ({
+      ...item,
+      age: new Date(item.createdAt).toLocaleDateString("pt-BR"),
+    })) : []),
+    ...defaultNotificationItems,
+  ];
+  const visibleNotifications = allNotifications.filter((item) => {
     if (notificationTab === "unread") return !item.read && !item.trash;
     if (notificationTab === "trash") return item.trash;
     return !item.trash;
@@ -2052,7 +2213,10 @@ export default function DashboardShell({
             <span className={styles.logoAccent}>OPS</span>
           </button>
           <nav className={styles.navigation} aria-label="Principal">
-            {navItems.slice(0, 3).map((item) => (
+            {navItems
+              .filter((item) => item.id !== "settings")
+              .filter((item) => item.id !== "access" || sessionUser.isSuperAdmin)
+              .map((item) => (
               <button key={item.id} type="button" onClick={() => navigateToMainSection(item.id)} className={`${styles.navItem} ${activeNav === item.id ? styles.navItemActive : ""}`.trim()} title={collapsed ? item.label : undefined}>
                 <span className={styles.navIcon}>{getNavIcon(item.id)}</span>
                 <span className={styles.navLabel}>{item.label}</span>
@@ -2128,6 +2292,8 @@ export default function DashboardShell({
           <SellerProfileContent dashboardData={dashboardData} sellerSlug={sellerSlug} />
         ) : activeNav === "sellers" ? (
           <SellersContent dashboardData={dashboardData} />
+        ) : activeNav === "access" ? (
+          <AccessPermissionsContent sessionUser={sessionUser} onNotificationsRefresh={refreshNotifications} />
         ) : activeNav === "reports" ? (
           <ReportsContent dashboardData={dashboardData} />
         ) : activeNav === "deals" ? (
@@ -2180,7 +2346,7 @@ export default function DashboardShell({
 
             <div className={styles.notificationsTabs}>
               <button type="button" className={`${styles.notificationsTab} ${notificationTab === "unread" ? styles.notificationsTabActive : ""}`.trim()} onClick={() => setNotificationTab("unread")}>
-                Não lidas (2)
+                Não lidas ({allNotifications.filter((item) => !item.read && !item.trash).length})
               </button>
               <button type="button" className={`${styles.notificationsTab} ${notificationTab === "all" ? styles.notificationsTabActive : ""}`.trim()} onClick={() => setNotificationTab("all")}>
                 Todos

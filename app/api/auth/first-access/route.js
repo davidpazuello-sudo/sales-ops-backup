@@ -1,12 +1,20 @@
 import { NextResponse } from "next/server";
-import { buildLoginRedirectUrl, FIRST_ACCESS_MODE, normalizeEmail } from "lib/auth-flows";
-import { createClient } from "lib/supabase/server";
-import { hasSupabaseEnv } from "lib/supabase/shared";
+import { normalizeEmail } from "lib/auth-flows";
+import { logAuthRouteError } from "lib/auth-logging";
+import { queueAccessRequest } from "lib/access-requests-store";
+import { getSuperAdminEmails, hasSupabaseEnv } from "lib/supabase/shared";
 
 export async function POST(request) {
   if (!hasSupabaseEnv()) {
     return NextResponse.json(
       { ok: false, error: "Supabase nao configurado neste ambiente." },
+      { status: 503 },
+    );
+  }
+
+  if (!getSuperAdminEmails().length) {
+    return NextResponse.json(
+      { ok: false, error: "Nao ha super admin configurado para aprovar primeiros acessos." },
       { status: 503 },
     );
   }
@@ -22,23 +30,19 @@ export async function POST(request) {
   }
 
   try {
-    const supabase = await createClient();
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: buildLoginRedirectUrl(request, FIRST_ACCESS_MODE),
+    const { created } = await queueAccessRequest({
+      email,
+      type: "first-access",
     });
-
-    if (error) {
-      return NextResponse.json(
-        { ok: false, error: error.message || "Nao foi possivel iniciar o primeiro acesso." },
-        { status: 400 },
-      );
-    }
 
     return NextResponse.json({
       ok: true,
-      message: "Se o email estiver habilitado, voce recebera um link para definir a senha do primeiro acesso.",
+      message: created
+        ? "Pedido de primeiro acesso enviado para aprovacao do super admin."
+        : "Ja existe um pedido pendente para este email. Aguarde a aprovacao do super admin.",
     });
-  } catch {
+  } catch (error) {
+    logAuthRouteError("api/auth/first-access", "queue-first-access", error, { email, requestUrl: request.url });
     return NextResponse.json(
       { ok: false, error: "Nao foi possivel iniciar o primeiro acesso neste ambiente." },
       { status: 503 },
