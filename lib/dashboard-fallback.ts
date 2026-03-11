@@ -1,9 +1,11 @@
+import type { DashboardData, DashboardFallbackOptions } from "./types/dashboard";
+
 export function createDashboardFallbackData({
   source = "hubspot",
   loading = "idle",
   status = "Pendente",
   error = "",
-} = {}) {
+}: DashboardFallbackOptions = {}): DashboardData {
   return {
     configured: false,
     integration: {

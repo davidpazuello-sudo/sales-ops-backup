@@ -20,13 +20,29 @@ As rotas de pagina continuam leves, mas o runtime principal agora esta dividido 
   - `globals.css`: tokens globais (cores, tipografia, densidade, motion)
   - `dashboard-shell.js`: orquestracao do shell principal, layout, sidebar, topbar e overlays
   - `dashboard-ui.js`: componentes visuais e icones reutilizados do dashboard
-  - `dashboard-sections.js`: secoes funcionais da aplicacao (relatorios, negocios, vendedores, configuracoes etc.)
+  - `dashboard-sections/`: secoes funcionais separadas por dominio
+    - `reports.js`: conteudo de relatorios e KPIs
+    - `deals.js`: pipeline, negocios e detalhe operacional
+    - `sellers.js`: lista, perfil e reunioes de vendedores
+    - `settings.js`: configuracoes, conta, 2FA e personalizacao
+    - `access.js`: permissoes, acessos e aprovacoes admin
+    - `index.js`: barrel file das secoes exportadas
   - `dashboard-shell-config.js`: configuracao estatica do shell e recursos de navegacao
   - `use-dashboard-shell-state.js`: estado compartilhado, efeitos e integracoes do shell
   - `page.js`: redirect para `/relatorios`
-  - `ai-agent/`, `relatorios/`, `vendedores/`, `negocios/`, `perfil/`, `configuracoes/`, `login/`
+  - `ai-agent/`, `relatorios/`, `vendedores/`, `negocios/`, `perfil/`, `configuracoes/`, `login/`, `permissoes-e-acessos/`
+  - `api/auth/`: rotas de autenticacao, sessao, primeiro acesso e solicitacoes
+  - `api/admin/access-requests/route.js`: aprovacao e recusa de acessos pelo super admin
+  - `api/notifications/route.js`: notificacoes reais de solicitacoes e pendencias admin
   - `api/hubspot/dashboard/route.js`: endpoint interno de dashboard
-- `lib/hubspot.js`: client de integracao e normalizacao de dados HubSpot
+- `lib/`
+  - `hubspot.js`: client de integracao e normalizacao de dados HubSpot
+  - `dashboard-domain.js`: montagem e enriquecimento do dominio do dashboard
+  - `dashboard-fallback.js`: fallback consistente para erro/configuracao ausente
+  - `services/`: servicos de dominio mais finos
+    - `dashboard-deals.js`
+    - `dashboard-sellers.js`
+  - `supabase/`: clients, middleware, MFA e helpers de auth
 - `scripts/validate-copy.mjs`: gate de qualidade de texto/codificacao
 
 ## 4) Modelo de roteamento
@@ -53,7 +69,8 @@ As rotas de pagina sao wrappers simples que chamam `DashboardShell` com props de
    - normaliza campos
    - calcula agregados (pipeline, estagnacao, relatorios)
    - devolve payload consolidado para UI
-4. UI renderiza com fallback para `defaultDashboardData` quando token ou API nao estao disponiveis.
+4. `lib/dashboard-domain.js` e `lib/services/*` refinam partes do dominio para consumo das secoes.
+5. UI renderiza com fallback para `defaultDashboardData` quando token ou API nao estao disponiveis.
 
 ## 6) Estado e interacao
 
@@ -65,7 +82,8 @@ Principais blocos de estado:
 - colapso de sidebar e colunas
 - notificacoes e busca global
 - personalizacao visual (persistida em localStorage)
-- perfil, sessao e foto
+- perfil, sessao, role e foto
+- acesso admin e notificacoes operacionais
 
 ## 7) Integracao HubSpot
 
@@ -91,13 +109,13 @@ Esse script bloqueia build se detectar:
 
 ## 9) Riscos arquiteturais atuais
 
-- ainda existem componentes de dominio grandes em `app/dashboard-sections.js`
+- ainda existem componentes de dominio grandes em `app/dashboard-sections/deals.js` e `app/dashboard-shell.js`
 - parte da interacao operacional continua local e ainda nao persiste no backend
 - ausencia de testes E2E cobrindo fluxo critico
 
 ## 10) Direcao arquitetural recomendada
 
-- continuar quebrando `app/dashboard-sections.js` em modulos por dominio
+- continuar refinando `app/dashboard-sections/` em submodulos menores quando necessario
 - criar camada de `services` para regras de negocio
 - tipar payload de integracao (TypeScript ou schema runtime)
 - adicionar testes de contrato para API HubSpot

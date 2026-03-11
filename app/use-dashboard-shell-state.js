@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { createDashboardFallbackData } from "lib/dashboard-fallback";
 import {
   buildMainSectionRoute,
@@ -21,6 +21,8 @@ import {
   globalSearchIndex,
 } from "./dashboard-shell-config";
 
+const SESSION_USER_STORAGE_KEY = "salesops:session-user";
+
 const defaultDashboardData = createDashboardFallbackData({
   loading: "loading",
   status: "Carregando HubSpot",
@@ -35,14 +37,37 @@ const defaultSessionUser = {
   twoFactorLevel: null,
 };
 
+function readStoredSessionUser() {
+  if (typeof window === "undefined") {
+    return defaultSessionUser;
+  }
+
+  try {
+    const storedValue = window.sessionStorage.getItem(SESSION_USER_STORAGE_KEY);
+    if (!storedValue) {
+      return defaultSessionUser;
+    }
+
+    const parsedValue = JSON.parse(storedValue);
+    return {
+      ...defaultSessionUser,
+      ...parsedValue,
+      isSuperAdmin: Boolean(parsedValue?.isSuperAdmin),
+      twoFactorEnabled: Boolean(parsedValue?.twoFactorEnabled),
+      twoFactorLevel: parsedValue?.twoFactorLevel || null,
+    };
+  } catch {
+    window.sessionStorage.removeItem(SESSION_USER_STORAGE_KEY);
+    return defaultSessionUser;
+  }
+}
+
 export function useDashboardShellState({
   initialNav,
   initialConfig,
   initialProfileView,
 }) {
   const router = useRouter();
-  const pathname = usePathname();
-  const lastPathnameRef = useRef(pathname);
   const menuRef = useRef(null);
   const [personalization, setPersonalization] = useState(personalizationDefaults);
   const [dashboardData, setDashboardData] = useState(defaultDashboardData);
@@ -58,17 +83,8 @@ export function useDashboardShellState({
   const [notificationTab, setNotificationTab] = useState("unread");
   const [globalSearchOpen, setGlobalSearchOpen] = useState(false);
   const [globalSearchQuery, setGlobalSearchQuery] = useState("");
-  const [sessionUser, setSessionUser] = useState(defaultSessionUser);
+  const [sessionUser, setSessionUser] = useState(readStoredSessionUser);
   const [adminNotifications, setAdminNotifications] = useState([]);
-
-  useEffect(() => {
-    if (!pathname || lastPathnameRef.current === pathname) {
-      return;
-    }
-
-    lastPathnameRef.current = pathname;
-    window.location.reload();
-  }, [pathname]);
 
   useEffect(() => {
     function closeOnOutside(event) {
@@ -94,6 +110,19 @@ export function useDashboardShellState({
       document.removeEventListener("keydown", closeOnEscape);
     };
   }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    if (!sessionUser?.email) {
+      window.sessionStorage.removeItem(SESSION_USER_STORAGE_KEY);
+      return;
+    }
+
+    window.sessionStorage.setItem(SESSION_USER_STORAGE_KEY, JSON.stringify(sessionUser));
+  }, [sessionUser]);
 
   useEffect(() => {
     try {
@@ -301,6 +330,9 @@ export function useDashboardShellState({
   }, [router]);
 
   const handleLogout = useCallback(async () => {
+    if (typeof window !== "undefined") {
+      window.sessionStorage.removeItem(SESSION_USER_STORAGE_KEY);
+    }
     await fetch("/api/auth/logout", { method: "POST" }).catch(() => null);
     router.replace("/login");
   }, [router]);

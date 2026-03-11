@@ -1,10 +1,19 @@
 export const FIRST_ACCESS_MODE = "first-access";
 
-export function normalizeEmail(value) {
+type RequestLike = {
+  url: string;
+};
+
+type ErrorLike = {
+  message?: string;
+  code?: string;
+} | null | undefined;
+
+export function normalizeEmail(value: unknown): string {
   return String(value || "").trim().toLowerCase();
 }
 
-export function buildLoginRedirectUrl(request, mode) {
+export function buildLoginRedirectUrl(request: RequestLike, mode?: string): string {
   const configuredBaseUrl = process.env.NEXT_PUBLIC_APP_URL;
   const redirectUrl = configuredBaseUrl
     ? new URL("/login", configuredBaseUrl)
@@ -17,7 +26,7 @@ export function buildLoginRedirectUrl(request, mode) {
   return redirectUrl.toString();
 }
 
-export function isAlreadyRegisteredError(error) {
+export function isAlreadyRegisteredError(error: ErrorLike): boolean {
   const message = String(error?.message || "").toLowerCase();
   return message.includes("already registered")
     || message.includes("already been registered")

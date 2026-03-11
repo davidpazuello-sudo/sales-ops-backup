@@ -8,7 +8,8 @@
     "build": "npm run check:copy && next build",
     "start": "next start",
     "lint": "next lint",
-    "test": "vitest run"
+    "test": "vitest run",
+    "e2e": "playwright test"
   },
   "dependencies": {
     "@supabase/ssr": "^0.5.2",
@@ -18,8 +19,13 @@
     "react-dom": "19.0.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.58.2",
+    "@types/node": "^25.4.0",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
     "eslint": "^8.57.1",
     "eslint-config-next": "^15.2.6",
+    "typescript": "^5.9.3",
     "vitest": "^4.0.18"
   }
 }
