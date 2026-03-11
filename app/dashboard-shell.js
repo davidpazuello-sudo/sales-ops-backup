@@ -1,7 +1,8 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
+import { createDashboardFallbackData } from "lib/dashboard-fallback";
 import styles from "./page.module.css";
 
 const STORAGE_KEY = "sales-ops-backup-personalization";
@@ -240,47 +241,10 @@ const sellerProfiles = [
   },
 ];
 
-const defaultDashboardData = {
-  configured: false,
-  integration: {
-    status: "Aguardando token",
-    owners: sellerProfiles.length,
-    deals: sellerPerformanceRows.length,
-    pipelineAmount: 620000,
-    profileEmail: "",
-    profileRole: "",
-  },
-  summary: {
-    sellersActive: 18,
-    totalPipeline: 620000,
-    wonThisMonth: 284000,
-    stalledDeals: 4,
-  },
-  sellers: sellerProfiles.map((seller, index) => ({
-    id: `${index + 1}`,
-    name: seller.name,
-    email: "",
-    team: seller.role,
-    initials: seller.initials,
-    openDeals: 4 - (index % 2),
-    wonDeals: 2 + (index % 2),
-    stalledDeals: index > 1 ? 1 : 0,
-    pipelineAmount: Number(String(seller.pipeline).replace(/[^\d]/g, "")) * 1000 || 0,
-    pipelineLabel: seller.pipeline,
-    compactPipeline: seller.pipeline,
-    metaPercent: Number.parseInt(seller.performance, 10) || 0,
-    health: "8/10",
-    status: seller.status,
-    note: seller.note,
-  })),
-  alerts: sellerAttentionRows,
-  deals: [
-    { id: "1", name: "Expansao Conta Solaris", owner: "Ana Souza", stage: "Proposal", amountLabel: "R$ 95.000", staleLabel: "2d sem touch" },
-    { id: "2", name: "Renovacao Grupo Prisma", owner: "Carlos Lima", stage: "Negotiation", amountLabel: "R$ 78.000", staleLabel: "4d sem touch" },
-    { id: "3", name: "Piloto Atlas", owner: "Marina Costa", stage: "Discovery", amountLabel: "R$ 41.000", staleLabel: "6d sem touch" },
-  ],
-  reports: sellerPerformanceRows.map((row) => [row[0], row[1], row[2], row[4]]),
-};
+const defaultDashboardData = createDashboardFallbackData({
+  loading: "loading",
+  status: "Carregando HubSpot",
+});
 
 const themeOptions = ["Claro ativo", "Escuro", "Automático"];
 const fontOptions = ["Manrope", "IBM Plex Sans", "Source Sans 3", "Montserrat", "Nunito Sans", "Work Sans"];
@@ -635,12 +599,30 @@ function SettingsContent({ section, personalization, updatePersonalization, prof
 }
 
 function ReportsContent({ dashboardData }) {
+  const loadingState = dashboardData.states?.loading || "ready";
+  const stateErrors = dashboardData.states?.errors || [];
+
   return (
     <section className={styles.dashboardSection}>
       <header className={styles.settingsHeader}>
         <h1>Relatórios</h1>
         <p>Resumo executivo puxado da HubSpot, com visão por vendedor e pipeline aberto.</p>
       </header>
+
+      {loadingState !== "ready" || stateErrors.length ? (
+        <div className={`${styles.sectionNotice} ${stateErrors.length ? styles.sectionNoticeError : ""}`.trim()}>
+          {loadingState === "loading"
+            ? "Carregando resumo executivo real da HubSpot..."
+            : stateErrors[0] || "Os relatorios ainda nao conseguiram carregar dados reais."}
+        </div>
+      ) : null}
+
+      {!dashboardData.reports.length ? (
+        <div className={styles.sectionEmptyPanel}>
+          <strong>Sem relatorios consolidados</strong>
+          <p>Assim que o dashboard receber dados reais da HubSpot, os resumos por vendedor aparecerao aqui.</p>
+        </div>
+      ) : null}
 
       <div className={styles.grid}>
         <Card eyebrow="HUBSPOT" title="KPIs comerciais" wide>
@@ -705,48 +687,12 @@ function DealsContent({ dashboardData }) {
   const [activityWeeksFilter, setActivityWeeksFilter] = useState("1");
   const [collapsedStages, setCollapsedStages] = useState({});
   const skipCardClickRef = useRef(false);
-  const stageOrder = [
-    "Oportunidade",
-    "Primeira Reunião",
-    "Avaliação Técnica Feita",
-    "Criação de Tabela de Preço",
-    "Tabela de Preço Criada",
-    "Avaliação da Tabela Feita",
-    "Tabela de Preço Enviada",
-    "Tabela de Preço Aceita",
-    "Elaboração de DOT",
-    "DOT Criado",
-    "Avaliação de DOT",
-    "DOT Aprovado",
-    "DOT Entregue",
-    "Elaboração da Proposta",
-    "Proposta Criada",
-    "Avaliação da Proposta Feita",
-    "Proposta Enviada",
-    "Proposta Aceita",
-    "Elaboração do Acordo de Cooperação",
-    "Acordo de Cooperação Criado",
-    "Acordo de Cooperação Assinado",
-    "Elaboração do Contrato",
-    "Contrato Enviado",
-    "Negócio Fechado",
-    "Negócio Perdido",
-  ];
+  const stageOrder = dashboardData.pipeline?.stages?.map((stage) => stage.label) || [];
 
   useEffect(() => {
     setBoardDeals(dashboardData.deals);
   }, [dashboardData.deals]);
 
-  useEffect(() => {
-    setBoardDeals((currentDeals) =>
-      currentDeals.map((deal) => {
-        if (deal.id === "1") return { ...deal, stage: "Proposta Enviada" };
-        if (deal.id === "2") return { ...deal, stage: "Avaliação de DOT" };
-        if (deal.id === "3") return { ...deal, stage: "Primeira Reunião" };
-        return deal;
-      }),
-    );
-  }, []);
 
   const formatCurrencyFromLabel = (label) => {
     const numericValue = Number.parseFloat(
@@ -771,13 +717,15 @@ function DealsContent({ dashboardData }) {
 
   const ownerOptions = Array.from(new Set(boardDeals.map((deal) => deal.owner))).sort((a, b) => a.localeCompare(b));
   const maxDays = Number(activityWeeksFilter) * 7;
+  const loadingState = dashboardData.states?.loading || "ready";
+  const stateErrors = dashboardData.states?.errors || [];
   const visibleDeals = boardDeals.filter((deal) => {
     const ownerMatch = ownerFilter === "todos" || deal.owner === ownerFilter;
     const activityMatch = parseStaleDays(deal.staleLabel) <= maxDays;
     return ownerMatch && activityMatch;
   });
 
-  const stages = Array.from(new Set([...stageOrder, ...boardDeals.map((deal) => deal.stage)]));
+  const stages = Array.from(new Set([...stageOrder, ...boardDeals.map((deal) => deal.stage)])).filter(Boolean);
 
   const boardColumns = stages.map((stage) => {
     const stageDeals = visibleDeals.filter((deal) => deal.stage === stage);
@@ -857,6 +805,21 @@ function DealsContent({ dashboardData }) {
           </select>
         </label>
       </div>
+
+      {loadingState !== "ready" || stateErrors.length ? (
+        <div className={`${styles.sectionNotice} ${stateErrors.length ? styles.sectionNoticeError : ""}`.trim()}>
+          {loadingState === "loading"
+            ? "Carregando pipeline real da HubSpot..."
+            : stateErrors[0] || "A pipeline ainda nao conseguiu carregar dados reais."}
+        </div>
+      ) : null}
+
+      {!stages.length ? (
+        <div className={styles.sectionEmptyPanel}>
+          <strong>Pipeline sem negocios sincronizados</strong>
+          <p>Assim que a HubSpot retornar etapas e negocios reais, elas aparecerao aqui.</p>
+        </div>
+      ) : null}
 
       <section className={styles.pipelineBoard}>
         {boardColumns.map((column) => {
@@ -1424,6 +1387,8 @@ function SellerMeetingDetailContent({ dashboardData, sellerSlug, meetingId }) {
 function SellersContent({ dashboardData }) {
   const router = useRouter();
   const [sellerFilter, setSellerFilter] = useState("");
+  const loadingState = dashboardData.states?.loading || "ready";
+  const stateErrors = dashboardData.states?.errors || [];
   const filteredSellers = dashboardData.sellers.filter((seller) =>
     seller.name.toLowerCase().includes(sellerFilter.trim().toLowerCase()),
   );
@@ -1472,6 +1437,25 @@ function SellersContent({ dashboardData }) {
           />
         </label>
       </div>
+
+      {loadingState !== "ready" || stateErrors.length ? (
+        <div className={`${styles.sectionNotice} ${stateErrors.length ? styles.sectionNoticeError : ""}`.trim()}>
+          {loadingState === "loading"
+            ? "Carregando vendedores sincronizados da HubSpot..."
+            : stateErrors[0] || "A lista de vendedores ainda nao conseguiu carregar dados reais."}
+        </div>
+      ) : null}
+
+      {!filteredSellers.length ? (
+        <div className={styles.sectionEmptyPanel}>
+          <strong>{sellerFilter.trim() ? "Nenhum vendedor encontrado" : "Nenhum vendedor sincronizado"}</strong>
+          <p>
+            {sellerFilter.trim()
+              ? "Tente ajustar o nome pesquisado ou limpar o filtro."
+              : "Quando a HubSpot retornar owners reais, eles aparecerao nesta lista."}
+          </p>
+        </div>
+      ) : null}
 
       <div className={styles.sellerProfilesGrid}>
         {filteredSellers.map((seller) => {
@@ -1535,6 +1519,22 @@ function SellerProfileContent({ dashboardData, sellerSlug }) {
   const router = useRouter();
   const [selectedStage, setSelectedStage] = useState("");
   const seller = dashboardData.sellers.find((item) => sellerToSlug(item.name) === sellerSlug) || dashboardData.sellers[0];
+
+  if (!seller) {
+    return (
+      <section className={styles.dashboardSection}>
+        <header className={styles.settingsHeader}>
+          <h1>Vendedores</h1>
+          <p>Nao encontramos um vendedor sincronizado para este perfil ainda.</p>
+        </header>
+        <div className={styles.sectionEmptyPanel}>
+          <strong>Perfil indisponivel no momento</strong>
+          <p>Volte para a lista de vendedores quando a HubSpot terminar a sincronizacao.</p>
+        </div>
+      </section>
+    );
+  }
+
   const sellerDeals = dashboardData.deals.filter((deal) => deal.owner === seller.name);
   const conversionRate = seller.openDeals + seller.wonDeals > 0
     ? Math.round((seller.wonDeals / (seller.openDeals + seller.wonDeals)) * 100)
@@ -1838,8 +1838,15 @@ export default function DashboardShell({
         if (cancelled) return;
 
         if (!response.ok) {
-          setDashboardData(defaultDashboardData);
-          setHubspotMessage(payload.error || "Nao foi possivel consultar a HubSpot.");
+          const errorMessage = payload.error || "Nao foi possivel consultar a HubSpot.";
+          setDashboardData(
+            createDashboardFallbackData({
+              loading: response.status === 503 ? "config_required" : "error",
+              status: response.status === 503 ? "Configuracao pendente" : "Falha na sincronizacao",
+              error: errorMessage,
+            }),
+          );
+          setHubspotMessage(errorMessage);
           return;
         }
 
@@ -1847,8 +1854,15 @@ export default function DashboardShell({
         setHubspotMessage("Dados da HubSpot sincronizados.");
       } catch {
         if (cancelled) return;
-        setDashboardData(defaultDashboardData);
-        setHubspotMessage("Nao foi possivel consultar a HubSpot.");
+        const errorMessage = "Nao foi possivel consultar a HubSpot.";
+        setDashboardData(
+          createDashboardFallbackData({
+            loading: "error",
+            status: "Falha na sincronizacao",
+            error: errorMessage,
+          }),
+        );
+        setHubspotMessage(errorMessage);
       }
     }
 
@@ -2257,5 +2271,6 @@ export default function DashboardShell({
     </main>
   );
 }
+
 
 

@@ -11,19 +11,22 @@ Blocos que podem usar dados reais hoje:
 - resumo executivo
 - cards de KPIs comerciais
 - lista de vendedores
-- lista de negócios
-- relatórios resumidos por vendedor
+- lista de negocios
+- relatorios resumidos por vendedor
+- pipeline por etapas usando labels reais da HubSpot
+- diretorio de owners para cruzamento por email
 
 ## Dados mockados ou derivados localmente
 
-- conteúdo do agente de IA
-- notificações do painel lateral
-- reuniões internas e detalhes de reunião
-- boa parte das configurações e preferências
-- parte do comportamento da pipeline quando não houver retorno suficiente da HubSpot
+- conteudo do agente de IA
+- notificacoes do painel lateral
+- reunioes internas e detalhes de reuniao
+- boa parte das configuracoes e preferencias
+- parte do comportamento da pipeline quando nao houver retorno suficiente da HubSpot
 
-## Observações
+## Observacoes
 
-- A shell já suporta fallback visual quando a HubSpot não responde.
-- O agente de IA ainda é uma experiência de interface, não um backend funcional.
-- O próximo passo para produção é reduzir blocos mockados nas áreas operacionais.
+- A shell ja suporta fallback visual quando a HubSpot nao responde.
+- O agente de IA ainda e uma experiencia de interface, nao um backend funcional.
+- O proximo passo para producao e reduzir blocos mockados nas areas operacionais.
+- A Sprint 2 passa a explicitar entidades de dominio e um payload mais rico (`pipeline`, `states`, `ownerDirectory`) sem quebrar o contrato base do dashboard.

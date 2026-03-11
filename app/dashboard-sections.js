@@ -227,48 +227,11 @@ export function DealsSectionContent({ dashboardData }) {
   const [ownerFilter, setOwnerFilter] = useState("todos");
   const [activityWeeksFilter, setActivityWeeksFilter] = useState("1");
   const [collapsedStages, setCollapsedStages] = useState({});
-  const stageOrder = [
-    "Oportunidade",
-    "Primeira Reunião",
-    "Avaliação Técnica Feita",
-    "Criação de Tabela de Preço",
-    "Tabela de Preço Criada",
-    "Avaliação da Tabela Feita",
-    "Tabela de Preço Enviada",
-    "Tabela de Preço Aceita",
-    "Elaboração de DOT",
-    "DOT Criado",
-    "Avaliação de DOT",
-    "DOT Aprovado",
-    "DOT Entregue",
-    "Elaboração da Proposta",
-    "Proposta Criada",
-    "Avaliação da Proposta Feita",
-    "Proposta Enviada",
-    "Proposta Aceita",
-    "Elaboração do Acordo de Cooperação",
-    "Acordo de Cooperação Criado",
-    "Acordo de Cooperação Assinado",
-    "Elaboração do Contrato",
-    "Contrato Enviado",
-    "Negócio Fechado",
-    "Negócio Perdido",
-  ];
+  const stageOrder = dashboardData.pipeline?.stages?.map((stage) => stage.label) || [];
 
   useEffect(() => {
     setBoardDeals(dashboardData.deals);
   }, [dashboardData.deals]);
-
-  useEffect(() => {
-    setBoardDeals((currentDeals) =>
-      currentDeals.map((deal) => {
-        if (deal.id === "1") return { ...deal, stage: "Proposta Enviada" };
-        if (deal.id === "2") return { ...deal, stage: "Avaliação de DOT" };
-        if (deal.id === "3") return { ...deal, stage: "Primeira Reunião" };
-        return deal;
-      }),
-    );
-  }, []);
 
   const formatCurrencyFromLabel = (label) => {
     const numericValue = Number.parseFloat(
@@ -293,13 +256,15 @@ export function DealsSectionContent({ dashboardData }) {
 
   const ownerOptions = Array.from(new Set(boardDeals.map((deal) => deal.owner))).sort((a, b) => a.localeCompare(b));
   const maxDays = Number(activityWeeksFilter) * 7;
+  const loadingState = dashboardData.states?.loading || "ready";
+  const stateErrors = dashboardData.states?.errors || [];
   const visibleDeals = boardDeals.filter((deal) => {
     const ownerMatch = ownerFilter === "todos" || deal.owner === ownerFilter;
     const activityMatch = parseStaleDays(deal.staleLabel) <= maxDays;
     return ownerMatch && activityMatch;
   });
 
-  const stages = Array.from(new Set([...stageOrder, ...boardDeals.map((deal) => deal.stage)]));
+  const stages = Array.from(new Set([...stageOrder, ...boardDeals.map((deal) => deal.stage)])).filter(Boolean);
   const boardColumns = stages.map((stage) => {
     const stageDeals = visibleDeals.filter((deal) => deal.stage === stage);
     const totalValue = stageDeals.reduce((sum, deal) => {
@@ -365,6 +330,21 @@ export function DealsSectionContent({ dashboardData }) {
           </select>
         </label>
       </div>
+
+      {loadingState !== "ready" || stateErrors.length ? (
+        <div className={`${styles.sectionNotice} ${stateErrors.length ? styles.sectionNoticeError : ""}`.trim()}>
+          {loadingState === "loading"
+            ? "Carregando pipeline real da HubSpot..."
+            : stateErrors[0] || "A pipeline ainda nao conseguiu carregar dados reais."}
+        </div>
+      ) : null}
+
+      {!stages.length ? (
+        <div className={styles.sectionEmptyPanel}>
+          <strong>Pipeline sem negocios sincronizados</strong>
+          <p>Assim que a HubSpot retornar etapas e negocios reais, elas aparecerao aqui.</p>
+        </div>
+      ) : null}
 
       <section className={styles.pipelineBoard}>
         {boardColumns.map((column) => (
@@ -441,6 +421,8 @@ export function DealsSectionContent({ dashboardData }) {
 export function SellersSectionContent({ dashboardData, sellerToSlug }) {
   const router = useRouter();
   const [sellerFilter, setSellerFilter] = useState("");
+  const loadingState = dashboardData.states?.loading || "ready";
+  const stateErrors = dashboardData.states?.errors || [];
   const filteredSellers = dashboardData.sellers.filter((seller) =>
     seller.name.toLowerCase().includes(sellerFilter.trim().toLowerCase()),
   );
@@ -481,6 +463,25 @@ export function SellersSectionContent({ dashboardData, sellerToSlug }) {
           />
         </label>
       </header>
+
+      {loadingState !== "ready" || stateErrors.length ? (
+        <div className={`${styles.sectionNotice} ${stateErrors.length ? styles.sectionNoticeError : ""}`.trim()}>
+          {loadingState === "loading"
+            ? "Carregando vendedores sincronizados da HubSpot..."
+            : stateErrors[0] || "A lista de vendedores ainda nao conseguiu carregar dados reais."}
+        </div>
+      ) : null}
+
+      {!filteredSellers.length ? (
+        <div className={styles.sectionEmptyPanel}>
+          <strong>{sellerFilter.trim() ? "Nenhum vendedor encontrado" : "Nenhum vendedor sincronizado"}</strong>
+          <p>
+            {sellerFilter.trim()
+              ? "Tente ajustar o nome pesquisado ou limpar o filtro."
+              : "Quando a HubSpot retornar owners reais, eles aparecerao nesta lista."}
+          </p>
+        </div>
+      ) : null}
 
       <div className={styles.sellerProfilesGrid}>
         {filteredSellers.map((seller) => {
@@ -544,6 +545,22 @@ export function SellerProfileSectionContent({ dashboardData, sellerSlug, sellerT
   const router = useRouter();
   const [selectedStage, setSelectedStage] = useState("");
   const seller = dashboardData.sellers.find((item) => sellerToSlug(item.name) === sellerSlug) || dashboardData.sellers[0];
+
+  if (!seller) {
+    return (
+      <section className={styles.dashboardSection}>
+        <header className={styles.settingsHeader}>
+          <h1>Vendedores</h1>
+          <p>Nao encontramos um vendedor sincronizado para este perfil ainda.</p>
+        </header>
+        <div className={styles.sectionEmptyPanel}>
+          <strong>Perfil indisponivel no momento</strong>
+          <p>Volte para a lista de vendedores quando a HubSpot terminar a sincronizacao.</p>
+        </div>
+      </section>
+    );
+  }
+
   const sellerDeals = dashboardData.deals.filter((deal) => deal.owner === seller.name);
   const conversionRate = seller.openDeals + seller.wonDeals > 0
     ? Math.round((seller.wonDeals / (seller.openDeals + seller.wonDeals)) * 100)
@@ -764,3 +781,4 @@ export function SellerProfileSectionContent({ dashboardData, sellerSlug, sellerT
     </section>
   );
 }
+

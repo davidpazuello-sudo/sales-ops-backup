@@ -5,15 +5,32 @@ const validDashboardData = {
   configured: true,
   integration: {
     status: "Conectado",
+    source: "hubspot",
     owners: 4,
     deals: 12,
     pipelineAmount: 620000,
+    ownerDirectory: [],
   },
   summary: {
     sellersActive: 4,
     totalPipeline: 620000,
     wonThisMonth: 284000,
     stalledDeals: 2,
+  },
+  states: {
+    source: "hubspot",
+    loading: "ready",
+    empty: {
+      sellers: false,
+      deals: false,
+      alerts: false,
+    },
+    errors: [],
+  },
+  pipeline: {
+    stages: [],
+    totalOpenDeals: 10,
+    totalClosedDeals: 2,
   },
   sellers: [],
   alerts: [],

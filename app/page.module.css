@@ -1261,6 +1261,44 @@
   color: color-mix(in srgb, var(--muted) 88%, white);
 }
 
+.sectionNotice {
+  margin: 0 0 14px;
+  padding: 12px 14px;
+  border: 1px solid rgba(22, 61, 115, 0.12);
+  border-radius: 12px;
+  background: rgba(22, 61, 115, 0.05);
+  color: #24476f;
+  font-size: calc(12px * var(--font-scale));
+  line-height: 1.5;
+}
+
+.sectionNoticeError {
+  border-color: rgba(180, 72, 55, 0.18);
+  background: rgba(180, 72, 55, 0.08);
+  color: #7d3021;
+}
+
+.sectionEmptyPanel {
+  display: grid;
+  gap: 6px;
+  margin: 0 0 16px;
+  padding: 18px 20px;
+  border: 1px dashed #c7d2df;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.sectionEmptyPanel strong {
+  color: #19395a;
+  font-size: calc(14px * var(--font-scale));
+}
+
+.sectionEmptyPanel p {
+  margin: 0;
+  color: #5c7698;
+  font-size: calc(12px * var(--font-scale));
+}
+
 
 .pipelineColumn {
   display: grid;
