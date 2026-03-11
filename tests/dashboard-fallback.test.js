@@ -15,6 +15,7 @@ describe("dashboard fallback", () => {
     expect(payload.states.empty.deals).toBe(true);
     expect(payload.pipeline.stages).toEqual([]);
     expect(payload.deals).toEqual([]);
+    expect(payload.tasks).toEqual([]);
     expect(payload.error).toBe("Configure HUBSPOT_ACCESS_TOKEN.");
   });
 });

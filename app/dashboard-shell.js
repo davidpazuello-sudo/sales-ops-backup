@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import {
   BellIcon,
   getConfigIcon,
@@ -11,6 +12,7 @@ import {
   SimpleArrow,
   SparkIcon,
 } from "./dashboard-ui";
+import { PageAgentToggleButton } from "./page-agent-panel";
 import {
   AccessPermissionsContent,
   DealProfileContent,
@@ -21,6 +23,7 @@ import {
   SellerProfileContent,
   SellersContent,
   SettingsContent,
+  TasksContent,
 } from "./dashboard-sections";
 import {
   configSections,
@@ -39,6 +42,7 @@ export default function DashboardShell({
   sellerMeetingId = "",
   dealId = "",
 }) {
+  const [pageAgentOpen, setPageAgentOpen] = useState(false);
   const {
     menuRef,
     personalization,
@@ -86,6 +90,11 @@ export default function DashboardShell({
     initialConfig,
     initialProfileView,
   });
+  const settingsHeaderAgentId = activeNav === "profile" || profileViewOpen ? "profile" : "settings";
+
+  useEffect(() => {
+    setPageAgentOpen(false);
+  }, [activeNav, activeConfig, profileViewOpen]);
 
   return (
     <main className={`${styles.appShell} ${collapsed ? styles.appShellCollapsed : ""}`.trim()}>
@@ -211,9 +220,16 @@ export default function DashboardShell({
               </aside>
             ) : null}
             <div className={`${styles.settingsContent} ${profileViewOpen ? styles.settingsContentFull : ""}`.trim()}>
-              <header className={styles.settingsHeader}>
-                <h1>{currentSection?.label}</h1>
-                <p>{currentSection?.description}</p>
+              <header className={styles.sectionHeaderBar}>
+                <div className={styles.settingsHeader}>
+                  <h1>{currentSection?.label}</h1>
+                  <p>{currentSection?.description}</p>
+                </div>
+                <PageAgentToggleButton
+                  agentId={settingsHeaderAgentId}
+                  open={pageAgentOpen}
+                  onToggle={() => setPageAgentOpen((value) => !value)}
+                />
               </header>
               {!dashboardData.configured && activeConfig === "hubspot" ? <div className={styles.integrationNotice}>{hubspotMessage}</div> : null}
               <SettingsContent
@@ -225,15 +241,23 @@ export default function DashboardShell({
                 dashboardData={dashboardData}
                 sessionUser={sessionUser}
                 onTwoFactorStatusChange={handleTwoFactorStatusChange}
+                showAgentPanel={pageAgentOpen}
               />
             </div>
           </section>
         ) : activeNav === "profile" ? (
           <section className={styles.profileLayout}>
             <div className={`${styles.settingsContent} ${styles.settingsContentFull}`.trim()}>
-              <header className={styles.settingsHeader}>
-                <h1>{currentSection?.label}</h1>
-                <p>{currentSection?.description}</p>
+              <header className={styles.sectionHeaderBar}>
+                <div className={styles.settingsHeader}>
+                  <h1>{currentSection?.label}</h1>
+                  <p>{currentSection?.description}</p>
+                </div>
+                <PageAgentToggleButton
+                  agentId={settingsHeaderAgentId}
+                  open={pageAgentOpen}
+                  onToggle={() => setPageAgentOpen((value) => !value)}
+                />
               </header>
               <div className={styles.profileStandalone}>
                 <SettingsContent
@@ -245,6 +269,7 @@ export default function DashboardShell({
                   dashboardData={dashboardData}
                   sessionUser={sessionUser}
                   onTwoFactorStatusChange={handleTwoFactorStatusChange}
+                  showAgentPanel={pageAgentOpen}
                 />
               </div>
             </div>
@@ -263,6 +288,8 @@ export default function DashboardShell({
           <AccessPermissionsContent sessionUser={sessionUser} onNotificationsRefresh={refreshNotifications} />
         ) : activeNav === "reports" ? (
           <ReportsContent dashboardData={dashboardData} />
+        ) : activeNav === "tasks" ? (
+          <TasksContent dashboardData={dashboardData} sessionUser={sessionUser} />
         ) : activeNav === "deals" ? (
           <DealsContent dashboardData={dashboardData} />
         ) : (

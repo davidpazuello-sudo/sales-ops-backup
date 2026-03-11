@@ -454,6 +454,14 @@
   grid-column: 1 / -1;
 }
 
+.sectionHeaderBar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
 .profileStandalone {
   max-width: 980px;
 }
@@ -471,6 +479,52 @@
   color: var(--muted);
   font-size: calc(14px * var(--font-scale));
   line-height: 1.5;
+}
+
+.pageAgentToggleButton {
+  min-height: 42px;
+  padding: 0 16px;
+  border: 1px solid color-mix(in srgb, var(--accent) 18%, var(--border));
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--panel) 40%, var(--panel-soft));
+  color: var(--heading);
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font: inherit;
+  font-size: calc(12px * var(--font-scale));
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    transform var(--motion-fast) ease,
+    border-color var(--motion-fast) ease,
+    background var(--motion-fast) ease,
+    color var(--motion-fast) ease,
+    box-shadow var(--motion-fast) ease;
+}
+
+.pageAgentToggleButton:hover {
+  transform: translateY(-1px);
+  border-color: color-mix(in srgb, var(--accent) 30%, var(--border));
+  background: color-mix(in srgb, var(--accent-soft) 54%, var(--panel));
+}
+
+.pageAgentToggleButtonActive {
+  border-color: color-mix(in srgb, var(--accent) 34%, var(--border));
+  background: color-mix(in srgb, var(--accent-soft) 76%, var(--panel));
+  color: var(--accent);
+  box-shadow: 0 10px 24px rgba(222, 131, 0, 0.1);
+}
+
+.pageAgentToggleButton svg {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  flex: 0 0 auto;
 }
 
 .grid {
@@ -1291,6 +1345,13 @@
 
 .dealsFilterInput::placeholder {
   color: color-mix(in srgb, var(--muted) 88%, white);
+}
+
+.taskScopeHint {
+  margin: -2px 0 18px;
+  color: var(--muted);
+  font-size: calc(12px * var(--font-scale));
+  line-height: 1.5;
 }
 
 .sectionNotice {
@@ -2439,6 +2500,10 @@
   grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, 0.8fr) minmax(0, 0.8fr);
 }
 
+.taskListItem {
+  grid-template-columns: minmax(0, 1.6fr) minmax(0, 0.95fr) minmax(0, 0.95fr) auto;
+}
+
 .dealIdentity,
 .dealMeta {
   display: flex;
@@ -2456,6 +2521,62 @@
 .dealMeta span {
   color: var(--muted);
   font-size: calc(11px * var(--font-scale));
+}
+
+.taskStatusWrap {
+  display: grid;
+  justify-items: end;
+  gap: 6px;
+}
+
+.taskStatusWrap small {
+  color: var(--muted);
+  font-size: calc(10px * var(--font-scale));
+  font-weight: 700;
+}
+
+.taskStatusBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 26px;
+  padding: 0 10px;
+  border-radius: 999px;
+  font-size: calc(10px * var(--font-scale));
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.taskStatusBadgeOpen {
+  background: rgba(222, 131, 0, 0.14);
+  color: var(--accent);
+}
+
+.taskStatusBadgeOverdue {
+  background: rgba(180, 72, 55, 0.12);
+  color: #a63b24;
+}
+
+.taskStatusBadgeDone {
+  background: rgba(31, 136, 61, 0.12);
+  color: #1f883d;
+}
+
+.taskEmptyState {
+  display: grid;
+  gap: 6px;
+  margin-top: 14px;
+}
+
+.taskEmptyState strong {
+  color: var(--heading);
+  font-size: calc(13px * var(--font-scale));
+}
+
+.taskEmptyState span {
+  color: var(--muted);
+  font-size: calc(12px * var(--font-scale));
+  line-height: 1.55;
 }
 
 .optionGroup {
@@ -3341,6 +3462,11 @@
     display: flex;
   }
 
+  .taskStatusWrap {
+    width: 100%;
+    justify-items: start;
+  }
+
   .detailValueBox {
     align-items: flex-start;
     text-align: left;
@@ -3379,6 +3505,15 @@
 
   .settingsContent {
     padding: 24px 18px 30px;
+  }
+
+  .sectionHeaderBar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .pageAgentToggleButton {
+    justify-content: center;
   }
 
   .dropdownMenu {

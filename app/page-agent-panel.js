@@ -79,3 +79,19 @@ export default function PageAgentPanel({
     </Card>
   );
 }
+
+export function PageAgentToggleButton({ agentId, open = false, onToggle }) {
+  const agent = getSpecialistAgent(agentId);
+
+  return (
+    <button
+      type="button"
+      className={`${styles.pageAgentToggleButton} ${open ? styles.pageAgentToggleButtonActive : ""}`.trim()}
+      onClick={onToggle}
+      aria-expanded={open}
+    >
+      <SparkIcon />
+      <span>{agent.name}</span>
+    </button>
+  );
+}

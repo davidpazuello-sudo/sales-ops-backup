@@ -1,18 +1,23 @@
 "use client";
 
+import { useState } from "react";
 import { Card, Metric, Table } from "../dashboard-ui";
-import PageAgentPanel from "../page-agent-panel";
+import PageAgentPanel, { PageAgentToggleButton } from "../page-agent-panel";
 import styles from "../page.module.css";
 
 export function ReportsContent({ dashboardData }) {
+  const [agentOpen, setAgentOpen] = useState(false);
   const loadingState = dashboardData.states?.loading || "ready";
   const stateErrors = dashboardData.states?.errors || [];
 
   return (
     <section className={styles.dashboardSection}>
-      <header className={styles.settingsHeader}>
-        <h1>Relatorios</h1>
-        <p>Resumo executivo puxado da HubSpot, com visao por vendedor e pipeline aberto.</p>
+      <header className={styles.sectionHeaderBar}>
+        <div className={styles.settingsHeader}>
+          <h1>Relatorios</h1>
+          <p>Resumo executivo puxado da HubSpot, com visao por vendedor e pipeline aberto.</p>
+        </div>
+        <PageAgentToggleButton agentId="reports" open={agentOpen} onToggle={() => setAgentOpen((value) => !value)} />
       </header>
 
       {loadingState !== "ready" || stateErrors.length ? (
@@ -31,6 +36,8 @@ export function ReportsContent({ dashboardData }) {
       ) : null}
 
       <div className={styles.grid}>
+        {agentOpen ? <PageAgentPanel agentId="reports" dashboardData={dashboardData} /> : null}
+
         <Card eyebrow="HUBSPOT" title="KPIs comerciais" wide>
           <div className={styles.metrics}>
             <Metric title="Pipeline aberto" value={`R$ ${Math.round((dashboardData.summary.totalPipeline || 0) / 1000)}k`} note="Negocios em aberto na HubSpot" />
@@ -42,8 +49,6 @@ export function ReportsContent({ dashboardData }) {
         <Card eyebrow="TIME" title="Visao por vendedor" wide>
           <Table head={["Vendedor", "Meta", "Pipeline", "Status"]} rows={dashboardData.reports} />
         </Card>
-
-        <PageAgentPanel agentId="reports" dashboardData={dashboardData} />
       </div>
     </section>
   );

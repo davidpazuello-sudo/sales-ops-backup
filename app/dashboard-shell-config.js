@@ -4,6 +4,7 @@ export const navItems = [
   { id: "reports", label: "Relatórios" },
   { id: "sellers", label: "Vendedores" },
   { id: "deals", label: "Negócios" },
+  { id: "tasks", label: "Tarefas" },
   { id: "access", label: "Permissões e Acessos" },
   { id: "settings", label: "Configurações" },
 ];
@@ -31,6 +32,13 @@ export const globalSearchIndex = [
     description: "Pipeline comercial com estágios e movimentação de deals.",
     keywords: "negocios oportunidades funil pipeline etapa card",
     route: "/negocios",
+  },
+  {
+    id: "tasks",
+    label: "Tarefas",
+    description: "Reunioes, chamadas e tarefas comerciais sincronizadas com a HubSpot por usuario.",
+    keywords: "tarefas reunioes chamadas call meeting agenda hubspot follow-up vendedor",
+    route: "/tarefas",
   },
   {
     id: "ai",

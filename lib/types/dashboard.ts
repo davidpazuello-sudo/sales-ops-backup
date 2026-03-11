@@ -53,6 +53,30 @@ export type DashboardDeal = {
   lastTouchDays?: number | null;
 };
 
+export type DashboardTask = {
+  id: string;
+  externalId: string;
+  objectType: string;
+  kind: string;
+  kindLabel: string;
+  title: string;
+  description: string;
+  ownerId: string;
+  ownerName: string;
+  ownerEmail: string;
+  ownerTeam: string;
+  status: string;
+  statusLabel: string;
+  isCompleted: boolean;
+  isOverdue: boolean;
+  dueAt: string | null;
+  dueLabel: string;
+  priority: string;
+  taskTypeLabel: string;
+  updatedAt: string | null;
+  source: string;
+};
+
 export type PipelineStage = {
   id: string;
   label: string;
@@ -88,6 +112,7 @@ export type DashboardData = {
   sellers: SellerSummary[];
   alerts: string[][];
   deals: DashboardDeal[];
+  tasks?: DashboardTask[];
   reports: string[][];
   error?: string;
 };

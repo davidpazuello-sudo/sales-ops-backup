@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Card, Table } from "../dashboard-ui";
-import PageAgentPanel from "../page-agent-panel";
+import PageAgentPanel, { PageAgentToggleButton } from "../page-agent-panel";
 import { permissionRows } from "../dashboard-shell-config";
 import styles from "../page.module.css";
 
@@ -11,6 +11,7 @@ export function AccessPermissionsContent({ sessionUser, onNotificationsRefresh }
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
   const [busyRequestId, setBusyRequestId] = useState("");
+  const [agentOpen, setAgentOpen] = useState(false);
 
   async function loadRequests() {
     setLoading(true);
@@ -76,14 +77,25 @@ export function AccessPermissionsContent({ sessionUser, onNotificationsRefresh }
 
   return (
     <section className={styles.dashboardSection}>
-      <header className={styles.settingsHeader}>
-        <h1>Permissoes e Acessos</h1>
-        <p>Revise as solicitacoes pendentes e aprove ou recuse o envio do primeiro acesso.</p>
+      <header className={styles.sectionHeaderBar}>
+        <div className={styles.settingsHeader}>
+          <h1>Permissoes e Acessos</h1>
+          <p>Revise as solicitacoes pendentes e aprove ou recuse o envio do primeiro acesso.</p>
+        </div>
+        <PageAgentToggleButton agentId="access" open={agentOpen} onToggle={() => setAgentOpen((value) => !value)} />
       </header>
 
       {message ? <div className={styles.sectionNotice}>{message}</div> : null}
 
       <div className={styles.grid}>
+        {agentOpen ? (
+          <PageAgentPanel
+            agentId="access"
+            dashboardData={null}
+            context={{ requests, sessionUser }}
+          />
+        ) : null}
+
         <Card eyebrow="PENDENTES" title="Solicitacoes em aberto" wide>
           {loading ? (
             <div className={styles.sectionEmptyPanel}>
@@ -131,12 +143,6 @@ export function AccessPermissionsContent({ sessionUser, onNotificationsRefresh }
         <Card eyebrow="PERMISSOES" title="Permissoes por cargo" wide>
           <Table head={["Cargo", "Acesso"]} rows={permissionRows} />
         </Card>
-
-        <PageAgentPanel
-          agentId="access"
-          dashboardData={null}
-          context={{ requests, sessionUser }}
-        />
       </div>
     </section>
   );

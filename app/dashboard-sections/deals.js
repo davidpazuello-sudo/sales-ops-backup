@@ -10,7 +10,7 @@ import {
   SendIcon,
   SparkIcon,
 } from "../dashboard-ui";
-import PageAgentPanel from "../page-agent-panel";
+import PageAgentPanel, { PageAgentToggleButton } from "../page-agent-panel";
 import styles from "../page.module.css";
 import { findDealByRouteId, sellerToSlug } from "lib/dashboard-shell-helpers";
 import {
@@ -28,6 +28,7 @@ export function DealsContent({ dashboardData }) {
   const [ownerFilter, setOwnerFilter] = useState("todos");
   const [activityWeeksFilter, setActivityWeeksFilter] = useState("1");
   const [collapsedStages, setCollapsedStages] = useState({});
+  const [agentOpen, setAgentOpen] = useState(false);
   const stageOrder = dashboardData.pipeline?.stages?.map((stage) => stage.label) || [];
 
   useEffect(() => {
@@ -55,8 +56,11 @@ export function DealsContent({ dashboardData }) {
 
   return (
     <section className={styles.dashboardSection}>
-      <header className={styles.settingsHeader}>
-        <h1>Negocios</h1>
+      <header className={styles.sectionHeaderBar}>
+        <div className={styles.settingsHeader}>
+          <h1>Negocios</h1>
+        </div>
+        <PageAgentToggleButton agentId="deals" open={agentOpen} onToggle={() => setAgentOpen((value) => !value)} />
       </header>
 
       <div className={styles.dealsFilters}>
@@ -105,7 +109,7 @@ export function DealsContent({ dashboardData }) {
       ) : null}
 
       <div className={styles.grid}>
-        <PageAgentPanel agentId="deals" dashboardData={dashboardData} />
+        {agentOpen ? <PageAgentPanel agentId="deals" dashboardData={dashboardData} /> : null}
       </div>
 
       <section className={styles.pipelineBoard}>

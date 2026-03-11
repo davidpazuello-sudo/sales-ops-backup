@@ -35,6 +35,7 @@ const validDashboardData = {
   sellers: [],
   alerts: [],
   deals: [],
+  tasks: [],
   reports: [],
 };
 

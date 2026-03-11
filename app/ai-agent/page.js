@@ -3,12 +3,13 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import styles from "./page.module.css";
-import { buildNoraResponse, specialistAgents } from "lib/ai-agent-orchestration";
+import { buildNoraResponse } from "lib/ai-agent-orchestration";
 
 const navItems = [
   { id: "reports", label: "Relatórios" },
   { id: "sellers", label: "Vendedores" },
   { id: "deals", label: "Negócios" },
+  { id: "tasks", label: "Tarefas" },
 ];
 
 const topMenuItems = ["Arquivo", "Editar", "Visualizar", "Ajuda"];
@@ -117,6 +118,7 @@ function getNavIcon(id) {
   if (id === "reports") return <BaseIcon><path d="M6 18V11" /><path d="M11 18V7" /><path d="M16 18V13" /></BaseIcon>;
   if (id === "sellers") return <BaseIcon><circle cx="9" cy="8" r="3" /><path d="M4 17c0-2.4 2.2-4.3 5-4.3s5 1.9 5 4.3" /><circle cx="17" cy="9" r="2.3" /><path d="M14.6 16.2c.6-1.5 2-2.5 3.7-2.5.8 0 1.5.2 2.1.5" /></BaseIcon>;
   if (id === "deals") return <BaseIcon><rect x="4" y="6" width="16" height="12" rx="1.5" /><path d="M12 6v12" /><path d="M4 10h16" /></BaseIcon>;
+  if (id === "tasks") return <BaseIcon><rect x="5" y="4.5" width="14" height="15" rx="2" /><path d="M8 9h7" /><path d="M8 13h4" /><path d="M8 17h5" /><path d="M15.5 13.5l1.3 1.3 2.7-3" /></BaseIcon>;
   return <BaseIcon><path d="M12 8.6A3.4 3.4 0 1 0 12 15.4A3.4 3.4 0 1 0 12 8.6z" /><path d="M19 12a7.2 7.2 0 0 0-.1-1l1.9-1.4-1.8-3.2-2.3 1a7.7 7.7 0 0 0-1.7-1l-.3-2.4H10l-.4 2.4a7.7 7.7 0 0 0-1.7 1l-2.3-1-1.8 3.2L5.7 11a7.2 7.2 0 0 0 0 2l-1.9 1.4 1.8 3.2 2.3-1c.5.4 1.1.7 1.7 1l.4 2.4h4.6l.3-2.4c.6-.2 1.2-.6 1.7-1l2.3 1 1.8-3.2L18.9 13c.1-.3.1-.7.1-1z" /></BaseIcon>;
 }
 
@@ -134,7 +136,6 @@ export default function AIAgentPage() {
   const menuRef = useRef(null);
   const fileInputRef = useRef(null);
   const recognitionRef = useRef(null);
-  const specialistDirectory = Object.values(specialistAgents);
 
   async function handleLogout() {
     await fetch("/api/auth/logout", { method: "POST" }).catch(() => null);
@@ -318,6 +319,7 @@ export default function AIAgentPage() {
       reports: "/relatorios",
       sellers: "/vendedores",
       deals: "/negocios",
+      tasks: "/tarefas",
       settings: "/configuracoes",
       profile: "/perfil",
     };
@@ -384,7 +386,8 @@ export default function AIAgentPage() {
             <p>Investigue o sistema inteiro com contexto operacional, histórico de perguntas, sugestões rápidas e conversa contínua. A NORA sempre consulta o especialista da página certa antes de responder.</p>
           </header>
 
-          <section className={styles.agentDirectory}>
+          {false ? (
+            <section className={styles.agentDirectory}>
             <div className={styles.agentDirectoryHeader}>
               <span className={styles.eyebrow}>REDE DE ESPECIALISTAS</span>
               <h2>NORA conversa com agentes por domínio</h2>
@@ -399,7 +402,8 @@ export default function AIAgentPage() {
                 </article>
               ))}
             </div>
-          </section>
+            </section>
+          ) : null}
 
           <div className={styles.agentPanels}>
             <aside className={styles.historyPanel}>

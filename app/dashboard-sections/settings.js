@@ -36,6 +36,7 @@ export function SettingsContent({
   dashboardData,
   sessionUser,
   onTwoFactorStatusChange,
+  showAgentPanel = false,
 }) {
   const profileEmail = dashboardData.integration?.profileEmail || "";
   const profileRole = dashboardData.integration?.profileRole || "";
@@ -61,6 +62,8 @@ export function SettingsContent({
   if (section === "account") {
     return (
       <div className={styles.grid}>
+        {showAgentPanel ? sectionAgentPanel : null}
+
         <Card eyebrow="PERFIL">
           <PhotoOption profilePhoto={profilePhoto} onPhotoChange={onPhotoChange} />
           <Row label="Nome" value={sessionUser?.name || "Usuario SalesOps"} helper={profileHelper} />
@@ -72,7 +75,6 @@ export function SettingsContent({
         <Card eyebrow="SEGURANCA" title="Autenticacao em dois fatores">
           <TwoFactorSettings sessionUser={sessionUser} onStatusChange={onTwoFactorStatusChange} />
         </Card>
-        {sectionAgentPanel}
       </div>
     );
   }
@@ -80,6 +82,8 @@ export function SettingsContent({
   if (section === "hubspot") {
     return (
       <div className={styles.grid}>
+        {showAgentPanel ? sectionAgentPanel : null}
+
         <Card eyebrow="STATUS" title="Integracao HubSpot">
           <Row
             label="Conexao"
@@ -99,7 +103,6 @@ export function SettingsContent({
         <Card eyebrow="LOG" title="Erros recentes">
           <Table head={["Hora", "Erro", "Gravidade"]} rows={dashboardData.configured ? [["Agora", "Sincronizacao via API operando", "Baixo"]] : errorRows} />
         </Card>
-        {sectionAgentPanel}
       </div>
     );
   }
@@ -107,6 +110,8 @@ export function SettingsContent({
   if (section === "notifications") {
     return (
       <div className={styles.grid}>
+        {showAgentPanel ? sectionAgentPanel : null}
+
         <Card eyebrow="CANAIS" title="Notificacoes & Alertas">
           <Row label="Email" value="Ativo" helper="comercial@salesops.ai" />
           <Row label="Push" value="Ativo" helper="Chrome + mobile" />
@@ -117,7 +122,6 @@ export function SettingsContent({
             {metricRows.map((item) => <Metric key={item[0]} title={item[0]} value={item[1]} note={item[2]} />)}
           </div>
         </Card>
-        {sectionAgentPanel}
       </div>
     );
   }
@@ -125,6 +129,8 @@ export function SettingsContent({
   if (section === "ai") {
     return (
       <div className={styles.grid}>
+        {showAgentPanel ? sectionAgentPanel : null}
+
         <Card eyebrow="MODELO" title="IA & Diagnosticos">
           <Row label="Modelo ativo" value="GPT SalesOps Analyst" />
           <Row label="Assistente de voz" value="Habilitado" />
@@ -139,7 +145,6 @@ export function SettingsContent({
             <span>Proximas tarefas</span>
           </div>
         </Card>
-        {sectionAgentPanel}
       </div>
     );
   }
@@ -147,6 +152,8 @@ export function SettingsContent({
   if (section === "personalize") {
     return (
       <div className={styles.grid}>
+        {showAgentPanel ? sectionAgentPanel : null}
+
         <Card eyebrow="APARENCIA" title="Tema e tipografia">
           <OptionGroup title="Tema" options={themeOptions} value={personalization.theme} onChange={(value) => updatePersonalization("theme", value)} />
           <OptionGroup title="Fonte principal" options={fontOptions} value={personalization.font} onChange={(value) => updatePersonalization("font", value)} />
@@ -175,7 +182,6 @@ export function SettingsContent({
             </div>
           </div>
         </Card>
-        {sectionAgentPanel}
       </div>
     );
   }
@@ -183,6 +189,8 @@ export function SettingsContent({
   if (section === "exports") {
     return (
       <div className={styles.grid}>
+        {showAgentPanel ? sectionAgentPanel : null}
+
         <Card eyebrow="AGENDAMENTO" title="Relatorios & Exportacao">
           <Row label="Envio semanal" value="Segunda, 07:30" />
           <Row label="Formato" value="PDF + XLSX" />
@@ -191,7 +199,6 @@ export function SettingsContent({
         <Card eyebrow="TEMPLATES" title="Templates por cargo" wide>
           <Table head={["Cargo", "Template", "Formato"]} rows={reportRows} />
         </Card>
-        {sectionAgentPanel}
       </div>
     );
   }
@@ -199,6 +206,8 @@ export function SettingsContent({
   if (section === "storage") {
     return (
       <div className={styles.grid}>
+        {showAgentPanel ? sectionAgentPanel : null}
+
         <Card eyebrow="USO" title="Gestao de Midia & Storage">
           <div className={styles.usage}>
             <div className={styles.usageTop}>
@@ -219,13 +228,14 @@ export function SettingsContent({
           <Row label="Regiao" value="Brazil South" helper="aderencia LGPD" />
           <Row label="Indexacao IA" value="Ativa" />
         </Card>
-        {sectionAgentPanel}
       </div>
     );
   }
 
   return (
     <div className={styles.grid}>
+      {showAgentPanel ? sectionAgentPanel : null}
+
       <Card eyebrow="AUDITORIA" title="Eventos recentes" wide>
         <Table head={["Quem", "O que", "Quando"]} rows={auditRows} />
       </Card>
@@ -237,7 +247,6 @@ export function SettingsContent({
         <Row label="Esquecimento" value="Fluxo habilitado" helper="remocao em ate 7 dias" />
         <Row label="Relatorio" value="Atualizado hoje" />
       </Card>
-      {sectionAgentPanel}
     </div>
   );
 }

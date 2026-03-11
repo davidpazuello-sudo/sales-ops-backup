@@ -9,7 +9,7 @@ import {
   Row,
   SparkIcon,
 } from "../dashboard-ui";
-import PageAgentPanel from "../page-agent-panel";
+import PageAgentPanel, { PageAgentToggleButton } from "../page-agent-panel";
 import styles from "../page.module.css";
 import { getInternalMeetingsForSeller, meetingToSlug, sellerToSlug } from "lib/dashboard-shell-helpers";
 import {
@@ -197,6 +197,7 @@ export function SellerMeetingDetailContent({ dashboardData, sellerSlug, meetingI
 export function SellersContent({ dashboardData }) {
   const router = useRouter();
   const [sellerFilter, setSellerFilter] = useState("");
+  const [agentOpen, setAgentOpen] = useState(false);
   const loadingState = dashboardData.states?.loading || "ready";
   const stateErrors = dashboardData.states?.errors || [];
   const filteredSellers = dashboardData.sellers.filter((seller) =>
@@ -205,8 +206,11 @@ export function SellersContent({ dashboardData }) {
 
   return (
     <section className={styles.dashboardSection}>
-      <header className={styles.settingsHeader}>
-        <h1>Vendedores</h1>
+      <header className={styles.sectionHeaderBar}>
+        <div className={styles.settingsHeader}>
+          <h1>Vendedores</h1>
+        </div>
+        <PageAgentToggleButton agentId="sellers" open={agentOpen} onToggle={() => setAgentOpen((value) => !value)} />
       </header>
 
       <div className={styles.dealsFilters}>
@@ -230,7 +234,7 @@ export function SellersContent({ dashboardData }) {
       ) : null}
 
       <div className={styles.grid}>
-        <PageAgentPanel agentId="sellers" dashboardData={dashboardData} />
+        {agentOpen ? <PageAgentPanel agentId="sellers" dashboardData={dashboardData} /> : null}
       </div>
 
       <div className={styles.sellerProfilesGrid}>

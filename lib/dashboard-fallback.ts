@@ -42,6 +42,7 @@ export function createDashboardFallbackData({
     sellers: [],
     alerts: [],
     deals: [],
+    tasks: [],
     reports: [],
     error,
   };

@@ -3,6 +3,7 @@ import {
   buildMainSectionRoute,
   getAppliedPersonalization,
   getCurrentSection,
+  getNotificationAction,
   getNotificationDisplayTitle,
   getVisibleNotifications,
   personalizationDefaults,
@@ -31,6 +32,7 @@ describe("dashboard shell helpers", () => {
     expect(buildMainSectionRoute("reports")).toBe("/relatorios");
     expect(buildMainSectionRoute("sellers")).toBe("/vendedores");
     expect(buildMainSectionRoute("deals")).toBe("/negocios");
+    expect(buildMainSectionRoute("tasks")).toBe("/tarefas");
     expect(buildMainSectionRoute("unknown")).toBe("/relatorios");
   });
 
@@ -81,5 +83,16 @@ describe("dashboard shell helpers", () => {
       body: "Sua reuniao com o cliente sera em breve.",
       tag: "Agenda",
     })).toBe("Próxima reunião");
+  });
+
+  it("routes task-like notifications to the tarefas page", () => {
+    expect(getNotificationAction({
+      title: "Ligacao com cliente amanha",
+      body: "Existe uma ligacao marcada para 10h.",
+      tag: "Tarefa",
+    })).toEqual({
+      route: "/tarefas",
+      label: "Abrir Tarefas",
+    });
   });
 });
