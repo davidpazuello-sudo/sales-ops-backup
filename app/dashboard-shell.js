@@ -178,33 +178,6 @@ const sellerAttentionRows = [
   ["Bruno Melo", "Forecast sem proximo passo definido", "Alta"],
 ];
 
-const defaultNotificationItems = [
-  {
-    id: "1",
-    title: "Joseph Israel tornou voce o Prospectante do contrato JN Corte - Manaus (AM).",
-    tag: "Marcos Nakahara",
-    age: "12d",
-    read: false,
-    trash: false,
-  },
-  {
-    id: "2",
-    title: "Voce foi atribuido a tarefa \"Preencher propriedade de aprovacao\".",
-    tag: "",
-    age: "14d",
-    read: false,
-    trash: false,
-  },
-  {
-    id: "3",
-    title: "Tabela de preco do negocio Nautilus Sports foi aceita pelo cliente.",
-    tag: "Equipe Comercial",
-    age: "2d",
-    read: true,
-    trash: false,
-  },
-];
-
 const sellerAgendaRows = [
   ["1:1 de coaching", "Hoje, 15:00", "Lucas Prado"],
   ["Revisao de forecast", "Hoje, 17:30", "Squad Enterprise"],
@@ -615,6 +588,24 @@ function SettingsContent({ section, personalization, updatePersonalization, prof
   if (section === "exports") return <div className={styles.grid}><Card eyebrow="AGENDAMENTO" title="Relatórios & Exportação"><Row label="Envio semanal" value="Segunda, 07:30" /><Row label="Formato" value="PDF + XLSX" /><Row label="Marca d'água" value="Confidencial" /></Card><Card eyebrow="TEMPLATES" title="Templates por cargo" wide><Table head={["Cargo", "Template", "Formato"]} rows={reportRows} /></Card></div>;
   if (section === "storage") return <div className={styles.grid}><Card eyebrow="USO" title="Gestão de Mídia & Storage"><div className={styles.usage}><div className={styles.usageTop}><strong>38.4 / 100 GB</strong><span>38%</span></div><div className={styles.usageBar}><span style={{ width: "38.4%" }} /></div><p>Gravações semanais, áudios e anexos operacionais.</p></div><Row label="Hot storage" value="45 dias" /><Row label="Cold storage" value="365 dias" helper="arquivamento automático" /></Card><Card eyebrow="STT" title="Fila de transcrição em tempo real" wide><Table head={["Arquivo", "Status", "Progresso"]} rows={queueRows} /></Card><Card eyebrow="PROVEDOR" title="Indexação e provedor"><Row label="Provedor" value="Azure Blob Storage" /><Row label="Região" value="Brazil South" helper="aderência LGPD" /><Row label="Indexação IA" value="Ativa" /></Card></div>;
   return <div className={styles.grid}><Card eyebrow="AUDITORIA" title="Eventos recentes" wide><Table head={["Quem", "O quê", "Quando"]} rows={auditRows} /></Card><Card eyebrow="MASKING" title="Matriz visual por campo e cargo"><Table head={["Campo", "Admin", "Gestor", "Vendedor"]} rows={maskingRows} matrix /></Card><Card eyebrow="LGPD" title="Consentimento e conformidade"><Row label="Consentimento" value="Registrado por contato" /><Row label="Esquecimento" value="Fluxo habilitado" helper="remoção em até 7 dias" /><Row label="Relatório" value="Atualizado hoje" /></Card></div>;
+}
+
+function getNotificationAction(item) {
+  if (!item) {
+    return { route: "", label: "" };
+  }
+
+  if (item.requestId || item.tag === "Solicitacao de acesso" || item.tag === "Primeiro acesso") {
+    return {
+      route: "/permissoes-e-acessos",
+      label: "Abrir Permissões e Acessos",
+    };
+  }
+
+  return {
+    route: "",
+    label: "",
+  };
 }
 
 function AccessPermissionsContent({ sessionUser, onNotificationsRefresh }) {
@@ -2161,18 +2152,19 @@ export default function DashboardShell({
   const currentSection = activeNav === "profile"
     ? accountSection
     : configSections.find((item) => item.id === activeConfig);
-  const allNotifications = [
-    ...(sessionUser.isSuperAdmin ? adminNotifications.map((item) => ({
+  const allNotifications = sessionUser.isSuperAdmin
+    ? adminNotifications.map((item) => ({
       ...item,
       age: new Date(item.createdAt).toLocaleDateString("pt-BR"),
-    })) : []),
-    ...defaultNotificationItems,
-  ];
+      ...getNotificationAction(item),
+    }))
+    : [];
   const visibleNotifications = allNotifications.filter((item) => {
     if (notificationTab === "unread") return !item.read && !item.trash;
     if (notificationTab === "trash") return item.trash;
     return !item.trash;
   });
+  const unreadNotificationsCount = allNotifications.filter((item) => !item.read && !item.trash).length;
   const globalSearchResults = getGlobalSearchResults(globalSearchQuery);
   const globalSearchHint = getAiSearchHint(globalSearchQuery, globalSearchResults);
 
@@ -2189,6 +2181,15 @@ export default function DashboardShell({
   const handleLogout = async () => {
     await fetch("/api/auth/logout", { method: "POST" }).catch(() => null);
     router.replace("/login");
+  };
+
+  const openNotificationAction = (item) => {
+    if (!item?.route) {
+      return;
+    }
+
+    setNotificationsOpen(false);
+    router.push(item.route);
   };
 
   return (
@@ -2364,52 +2365,42 @@ export default function DashboardShell({
                 &times;
               </button>
             </div>
-            <header className={styles.notificationsHeader}>
-              <h2>Notificações</h2>
-              <button type="button" className={styles.notificationsClose} onClick={() => setNotificationsOpen(false)} aria-label="Fechar notificações">
-                ×
-              </button>
-            </header>
 
             <div className={styles.notificationsTabs}>
               <button type="button" className={`${styles.notificationsTab} ${notificationTab === "unread" ? styles.notificationsTabActive : ""}`.trim()} onClick={() => setNotificationTab("unread")}>
-                Não lidas ({allNotifications.filter((item) => !item.read && !item.trash).length})
+                Não lidas ({unreadNotificationsCount})
               </button>
               <button type="button" className={`${styles.notificationsTab} ${notificationTab === "all" ? styles.notificationsTabActive : ""}`.trim()} onClick={() => setNotificationTab("all")}>
                 Todos
               </button>
-              <button type="button" className={`${styles.notificationsTab} ${notificationTab === "trash" ? styles.notificationsTabActive : ""}`.trim()} onClick={() => setNotificationTab("trash")}>
-                Lixeira
-              </button>
-              <button type="button" className={styles.notificationsSettings} aria-label="Configurar notificações">
-                {getConfigIcon("notifications")}
-              </button>
-            </div>
-
-            <div className={styles.notificationsToolbar}>
-              <label className={styles.notificationsCheckbox}>
-                <input type="checkbox" />
-                <span>Selecionar tudo</span>
-              </label>
-              <div className={styles.notificationsFilter}>
-                <span>Tipo:</span>
-                <button type="button">Todos</button>
-              </div>
             </div>
 
             <div className={styles.notificationsList}>
-              {visibleNotifications.map((item) => (
-                <article key={item.id} className={styles.notificationRow}>
-                  <label className={styles.notificationsCheckbox}>
-                    <input type="checkbox" />
-                  </label>
+              {visibleNotifications.length ? visibleNotifications.map((item) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  className={`${styles.notificationRow} ${item.route ? styles.notificationRowButton : ""}`.trim()}
+                  onClick={() => openNotificationAction(item)}
+                  disabled={!item.route}
+                  title={item.label || undefined}
+                >
                   <div className={styles.notificationContent}>
                     <strong>{item.title}</strong>
+                    {item.body ? <span className={styles.notificationBody}>{item.body}</span> : null}
                     {item.tag ? <span className={styles.notificationTag}>{item.tag}</span> : null}
                   </div>
-                  <small>{item.age}</small>
-                </article>
-              ))}
+                  <div className={styles.notificationSide}>
+                    <small>{item.age}</small>
+                    {item.route ? <span className={styles.notificationArrow}>Abrir</span> : null}
+                  </div>
+                </button>
+              )) : (
+                <div className={styles.notificationsEmptyState}>
+                  <strong>Nenhuma notificação real por aqui.</strong>
+                  <p>Quando houver uma ação pendente de verdade, ela vai aparecer nesta central.</p>
+                </div>
+              )}
             </div>
           </aside>
         </div>
