@@ -2,58 +2,71 @@ import { NextResponse } from "next/server";
 import { normalizeEmail } from "lib/auth-flows";
 import { logAuthRouteError } from "lib/auth-logging";
 import { queueAccessRequest } from "lib/access-requests-store";
-import { getSuperAdminEmails, hasSupabaseAdminEnv, hasSupabaseEnv } from "lib/supabase/shared";
+import { getSuperAdminEmails, hasSupabaseAdminEnv, hasSupabaseEnv, isCorporateEmail } from "lib/supabase/shared";
+import { consumeRateLimit, getRequestClientKey } from "lib/auth-rate-limit";
+import { PUBLIC_AUTH_ERRORS } from "lib/public-auth-errors";
 
 export async function POST(request) {
+  const body = await request.json().catch(() => null);
+  const email = normalizeEmail(body?.email);
+  const rateLimit = await consumeRateLimit({
+    scope: "first-access",
+    bucket: `${getRequestClientKey(request)}:${email || "anonymous"}`,
+    limit: 4,
+    windowMs: 10 * 60 * 1000,
+  });
+
+  if (!rateLimit.ok) {
+    return NextResponse.json(
+      { ok: false, error: PUBLIC_AUTH_ERRORS.tooManyAttempts },
+      { status: 429 },
+    );
+  }
+
   if (!hasSupabaseEnv()) {
     return NextResponse.json(
-      { ok: false, error: "Supabase nao configurado neste ambiente." },
+      { ok: false, error: PUBLIC_AUTH_ERRORS.authUnavailable },
       { status: 503 },
     );
   }
 
   if (!hasSupabaseAdminEnv()) {
     return NextResponse.json(
-      { ok: false, error: "Permissoes e Acessos ainda nao esta configurado com chave administrativa do Supabase." },
+      { ok: false, error: PUBLIC_AUTH_ERRORS.authUnavailable },
       { status: 503 },
     );
   }
 
   if (!getSuperAdminEmails().length) {
     return NextResponse.json(
-      { ok: false, error: "Nao ha super admin configurado para aprovar primeiros acessos." },
+      { ok: false, error: PUBLIC_AUTH_ERRORS.authUnavailable },
       { status: 503 },
     );
   }
 
-  const body = await request.json().catch(() => null);
-  const email = normalizeEmail(body?.email);
-
-  if (!email) {
+  if (!email || !isCorporateEmail(email)) {
     return NextResponse.json(
-      { ok: false, error: "Informe um email valido." },
+      { ok: false, error: PUBLIC_AUTH_ERRORS.corporateEmailRequired },
       { status: 400 },
     );
   }
 
   try {
-    const { created } = await queueAccessRequest({
+    await queueAccessRequest({
       email,
       type: "first-access",
     });
 
     return NextResponse.json({
       ok: true,
-      message: created
-        ? "Pedido de primeiro acesso enviado para aprovacao do super admin."
-        : "Ja existe um pedido pendente para este email. Aguarde a aprovacao do super admin.",
+      message: PUBLIC_AUTH_ERRORS.accessRequestSubmitted,
     });
   } catch (error) {
     logAuthRouteError("api/auth/first-access", "queue-first-access", error, { email, requestUrl: request.url });
     return NextResponse.json(
       {
         ok: false,
-        error: error instanceof Error ? error.message : "Nao foi possivel iniciar o primeiro acesso neste ambiente.",
+        error: PUBLIC_AUTH_ERRORS.authUnavailable,
       },
       { status: 503 },
     );
