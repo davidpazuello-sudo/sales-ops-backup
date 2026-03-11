@@ -363,8 +363,8 @@
 
 .agentPanels {
   display: grid;
-  grid-template-columns: 280px minmax(0, 1fr);
-  gap: 20px;
+  grid-template-columns: 236px minmax(0, 1fr);
+  gap: 0;
   margin-top: 24px;
   align-items: start;
   flex: 1;
@@ -435,31 +435,28 @@
   line-height: 1.5;
 }
 
-.historySidebar,
-.chatPanel {
-  border-radius: var(--surface-radius);
-  background: color-mix(in srgb, var(--panel) 94%, transparent);
-  box-shadow: var(--surface-shadow);
-}
-
 .historySidebar {
   position: sticky;
-  top: 24px;
-  min-height: 520px;
-  padding: calc(18px * var(--density-scale));
+  top: 0;
+  align-self: start;
+  height: 100%;
+  min-height: 100%;
+  overflow: auto;
+  padding: calc(22px * var(--density-scale)) 12px;
+  background: var(--sidebar);
+  border-right: 1px solid var(--border);
+  box-shadow: none;
+  border-radius: 0;
   display: grid;
   grid-template-rows: auto 1fr;
-  align-self: stretch;
-  overflow: hidden;
   transition:
     padding var(--motion-fast) ease,
-    min-height var(--motion-fast) ease,
-    background var(--motion-fast) ease,
-    border-radius var(--motion-fast) ease;
+    width var(--motion-fast) ease,
+    background var(--motion-fast) ease;
 }
 
 .historySidebarCollapsed {
-  min-height: 520px;
+  min-height: 100%;
   padding: 12px 10px;
   justify-items: center;
 }
@@ -473,15 +470,15 @@
 .historySidebarToggleRow {
   display: flex;
   justify-content: flex-end;
-  margin-bottom: 12px;
+  margin: 0 4px 14px;
 }
 
 .historySidebarToggle {
-  width: 40px;
-  height: 40px;
-  border: 1px solid color-mix(in srgb, var(--heading) 18%, var(--border));
-  border-radius: 12px;
-  background: color-mix(in srgb, var(--panel-soft) 82%, transparent);
+  width: 38px;
+  height: 38px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--panel-soft);
   color: var(--muted);
   display: inline-flex;
   align-items: center;
@@ -495,10 +492,8 @@
 }
 
 .historySidebarToggle:hover {
-  border-color: color-mix(in srgb, var(--accent) 38%, var(--border));
-  background: color-mix(in srgb, var(--accent-soft) 52%, var(--panel-soft));
+  background: var(--panel-soft);
   color: var(--heading);
-  transform: translateY(-1px);
 }
 
 .historySidebarToggle svg {
@@ -507,25 +502,66 @@
 }
 
 .historySidebarToggleCollapsed {
-  background: color-mix(in srgb, var(--accent-soft) 48%, var(--panel-soft));
+  background: var(--panel-soft);
   color: var(--heading);
 }
 
 .historySidebarRail {
   height: 100%;
-  display: grid;
-  place-items: center;
-  padding: 8px 0 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 0 16px;
 }
 
 .historySidebarRailLabel {
   writing-mode: vertical-rl;
   transform: rotate(180deg);
   color: var(--muted);
-  font-size: calc(11px * var(--font-scale));
+  font-size: calc(10px * var(--font-scale));
   font-weight: 800;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.09em;
   text-transform: uppercase;
+}
+
+.historySidebarTitle {
+  margin: 4px 8px 14px;
+  color: var(--muted);
+  font-size: calc(10px * var(--font-scale));
+  font-weight: 800;
+  letter-spacing: 0.09em;
+}
+
+.historySidebarList {
+  display: flex;
+  flex-direction: column;
+  gap: calc(6px * var(--density-scale));
+}
+
+.historySidebarItem {
+  width: 100%;
+  min-height: calc(40px * var(--density-scale));
+  padding: calc(10px * var(--density-scale)) calc(12px * var(--density-scale));
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: calc(13px * var(--font-scale));
+  text-align: left;
+  line-height: 1.45;
+  cursor: pointer;
+}
+
+.historySidebarItem:hover {
+  background: var(--panel-soft);
+}
+
+.historySidebarItemActive {
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-weight: 700;
 }
 
 .chatPanel {
@@ -534,6 +570,9 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  border-radius: 0 var(--surface-radius) var(--surface-radius) 0;
+  background: color-mix(in srgb, var(--panel) 94%, transparent);
+  box-shadow: var(--surface-shadow);
 }
 
 .chatWorkspace {
@@ -550,42 +589,12 @@
   font-size: calc(17px * var(--font-scale));
 }
 
-.historyList {
-  display: grid;
-  gap: 10px;
-  margin-top: 18px;
-}
-
-.newChatButton {
-  width: 100%;
-  height: 42px;
-  margin-top: 18px;
-  border: 0;
-  border-radius: 14px;
-  background: var(--accent-soft);
-  color: var(--accent);
-  font: inherit;
-  font-size: calc(13px * var(--font-scale));
-  font-weight: 800;
-  cursor: pointer;
-}
-
 .historyItem,
 .promptChip,
 .chatComposer button {
   border: 0;
   font: inherit;
   cursor: pointer;
-}
-
-.historyItem {
-  padding: calc(14px * var(--density-scale));
-  border-radius: 16px;
-  background: var(--panel-soft);
-  color: var(--text);
-  font-size: calc(13px * var(--font-scale));
-  text-align: left;
-  line-height: 1.45;
 }
 
 .promptRow {
@@ -725,6 +734,206 @@
   outline: none;
 }
 
+.notificationsBackdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(5, 10, 18, 0.34);
+  backdrop-filter: blur(3px);
+  z-index: 220;
+}
+
+.notificationsPanel {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: min(100%, 396px);
+  height: 100%;
+  background: color-mix(in srgb, var(--panel) 98%, #f8fafc);
+  border-left: 1px solid var(--border);
+  box-shadow: -24px 0 44px rgba(15, 23, 42, 0.18);
+  display: grid;
+  grid-template-rows: auto auto 1fr;
+  z-index: 221;
+}
+
+.notificationsTopBar {
+  min-height: 72px;
+  padding: 0 18px 0 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: linear-gradient(135deg, #20becd 0%, #18a8cb 100%);
+  color: #ffffff;
+}
+
+.notificationsTopBar h2 {
+  margin: 0;
+  font-size: calc(1.65rem - 2px);
+  font-weight: 780;
+  letter-spacing: -0.03em;
+  color: #163d73;
+  line-height: 1.05;
+}
+
+.notificationsClose {
+  width: 38px;
+  height: 38px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+  font-size: 30px;
+  line-height: 0.9;
+  cursor: pointer;
+}
+
+.notificationsClose:hover {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.notificationsTabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  gap: 0;
+  background: color-mix(in srgb, var(--panel) 96%, #fdfefe);
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 92%, #d5dde8);
+}
+
+.notificationsTab {
+  min-height: 48px;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font-weight: 700;
+  cursor: pointer;
+  font-size: calc(13px * var(--font-scale));
+}
+
+.notificationsTabActive {
+  color: var(--heading);
+  box-shadow: inset 0 -2px 0 #de8300;
+}
+
+.notificationsList {
+  overflow: auto;
+  background: color-mix(in srgb, var(--panel) 98%, #fbfcfe);
+}
+
+.notificationRow {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 16px;
+  align-items: start;
+  padding: 18px 20px;
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 92%, #d8e0ea);
+  text-align: left;
+  transition: background var(--motion-fast), border-color var(--motion-fast);
+}
+
+.notificationRow:hover {
+  background: color-mix(in srgb, var(--panel-soft) 88%, #f4f7fb);
+}
+
+.notificationRowButton {
+  cursor: pointer;
+}
+
+.notificationRowButton:disabled {
+  cursor: default;
+}
+
+.notificationContent {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+
+.notificationContent strong {
+  color: var(--heading);
+  font-size: calc(14px * var(--font-scale));
+  line-height: 1.45;
+  font-weight: 700;
+}
+
+.notificationBody {
+  margin: 0;
+  color: var(--muted);
+  font-size: calc(13px * var(--font-scale));
+  line-height: 1.55;
+}
+
+.notificationSide {
+  min-width: 76px;
+  display: grid;
+  justify-items: end;
+  align-content: start;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.notificationSide small,
+.notificationRow small {
+  color: color-mix(in srgb, var(--muted) 88%, transparent);
+  font-size: calc(11px * var(--font-scale));
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.notificationArrow {
+  min-height: 30px;
+  padding: 0 12px;
+  border: 1px solid color-mix(in srgb, var(--border) 96%, #d4deea);
+  border-radius: 999px;
+  background: var(--panel-soft);
+  color: var(--heading);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(11px * var(--font-scale));
+  font-weight: 800;
+  letter-spacing: 0.01em;
+}
+
+.notificationRowButton:hover .notificationArrow {
+  border-color: color-mix(in srgb, var(--accent) 26%, var(--border));
+}
+
+.notificationTag {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  width: fit-content;
+  padding: 0 12px;
+  border: 1px solid color-mix(in srgb, var(--border) 96%, #d4deea);
+  border-radius: 999px;
+  background: var(--panel-soft);
+  color: var(--muted);
+  font-size: calc(11px * var(--font-scale));
+  font-weight: 700;
+}
+
+.notificationsEmptyState {
+  display: grid;
+  gap: 8px;
+  padding: 26px 20px;
+  color: var(--muted);
+}
+
+.notificationsEmptyState strong {
+  color: var(--heading);
+  font-size: calc(14px * var(--font-scale));
+}
+
+.notificationsEmptyState p {
+  margin: 0;
+  font-size: calc(13px * var(--font-scale));
+  line-height: 1.55;
+}
+
 .iconButton {
   height: 50px;
   width: 50px;
@@ -857,6 +1066,7 @@
   .historySidebarCollapsed {
     position: static;
     min-height: 0;
+    height: auto;
   }
 
   .historySidebarCollapsed {
@@ -871,6 +1081,10 @@
     writing-mode: initial;
     transform: none;
     letter-spacing: 0.08em;
+  }
+
+  .chatPanel {
+    border-radius: 0 0 var(--surface-radius) var(--surface-radius);
   }
 }
 

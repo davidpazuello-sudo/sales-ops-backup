@@ -4,6 +4,11 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import styles from "./page.module.css";
 import { buildNoraResponse } from "lib/ai-agent-orchestration";
+import {
+  getNotificationAction,
+  getNotificationDisplayTitle,
+  getVisibleNotifications,
+} from "lib/dashboard-shell-helpers";
 
 const navItems = [
   { id: "reports", label: "Relatórios" },
@@ -131,9 +136,12 @@ export default function AIAgentPage() {
   const [collapsed, setCollapsed] = useState(false);
   const [historyCollapsed, setHistoryCollapsed] = useState(true);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [notificationTab, setNotificationTab] = useState("unread");
   const [sessionUser, setSessionUser] = useState({ name: "Usuario", role: "Cargo", isSuperAdmin: false });
   const [dashboardData, setDashboardData] = useState(null);
   const [accessRequests, setAccessRequests] = useState([]);
+  const [notifications, setNotifications] = useState([]);
   const [notificationCount, setNotificationCount] = useState(0);
   const menuRef = useRef(null);
   const fileInputRef = useRef(null);
@@ -235,8 +243,9 @@ export default function AIAgentPage() {
       const payload = await response?.json().catch(() => null);
       if (cancelled) return;
 
-      const notifications = Array.isArray(payload?.notifications) ? payload.notifications : [];
-      const unreadCount = notifications.filter((item) => !item?.read && !item?.trash).length;
+      const nextNotifications = Array.isArray(payload?.notifications) ? payload.notifications : [];
+      const unreadCount = nextNotifications.filter((item) => !item?.read && !item?.trash).length;
+      setNotifications(nextNotifications);
       setNotificationCount(unreadCount);
     }
 
@@ -245,6 +254,16 @@ export default function AIAgentPage() {
       cancelled = true;
     };
   }, [sessionUser.isSuperAdmin]);
+
+  const allNotifications = sessionUser.isSuperAdmin
+    ? notifications.map((item) => ({
+      ...item,
+      title: getNotificationDisplayTitle(item),
+      age: item?.createdAt ? new Date(item.createdAt).toLocaleDateString("pt-BR") : "",
+      ...getNotificationAction(item),
+    }))
+    : [];
+  const visibleNotifications = getVisibleNotifications(allNotifications, notificationTab);
 
   useEffect(() => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -354,6 +373,12 @@ export default function AIAgentPage() {
     router.push(routeMap[view] || "/relatorios");
   }
 
+  function openNotificationAction(item) {
+    if (!item?.route) return;
+    setNotificationsOpen(false);
+    router.push(item.route);
+  }
+
   return (
     <main className={`${styles.appShell} ${collapsed ? styles.appShellCollapsed : ""}`.trim()}>
       <header className={styles.topbar}>
@@ -367,7 +392,13 @@ export default function AIAgentPage() {
           <button type="button" className={styles.topbarButton} aria-label="Avançar" onClick={() => window.history.forward()}><SimpleArrow right /></button>
         </div>
         <div className={styles.topbarActions}>
-          <button type="button" className={`${styles.topbarButton} ${styles.notificationButton}`.trim()} aria-label="Notificações" title="Notificações">
+          <button
+            type="button"
+            className={`${styles.topbarButton} ${styles.notificationButton} ${notificationsOpen ? styles.topbarButtonActive : ""}`.trim()}
+            aria-label="Notificações"
+            title="Notificações"
+            onClick={() => setNotificationsOpen(true)}
+          >
             <BellIcon />
             <span className={styles.notificationBadge} aria-hidden="true">{notificationBadge}</span>
           </button>
@@ -453,20 +484,17 @@ export default function AIAgentPage() {
                 </div>
               ) : (
                 <>
-              <div className={styles.panelHeader}>
-                <h2>Histórico</h2>
-                <p>Perguntas recentes feitas à NORA sobre todo o sistema.</p>
-              </div>
-              <button type="button" className={styles.newChatButton} onClick={startNewChat}>
-                Novo chat
-              </button>
-              <div className={styles.historyList}>
-                {historyItems.map((item) => (
-                  <button key={item} type="button" className={styles.historyItem} onClick={() => submitQuestion(item)}>
-                    {item}
-                  </button>
-                ))}
-              </div>
+                  <div className={styles.historySidebarTitle}>{"HIST\u00D3RICO"}</div>
+                  <div className={styles.historySidebarList}>
+                    <button type="button" className={`${styles.historySidebarItem} ${styles.historySidebarItemActive}`.trim()} onClick={startNewChat}>
+                      Novo chat
+                    </button>
+                    {historyItems.map((item) => (
+                      <button key={item} type="button" className={styles.historySidebarItem} onClick={() => submitQuestion(item)}>
+                        {item}
+                      </button>
+                    ))}
+                  </div>
                 </>
               )}
             </aside>
@@ -554,6 +582,67 @@ export default function AIAgentPage() {
           </div>
         </div>
       </section>
+
+      {notificationsOpen ? (
+        <div className={styles.notificationsBackdrop} role="presentation" onClick={() => setNotificationsOpen(false)}>
+          <aside
+            className={styles.notificationsPanel}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Notificações"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className={styles.notificationsTopBar}>
+              <h2>Notificações</h2>
+              <button
+                type="button"
+                className={styles.notificationsClose}
+                onClick={() => setNotificationsOpen(false)}
+                aria-label="Fechar notificações"
+              >
+                &times;
+              </button>
+            </div>
+
+            <div className={styles.notificationsTabs}>
+              <button type="button" className={`${styles.notificationsTab} ${notificationTab === "unread" ? styles.notificationsTabActive : ""}`.trim()} onClick={() => setNotificationTab("unread")}>
+                Não lidas ({notificationCount})
+              </button>
+              <button type="button" className={`${styles.notificationsTab} ${notificationTab === "all" ? styles.notificationsTabActive : ""}`.trim()} onClick={() => setNotificationTab("all")}>
+                Todos
+              </button>
+            </div>
+
+            <div className={styles.notificationsList}>
+              {visibleNotifications.length ? visibleNotifications.map((item) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  className={`${styles.notificationRow} ${item.route ? styles.notificationRowButton : ""}`.trim()}
+                  onClick={() => openNotificationAction(item)}
+                  disabled={!item.route}
+                  title={item.label || undefined}
+                >
+                  <div className={styles.notificationContent}>
+                    <strong>{item.title}</strong>
+                    {item.body ? <span className={styles.notificationBody}>{item.body}</span> : null}
+                    {item.tag ? <span className={styles.notificationTag}>{item.tag}</span> : null}
+                  </div>
+                  <div className={styles.notificationSide}>
+                    <small>{item.age}</small>
+                    {item.route ? <span className={styles.notificationArrow}>Abrir</span> : null}
+                  </div>
+                </button>
+              )) : (
+                <div className={styles.notificationsEmptyState}>
+                  <strong>Nenhuma notificação real por aqui.</strong>
+                  <p>Quando houver uma ação pendente de verdade, ela vai aparecer nesta central.</p>
+                </div>
+              )}
+            </div>
+          </aside>
+        </div>
+      ) : null}
     </main>
   );
 }
