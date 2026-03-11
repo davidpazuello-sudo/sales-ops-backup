@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getPublicSupabaseConfig } from "lib/supabase/shared";
+import { getPublicSupabaseConfig, getSuperAdminEmails, hasSupabaseAdminEnv } from "lib/supabase/shared";
 
 export async function GET() {
   const supabase = getPublicSupabaseConfig();
@@ -14,5 +14,9 @@ export async function GET() {
   return NextResponse.json({
     ok: true,
     supabase,
+    accessControl: {
+      adminConfigured: hasSupabaseAdminEnv(),
+      superAdminsConfigured: getSuperAdminEmails().length > 0,
+    },
   });
 }

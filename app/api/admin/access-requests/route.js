@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { approveAccessRequest, listPendingAccessRequests, rejectAccessRequest } from "lib/access-requests-store";
 import { requireSuperAdmin } from "lib/admin-access";
 import { logAuthRouteError } from "lib/auth-logging";
-import { createClient } from "lib/supabase/server";
 
 export async function GET() {
   const auth = await requireSuperAdmin();
@@ -10,8 +9,21 @@ export async function GET() {
     return NextResponse.json({ ok: false, error: auth.error }, { status: auth.status });
   }
 
-  const requests = await listPendingAccessRequests();
-  return NextResponse.json({ ok: true, requests });
+  try {
+    const requests = await listPendingAccessRequests();
+    return NextResponse.json({ ok: true, requests });
+  } catch (error) {
+    logAuthRouteError("api/admin/access-requests", "list-pending", error, {
+      actorEmail: auth.user.email,
+    });
+    return NextResponse.json(
+      {
+        ok: false,
+        error: error instanceof Error ? error.message : "Nao foi possivel carregar as solicitacoes.",
+      },
+      { status: 503 },
+    );
+  }
 }
 
 export async function POST(request) {
@@ -57,7 +69,6 @@ export async function POST(request) {
     actorEmail: auth.user.email,
     actorName: auth.user.name,
     request,
-    createClient,
   });
 
   if (!result.ok) {
