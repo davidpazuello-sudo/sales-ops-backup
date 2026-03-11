@@ -1434,6 +1434,120 @@
   gap: 10px;
 }
 
+.systemUsersList {
+  display: grid;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.systemUsersHead,
+.systemUserRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(120px, 0.55fr) minmax(150px, 0.7fr) minmax(0, 0.9fr) auto;
+  gap: 14px;
+  align-items: center;
+}
+
+.systemUsersHead {
+  color: var(--muted);
+  font-size: calc(11px * var(--font-scale));
+  font-weight: 800;
+  letter-spacing: 0.05em;
+}
+
+.systemUserRow {
+  padding: calc(14px * var(--density-scale));
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: linear-gradient(180deg, var(--panel), var(--panel-soft));
+}
+
+.systemUserMeta,
+.systemUserInteraction,
+.systemUserRoleField {
+  display: grid;
+  gap: 4px;
+}
+
+.systemUserMeta strong,
+.systemUserInteraction strong {
+  color: var(--heading);
+  font-size: calc(14px * var(--font-scale));
+}
+
+.systemUserMeta span,
+.systemUserInteraction span,
+.systemUserRoleField small {
+  color: var(--muted);
+  font-size: calc(11px * var(--font-scale));
+}
+
+.systemUserStatus {
+  display: flex;
+  align-items: center;
+}
+
+.systemUserStatusBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 26px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: rgba(222, 131, 0, 0.12);
+  color: var(--accent);
+  font-size: calc(10px * var(--font-scale));
+  font-weight: 800;
+}
+
+.systemUserStatusBadgeActive {
+  background: rgba(31, 136, 61, 0.12);
+  color: #1f883d;
+}
+
+.systemUserRoleSelect {
+  width: 100%;
+  height: 38px;
+  padding: 0 36px 0 14px;
+  border: 1px solid #c7d2df;
+  border-radius: 10px;
+  background-color: #ffffff;
+  background-image:
+    linear-gradient(45deg, transparent 50%, #8ca0ba 50%),
+    linear-gradient(135deg, #8ca0ba 50%, transparent 50%);
+  background-position:
+    calc(100% - 18px) calc(50% - 2px),
+    calc(100% - 12px) calc(50% - 2px);
+  background-size: 6px 6px, 6px 6px;
+  background-repeat: no-repeat;
+  color: var(--heading);
+  font: inherit;
+  font-size: calc(13px * var(--font-scale));
+  font-weight: 700;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+.systemUserRoleSelect:focus {
+  border-color: #90a7c4;
+  box-shadow:
+    0 0 0 3px rgba(74, 105, 143, 0.12),
+    0 8px 18px rgba(28, 53, 94, 0.08);
+}
+
+.systemUserRoleSelect:disabled {
+  background-color: #f4f7fb;
+  color: #7b8da5;
+  cursor: not-allowed;
+}
+
+.systemUserActions {
+  display: flex;
+  justify-content: flex-end;
+}
+
 .twoFactorPanel {
   display: grid;
   gap: 14px;
@@ -3452,14 +3566,42 @@
   .meetingRow,
   .dealTaskItem,
   .dealAttachmentItem,
-  .dealAiComposer {
+  .dealAiComposer,
+  .accessRequestCard {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .accessRequestCard {
+    grid-template-columns: 1fr;
+  }
+
+  .accessRequestActions {
+    width: 100%;
+    justify-content: flex-start;
   }
 
   .dealListItem,
   .meetingRow {
     display: flex;
+  }
+
+  .systemUsersHead {
+    display: none;
+  }
+
+  .systemUserRow {
+    grid-template-columns: 1fr;
+    justify-items: flex-start;
+  }
+
+  .systemUserRoleField {
+    width: 100%;
+  }
+
+  .systemUserActions {
+    width: 100%;
+    justify-content: flex-start;
   }
 
   .taskStatusWrap {

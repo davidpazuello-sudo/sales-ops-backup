@@ -95,7 +95,7 @@ export const configSections = [
 
 export const permissionRows = [
   ["Admin", "Total"],
-  ["Gestor", "Dashboards, sync e relatórios"],
+  ["Gerente", "Dashboards, sync e relatórios"],
   ["Supervisor", "Coaching e auditoria"],
   ["Vendedor", "Carteira própria"],
 ];
