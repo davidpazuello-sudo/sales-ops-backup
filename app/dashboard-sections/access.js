@@ -185,17 +185,19 @@ export function AccessPermissionsContent({ sessionUser, onNotificationsRefresh }
         <PageAgentToggleButton agentId="access" open={agentOpen} onToggle={() => setAgentOpen((value) => !value)} />
       </header>
 
-      {message ? <div className={styles.sectionNotice}>{message}</div> : null}
-
-      <div className={styles.grid}>
-        {agentOpen ? (
+      {agentOpen ? (
+        <div className={styles.grid}>
           <PageAgentPanel
             agentId="access"
             dashboardData={null}
             context={{ requests, users, sessionUser }}
           />
-        ) : null}
+        </div>
+      ) : null}
 
+      {message ? <div className={styles.sectionNotice}>{message}</div> : null}
+
+      <div className={styles.grid}>
         <Card eyebrow="PENDENTES" title="Solicitacoes em aberto" wide>
           {requestsError ? <div className={`${styles.sectionNotice} ${styles.sectionNoticeError}`.trim()}>{requestsError}</div> : null}
           {loading ? (

@@ -20,6 +20,12 @@ export function ReportsContent({ dashboardData }) {
         <PageAgentToggleButton agentId="reports" open={agentOpen} onToggle={() => setAgentOpen((value) => !value)} />
       </header>
 
+      {agentOpen ? (
+        <div className={styles.grid}>
+          <PageAgentPanel agentId="reports" dashboardData={dashboardData} />
+        </div>
+      ) : null}
+
       {loadingState !== "ready" || stateErrors.length ? (
         <div className={`${styles.sectionNotice} ${stateErrors.length ? styles.sectionNoticeError : ""}`.trim()}>
           {loadingState === "loading"
@@ -36,8 +42,6 @@ export function ReportsContent({ dashboardData }) {
       ) : null}
 
       <div className={styles.grid}>
-        {agentOpen ? <PageAgentPanel agentId="reports" dashboardData={dashboardData} /> : null}
-
         <Card eyebrow="HUBSPOT" title="KPIs comerciais" wide>
           <div className={styles.metrics}>
             <Metric title="Pipeline aberto" value={`R$ ${Math.round((dashboardData.summary.totalPipeline || 0) / 1000)}k`} note="Negocios em aberto na HubSpot" />

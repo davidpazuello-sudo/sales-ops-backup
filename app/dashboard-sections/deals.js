@@ -63,6 +63,12 @@ export function DealsContent({ dashboardData }) {
         <PageAgentToggleButton agentId="deals" open={agentOpen} onToggle={() => setAgentOpen((value) => !value)} />
       </header>
 
+      {agentOpen ? (
+        <div className={styles.grid}>
+          <PageAgentPanel agentId="deals" dashboardData={dashboardData} />
+        </div>
+      ) : null}
+
       <div className={styles.dealsFilters}>
         <label className={styles.dealsFilterField}>
           <span>Por proprietario</span>
@@ -107,10 +113,6 @@ export function DealsContent({ dashboardData }) {
           <p>Assim que a HubSpot retornar etapas e negocios reais, elas aparecerao aqui.</p>
         </div>
       ) : null}
-
-      <div className={styles.grid}>
-        {agentOpen ? <PageAgentPanel agentId="deals" dashboardData={dashboardData} /> : null}
-      </div>
 
       <section className={styles.pipelineBoard}>
         {boardColumns.map((column) => (

@@ -213,6 +213,12 @@ export function SellersContent({ dashboardData }) {
         <PageAgentToggleButton agentId="sellers" open={agentOpen} onToggle={() => setAgentOpen((value) => !value)} />
       </header>
 
+      {agentOpen ? (
+        <div className={styles.grid}>
+          <PageAgentPanel agentId="sellers" dashboardData={dashboardData} />
+        </div>
+      ) : null}
+
       <div className={styles.dealsFilters}>
         <label className={styles.dealsFilterField}>
           <span>Filtrar por nome</span>
@@ -232,10 +238,6 @@ export function SellersContent({ dashboardData }) {
           <p>{sellerFilter.trim() ? "Tente ajustar o nome pesquisado ou limpar o filtro." : "Quando a HubSpot retornar owners reais, eles aparecerao nesta lista."}</p>
         </div>
       ) : null}
-
-      <div className={styles.grid}>
-        {agentOpen ? <PageAgentPanel agentId="sellers" dashboardData={dashboardData} /> : null}
-      </div>
 
       <div className={styles.sellerProfilesGrid}>
         {filteredSellers.map((seller) => {

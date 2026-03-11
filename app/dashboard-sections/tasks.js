@@ -117,6 +117,22 @@ export function TasksContent({ dashboardData, sessionUser = {} }) {
         <PageAgentToggleButton agentId="tasks" open={agentOpen} onToggle={() => setAgentOpen((value) => !value)} />
       </header>
 
+      {agentOpen ? (
+        <div className={styles.grid}>
+          <PageAgentPanel
+            agentId="tasks"
+            dashboardData={dashboardData}
+            context={{
+              sessionUser,
+              tasks: visibleTasks,
+              ownerFilter,
+              typeFilter,
+              statusFilter,
+            }}
+          />
+        </div>
+      ) : null}
+
       <div className={styles.dealsFilters}>
         {teamAccess ? (
           <label className={styles.dealsFilterField}>
@@ -181,20 +197,6 @@ export function TasksContent({ dashboardData, sessionUser = {} }) {
       ) : null}
 
       <div className={styles.grid}>
-        {agentOpen ? (
-          <PageAgentPanel
-            agentId="tasks"
-            dashboardData={dashboardData}
-            context={{
-              sessionUser,
-              tasks: visibleTasks,
-              ownerFilter,
-              typeFilter,
-              statusFilter,
-            }}
-          />
-        ) : null}
-
         <Card eyebrow="HUBSPOT" title="Resumo operacional" wide>
           <div className={styles.metrics}>
             <Metric title="Em aberto" value={`${summary.open}`} note="Tarefas visiveis ainda pendentes" />
