@@ -2856,12 +2856,16 @@
 }
 
 .notificationRow {
+  width: 100%;
+  border: 0;
+  background: transparent;
   display: grid;
-  grid-template-columns: auto 1fr auto;
-  gap: 12px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 16px;
   align-items: start;
-  padding: 16px;
+  padding: 18px 20px;
   border-bottom: 1px solid color-mix(in srgb, var(--border) 92%, #d8e0ea);
+  text-align: left;
   transition: background var(--motion-fast), border-color var(--motion-fast);
 }
 
@@ -2869,36 +2873,101 @@
   background: #f4f7fb;
 }
 
+.notificationRowButton {
+  cursor: pointer;
+}
+
+.notificationRowButton:disabled {
+  cursor: default;
+}
+
 .notificationContent {
   display: grid;
-  gap: 10px;
+  gap: 8px;
+  min-width: 0;
 }
 
 .notificationContent strong {
   color: #2b415c;
   font-size: 14px;
-  line-height: 1.4;
+  line-height: 1.45;
   font-weight: 700;
 }
 
+.notificationBody {
+  margin: 0;
+  color: #5e7189;
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.notificationSide {
+  min-width: 76px;
+  display: grid;
+  justify-items: end;
+  align-content: start;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.notificationSide small,
 .notificationRow small {
   color: #8a9cb2;
   font-size: 11px;
   font-weight: 600;
+  white-space: nowrap;
+}
+
+.notificationArrow {
+  min-height: 30px;
+  padding: 0 12px;
+  border: 1px solid #d4deea;
+  border-radius: 999px;
+  background: #f4f7fb;
+  color: #173a5e;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+}
+
+.notificationRowButton:hover .notificationArrow {
+  border-color: #c4d3e4;
+  background: #ebf2f9;
 }
 
 .notificationTag {
   display: inline-flex;
   align-items: center;
-  min-height: 26px;
+  min-height: 28px;
   width: fit-content;
-  padding: 0 10px;
-  border: 1px solid #cad5e3;
+  padding: 0 12px;
+  border: 1px solid #d4deea;
   border-radius: 999px;
-  background: #eef3f8;
-  color: #5e7591;
+  background: #f3f7fb;
+  color: #5b7290;
   font-size: 11px;
   font-weight: 700;
+}
+
+.notificationsEmptyState {
+  display: grid;
+  gap: 8px;
+  padding: 26px 20px;
+  color: #60748d;
+}
+
+.notificationsEmptyState strong {
+  color: #264362;
+  font-size: 14px;
+}
+
+.notificationsEmptyState p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.55;
 }
 
 .logoutModal {
@@ -3102,6 +3171,19 @@
 @media (max-width: 640px) {
   .topbar {
     gap: 12px;
+  }
+
+  .notificationRow {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .notificationSide {
+    width: 100%;
+    grid-auto-flow: column;
+    justify-content: space-between;
+    justify-items: start;
+    align-items: center;
   }
 
   .logoutButton span {
