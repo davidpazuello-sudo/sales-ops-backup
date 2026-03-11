@@ -114,6 +114,13 @@ export function AccessPermissionsContent({ sessionUser, onNotificationsRefresh }
     return getRoleDraft(user) !== user.role;
   }
 
+  function handleRoleCancel(user) {
+    setRoleDrafts((current) => ({
+      ...current,
+      [user.id]: user.role,
+    }));
+  }
+
   async function handleRoleSave(user) {
     const nextRole = getRoleDraft(user);
     if (!nextRole || nextRole === user.role) {
@@ -292,14 +299,24 @@ export function AccessPermissionsContent({ sessionUser, onNotificationsRefresh }
 
                     <div className={styles.systemUserActions}>
                       {pendingChange ? (
-                        <button
-                          type="button"
-                          className={styles.primaryActionButton}
-                          onClick={() => handleRoleSave(item)}
-                          disabled={busyUserId === item.id}
-                        >
-                          {busyUserId === item.id ? "Salvando..." : "Salvar"}
-                        </button>
+                        <>
+                          <button
+                            type="button"
+                            className={styles.dangerActionButton}
+                            onClick={() => handleRoleCancel(item)}
+                            disabled={busyUserId === item.id}
+                          >
+                            Cancelar
+                          </button>
+                          <button
+                            type="button"
+                            className={styles.primaryActionButton}
+                            onClick={() => handleRoleSave(item)}
+                            disabled={busyUserId === item.id}
+                          >
+                            {busyUserId === item.id ? "Salvando..." : "Salvar"}
+                          </button>
+                        </>
                       ) : null}
                     </div>
                   </article>
