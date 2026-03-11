@@ -186,9 +186,10 @@ test("admin abre notificacoes e acessa a fila de aprovacoes", async ({ context, 
   await page.locator('button[aria-label*="Notifica"]').click();
 
   await expect(page.getByRole("dialog", { name: /Notifica/i })).toBeVisible();
-  await expect(page.getByText("qa-admin@sasi.com.br solicitou acesso ao sistema.")).toBeVisible();
+  await expect(page.getByText("Solicitação de acesso")).toBeVisible();
+  await expect(page.getByText("A solicitacao de qa-admin@sasi.com.br aguarda aprovacao de um admin.")).toBeVisible();
 
-  await page.getByRole("button", { name: /qa-admin@sasi.com.br solicitou acesso/i }).click();
+  await page.getByRole("button", { name: /Solicitação de acesso/i }).click();
   await expect(page).toHaveURL(/\/permissoes-e-acessos$/);
   await expect(page.getByText("Solicitacoes em aberto")).toBeVisible();
   await expect(page.getByText("qa-admin@sasi.com.br")).toBeVisible();

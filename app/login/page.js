@@ -24,6 +24,17 @@ const qrCells = [
   "111111101111111",
 ];
 
+function GoogleIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path fill="#EA4335" d="M12.2 10.1v4.1h5.7c-.2 1.3-1.5 3.8-5.7 3.8-3.4 0-6.2-2.8-6.2-6.3s2.8-6.3 6.2-6.3c2 0 3.3.8 4.1 1.5l2.8-2.7C17.4 2.6 15 1.5 12.2 1.5 6.4 1.5 1.8 6.2 1.8 12s4.6 10.5 10.4 10.5c6 0 10-4.2 10-10.1 0-.7-.1-1.2-.2-1.8z" />
+      <path fill="#FBBC05" d="M1.8 7.1l3.4 2.5c.9-2.6 3.3-4.4 7-4.4 2 0 3.3.8 4.1 1.5l2.8-2.7C17.4 2.6 15 1.5 12.2 1.5c-4.2 0-7.9 2.4-9.7 5.6z" />
+      <path fill="#34A853" d="M12.2 22.5c2.7 0 5-.9 6.7-2.5l-3.1-2.5c-.8.6-2 .9-3.6.9-3.9 0-5.4-2.5-5.8-3.8l-3.4 2.6c1.8 3.4 5.4 5.3 9.2 5.3z" />
+      <path fill="#4285F4" d="M22.2 12.4c0-.7-.1-1.2-.2-1.8h-9.8v4.1h5.7c-.3 1.4-1.1 2.4-2 3.1l3.1 2.5c1.8-1.7 3.2-4.3 3.2-7.9z" />
+    </svg>
+  );
+}
+
 export default function LoginPage() {
   const router = useRouter();
   const [view, setView] = useState("login");
@@ -45,6 +56,7 @@ export default function LoginPage() {
   const [supabaseConfig, setSupabaseConfig] = useState(null);
   const [isPreparingRecovery, setIsPreparingRecovery] = useState(false);
   const [isRecoverySessionReady, setIsRecoverySessionReady] = useState(false);
+  const [isGoogleSubmitting, setIsGoogleSubmitting] = useState(false);
   const [twoFactorCode, setTwoFactorCode] = useState("");
   const [twoFactorFactorId, setTwoFactorFactorId] = useState("");
   const [twoFactorFactorLabel, setTwoFactorFactorLabel] = useState("Aplicativo autenticador");
@@ -83,6 +95,8 @@ export default function LoginPage() {
 
     if (params.get("config") === "supabase") {
       setLoginError("Supabase ainda nao esta configurado no ambiente publicado.");
+    } else if (params.get("access") === "request") {
+      setView("request");
     } else if (params.get("authError") === "middleware") {
       setLoginError("Nao foi possivel validar a sessao agora. Tente novamente em instantes.");
     } else if (params.get("mfa") === "required") {
@@ -120,6 +134,30 @@ export default function LoginPage() {
     setLoginError("Nao encontramos um autenticador configurado para esta conta. Ative o 2FA primeiro no perfil.");
     return false;
   }, [getSupabaseClientOrNull]);
+
+  const requestAccessForEmail = useCallback(async (nextEmail) => {
+    const normalizedEmail = String(nextEmail || "").trim().toLowerCase();
+    if (!normalizedEmail) {
+      return "Nao identificamos um email valido para solicitar acesso.";
+    }
+
+    const response = await fetch("/api/auth/request-access", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: normalizedEmail }),
+    }).catch(() => null);
+
+    if (!response) {
+      return "Nao foi possivel solicitar acesso agora.";
+    }
+
+    const payload = await response.json().catch(() => null);
+    if (!response.ok) {
+      return payload?.error || "Nao foi possivel solicitar acesso agora.";
+    }
+
+    return payload?.message || "Solicitacao enviada com sucesso.";
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -231,6 +269,19 @@ export default function LoginPage() {
       if (cancelled || !response?.ok) return;
 
       const payload = await response.json().catch(() => null);
+      if (payload?.authenticated && payload?.authorizedAccess === false) {
+        const nextEmail = payload?.user?.email || "";
+        const nextMessage = await requestAccessForEmail(nextEmail);
+        await fetch("/api/auth/logout", { method: "POST" }).catch(() => null);
+        if (cancelled) return;
+
+        setRequestEmail(nextEmail);
+        setRequestMessage(nextMessage);
+        setLoginError("");
+        setView("request");
+        return;
+      }
+
       if (payload?.authenticated && payload?.requiresTwoFactor) {
         await prepareTwoFactorChallenge();
         return;
@@ -245,7 +296,7 @@ export default function LoginPage() {
     return () => {
       cancelled = true;
     };
-  }, [prepareTwoFactorChallenge, redirectPath, router]);
+  }, [prepareTwoFactorChallenge, redirectPath, requestAccessForEmail, router]);
 
   useEffect(() => {
     let subscription;
@@ -367,27 +418,45 @@ export default function LoginPage() {
     setView("login");
   }
 
+  async function handleGoogleAccess() {
+    setLoginError("");
+    setRequestMessage("");
+    setFirstAccessMessage("");
+    setForgotMessage("");
+    setIsGoogleSubmitting(true);
+
+    const supabase = await getSupabaseClientOrNull();
+    if (!supabase) {
+      setLoginError("Nao foi possivel iniciar o login com Google neste ambiente.");
+      setIsGoogleSubmitting(false);
+      return;
+    }
+
+    const targetUrl = new URL("/login", window.location.origin);
+    if (redirectPath && redirectPath !== "/relatorios") {
+      targetUrl.searchParams.set("redirect", redirectPath);
+    }
+
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: targetUrl.toString(),
+      },
+    });
+
+    if (error) {
+      setLoginError(error.message || "Nao foi possivel iniciar o login com Google.");
+      setIsGoogleSubmitting(false);
+    }
+  }
+
   function handleRequestAccess(event) {
     event.preventDefault();
     setRequestMessage("");
     setLoginError("");
-
-    fetch("/api/auth/request-access", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: requestEmail }),
-    })
-      .then(async (response) => {
-        const payload = await response.json().catch(() => null);
-        if (!response.ok) {
-          setRequestMessage(payload?.error || "Nao foi possivel solicitar acesso.");
-          return;
-        }
-        setRequestMessage(payload?.message || "Solicitacao enviada com sucesso.");
-      })
-      .catch(() => {
-        setRequestMessage("Nao foi possivel solicitar acesso.");
-      });
+    requestAccessForEmail(requestEmail).then((message) => {
+      setRequestMessage(message);
+    });
   }
 
   function handleFirstAccess(event) {
@@ -798,16 +867,18 @@ export default function LoginPage() {
           <div className={styles.qrCopy}>
             <h2>Acesso protegido</h2>
             <p>
-              O login do sistema agora e autenticado pelo Supabase com sessao real.
+              Entre com Google para autenticar. Se sua conta ainda nao tiver acesso liberado, o sistema abre a solicitacao automaticamente para analise do admin.
             </p>
           </div>
 
           <button
             type="button"
-            className={styles.secondaryButton}
-            onClick={() => window.open("https://supabase.com/dashboard", "_blank", "noopener,noreferrer")}
+            className={styles.googleButton}
+            onClick={handleGoogleAccess}
+            disabled={isGoogleSubmitting}
           >
-            Painel Supabase
+            <GoogleIcon />
+            <span>{isGoogleSubmitting ? "Conectando com Google..." : "Continuar com Google"}</span>
           </button>
         </section>
       </div>

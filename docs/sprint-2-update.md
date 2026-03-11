@@ -33,7 +33,7 @@ Estruturar dominio, dados reais e payloads do dashboard para reduzir dependencia
 ## Impacto na Sprint 3
 
 - Interfere no proximo sprint: sim
-- Motivo: o agente de IA e a persistencia passam a ter um modelo de dominio mais claro para usar dados reais do sistema.
+- Motivo: a NORA e a persistencia passam a ter um modelo de dominio mais claro para usar dados reais do sistema.
 
 ## Observacoes
 

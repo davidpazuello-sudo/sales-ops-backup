@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import styles from "./page.module.css";
+import { buildNoraResponse, specialistAgents } from "lib/ai-agent-orchestration";
 
 const navItems = [
   { id: "reports", label: "Relatórios" },
@@ -127,10 +128,13 @@ export default function AIAgentPage() {
   const [isListening, setIsListening] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [sessionUser, setSessionUser] = useState({ name: "Usuario", role: "Cargo" });
+  const [sessionUser, setSessionUser] = useState({ name: "Usuario", role: "Cargo", isSuperAdmin: false });
+  const [dashboardData, setDashboardData] = useState(null);
+  const [accessRequests, setAccessRequests] = useState([]);
   const menuRef = useRef(null);
   const fileInputRef = useRef(null);
   const recognitionRef = useRef(null);
+  const specialistDirectory = Object.values(specialistAgents);
 
   async function handleLogout() {
     await fetch("/api/auth/logout", { method: "POST" }).catch(() => null);
@@ -165,6 +169,7 @@ export default function AIAgentPage() {
       setSessionUser({
         name: payload.user.name || "Usuario",
         role: payload.user.role || "Cargo",
+        isSuperAdmin: Boolean(payload.user.isSuperAdmin),
       });
     }
 
@@ -173,6 +178,49 @@ export default function AIAgentPage() {
       cancelled = true;
     };
   }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadDashboardData() {
+      const response = await fetch("/api/hubspot/dashboard", { cache: "no-store" }).catch(() => null);
+      if (!response || cancelled) return;
+
+      const payload = await response.json().catch(() => null);
+      if (!payload || cancelled) return;
+
+      setDashboardData(payload);
+    }
+
+    loadDashboardData();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadAccessRequests() {
+      if (!sessionUser.isSuperAdmin) {
+        setAccessRequests([]);
+        return;
+      }
+
+      const response = await fetch("/api/admin/access-requests", { cache: "no-store" }).catch(() => null);
+      if (!response?.ok || cancelled) return;
+
+      const payload = await response.json().catch(() => null);
+      if (!payload || cancelled) return;
+
+      setAccessRequests(Array.isArray(payload.requests) ? payload.requests : []);
+    }
+
+    loadAccessRequests();
+    return () => {
+      cancelled = true;
+    };
+  }, [sessionUser.isSuperAdmin]);
 
   useEffect(() => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -209,6 +257,10 @@ export default function AIAgentPage() {
       name: file.name,
       type: file.type || "application/octet-stream",
     }));
+    const noraResponse = buildNoraResponse(trimmed, dashboardData, {
+      requests: accessRequests,
+      sessionUser,
+    });
 
     setMessages((current) => [
       ...current,
@@ -216,7 +268,8 @@ export default function AIAgentPage() {
       {
         id: current.length + 2,
         role: "assistant",
-        text: "Análise iniciada. Vou considerar permissões, contexto operacional e sinais do sistema para responder de forma segura.",
+        text: noraResponse.text,
+        consultedAgents: noraResponse.consultedAgents,
       },
     ]);
     setInputValue("");
@@ -288,9 +341,9 @@ export default function AIAgentPage() {
           <button type="button" className={`${styles.topbarButton} ${styles.notificationButton}`.trim()} aria-label="Notificações" title="Notificações">
             <BellIcon />
           </button>
-          <button type="button" className={styles.aiButton} title="Agente de IA">
+          <button type="button" className={styles.aiButton} title="NORA">
             <SparkIcon />
-            <span>Agente de IA</span>
+            <span>NORA</span>
           </button>
           <button type="button" className={styles.logoutButton} onClick={handleLogout}>
             <LogoutIcon />
@@ -326,16 +379,33 @@ export default function AIAgentPage() {
       <section className={styles.content}>
         <div className={styles.agentContent}>
           <header className={styles.agentHeader}>
-            <span className={styles.eyebrow}>AGENTE DE IA</span>
-            <h1>Central de análise inteligente</h1>
-            <p>Investigue o sistema com histórico de perguntas, sugestões rápidas e conversa contínua.</p>
+            <span className={styles.eyebrow}>NORA</span>
+            <h1>NORA analisa todo o sistema</h1>
+            <p>Investigue o sistema inteiro com contexto operacional, histórico de perguntas, sugestões rápidas e conversa contínua. A NORA sempre consulta o especialista da página certa antes de responder.</p>
           </header>
+
+          <section className={styles.agentDirectory}>
+            <div className={styles.agentDirectoryHeader}>
+              <span className={styles.eyebrow}>REDE DE ESPECIALISTAS</span>
+              <h2>NORA conversa com agentes por domínio</h2>
+              <p>Quando a pergunta cruza mais de um assunto, a NORA consulta mais de um especialista para montar a resposta final.</p>
+            </div>
+            <div className={styles.agentDirectoryGrid}>
+              {specialistDirectory.map((agent) => (
+                <article key={agent.id} className={styles.agentDirectoryCard}>
+                  <strong>{agent.name}</strong>
+                  <span>{agent.pageLabel}</span>
+                  <p>{agent.scope}</p>
+                </article>
+              ))}
+            </div>
+          </section>
 
           <div className={styles.agentPanels}>
             <aside className={styles.historyPanel}>
               <div className={styles.panelHeader}>
                 <h2>Histórico</h2>
-                <p>Perguntas recentes feitas ao agente.</p>
+                <p>Perguntas recentes feitas à NORA sobre todo o sistema.</p>
               </div>
               <button type="button" className={styles.newChatButton} onClick={startNewChat}>
                 Novo chat
@@ -366,8 +436,20 @@ export default function AIAgentPage() {
                     key={message.id}
                     className={`${styles.messageBubble} ${message.role === "user" ? styles.messageUser : styles.messageAssistant}`.trim()}
                   >
-                    <span className={styles.messageRole}>{message.role === "user" ? "Você" : "Agente IA"}</span>
+                    <span className={styles.messageRole}>{message.role === "user" ? "Você" : "NORA"}</span>
                     <p>{message.text}</p>
+                    {message.consultedAgents?.length ? (
+                      <div className={styles.consultedAgentsRow}>
+                        <small>Agentes consultados</small>
+                        <div className={styles.consultedAgentsList}>
+                          {message.consultedAgents.map((agentName) => (
+                            <span key={`${message.id}-${agentName}`} className={styles.consultedAgentChip}>
+                              {agentName}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    ) : null}
                     {message.attachments?.length ? (
                       <div className={styles.messageAttachments}>
                         {message.attachments.map((file) => (

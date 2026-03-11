@@ -34,9 +34,9 @@ export const globalSearchIndex = [
   },
   {
     id: "ai",
-    label: "Agente de IA",
-    description: "Análise inteligente e perguntas sobre dados do sistema.",
-    keywords: "ia ai agente pergunta analise risco insight",
+    label: "NORA",
+    description: "Análise inteligente de todo o sistema com contexto operacional e perguntas guiadas.",
+    keywords: "nora ia ai analise sistema risco insight diagnostico",
     route: "/ai-agent",
   },
   {
@@ -72,13 +72,13 @@ export const globalSearchIndex = [
 export const accountSection = {
   id: "account",
   label: "Conta & Acesso",
-  description: "Perfil, senha, 2FA, sessões ativas e permissões por cargo.",
+  description: "Perfil, senha, 2FA e sessões ativas do usuário.",
 };
 
 export const configSections = [
   { id: "hubspot", label: "Integração HubSpot", description: "Status da conexão, chave, sync, mapeamento e log de erros." },
   { id: "notifications", label: "Notificações & Alertas", description: "Canais, thresholds, metas e resumos automáticos." },
-  { id: "ai", label: "IA & Diagnósticos", description: "Modelo ativo, voz, dados de contexto e sensibilidade diagnóstica." },
+  { id: "ai", label: "NORA & Diagnósticos", description: "Modelo ativo, voz, dados de contexto e sensibilidade diagnóstica da NORA." },
   { id: "personalize", label: "Personalizar", description: "Tema, fonte, escala, contraste e comportamento visual da interface." },
   { id: "exports", label: "Relatórios & Exportação", description: "Agendamento, formato, marca d'água e templates por cargo." },
   { id: "storage", label: "Gestão de Mídia & Storage", description: "Uso, retenção, STT, indexação e provedor com LGPD." },

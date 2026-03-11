@@ -9,6 +9,7 @@ import {
   Row,
   Table,
 } from "../dashboard-ui";
+import PageAgentPanel from "../page-agent-panel";
 import {
   auditRows,
   densityOptions,
@@ -18,7 +19,6 @@ import {
   mappingRows,
   maskingRows,
   metricRows,
-  permissionRows,
   queueRows,
   reportRows,
   themeOptions,
@@ -49,6 +49,14 @@ export function SettingsContent({
         : "Sera solicitado um codigo do autenticador no proximo login"
     )
     : "Ative com Google Authenticator, Microsoft Authenticator ou app equivalente";
+  const sectionAgentId = section === "account" ? "profile" : "settings";
+  const sectionAgentPanel = (
+    <PageAgentPanel
+      agentId={sectionAgentId}
+      dashboardData={dashboardData}
+      context={{ section, sessionUser }}
+    />
+  );
 
   if (section === "account") {
     return (
@@ -64,9 +72,7 @@ export function SettingsContent({
         <Card eyebrow="SEGURANCA" title="Autenticacao em dois fatores">
           <TwoFactorSettings sessionUser={sessionUser} onStatusChange={onTwoFactorStatusChange} />
         </Card>
-        <Card eyebrow="PERMISSOES" title="Permissoes por cargo" wide>
-          <Table head={["Cargo", "Acesso"]} rows={permissionRows} />
-        </Card>
+        {sectionAgentPanel}
       </div>
     );
   }
@@ -93,6 +99,7 @@ export function SettingsContent({
         <Card eyebrow="LOG" title="Erros recentes">
           <Table head={["Hora", "Erro", "Gravidade"]} rows={dashboardData.configured ? [["Agora", "Sincronizacao via API operando", "Baixo"]] : errorRows} />
         </Card>
+        {sectionAgentPanel}
       </div>
     );
   }
@@ -110,6 +117,7 @@ export function SettingsContent({
             {metricRows.map((item) => <Metric key={item[0]} title={item[0]} value={item[1]} note={item[2]} />)}
           </div>
         </Card>
+        {sectionAgentPanel}
       </div>
     );
   }
@@ -131,6 +139,7 @@ export function SettingsContent({
             <span>Proximas tarefas</span>
           </div>
         </Card>
+        {sectionAgentPanel}
       </div>
     );
   }
@@ -166,6 +175,7 @@ export function SettingsContent({
             </div>
           </div>
         </Card>
+        {sectionAgentPanel}
       </div>
     );
   }
@@ -181,6 +191,7 @@ export function SettingsContent({
         <Card eyebrow="TEMPLATES" title="Templates por cargo" wide>
           <Table head={["Cargo", "Template", "Formato"]} rows={reportRows} />
         </Card>
+        {sectionAgentPanel}
       </div>
     );
   }
@@ -208,6 +219,7 @@ export function SettingsContent({
           <Row label="Regiao" value="Brazil South" helper="aderencia LGPD" />
           <Row label="Indexacao IA" value="Ativa" />
         </Card>
+        {sectionAgentPanel}
       </div>
     );
   }
@@ -225,6 +237,7 @@ export function SettingsContent({
         <Row label="Esquecimento" value="Fluxo habilitado" helper="remocao em ate 7 dias" />
         <Row label="Relatorio" value="Atualizado hoje" />
       </Card>
+      {sectionAgentPanel}
     </div>
   );
 }

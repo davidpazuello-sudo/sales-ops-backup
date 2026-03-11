@@ -8,6 +8,7 @@ import {
   getAiSearchHint,
   getAppliedPersonalization,
   getCurrentSection,
+  getNotificationDisplayTitle,
   getGlobalSearchResults,
   getNotificationAction,
   getVisibleNotifications,
@@ -22,6 +23,7 @@ import {
 } from "./dashboard-shell-config";
 
 const SESSION_USER_STORAGE_KEY = "salesops:session-user";
+const BROWSER_NOTIFICATION_IDS_KEY = "salesops:browser-notification-ids";
 
 const defaultDashboardData = createDashboardFallbackData({
   loading: "loading",
@@ -62,6 +64,33 @@ function readStoredSessionUser() {
   }
 }
 
+function getBrowserNotificationSupport() {
+  return typeof window !== "undefined" && "Notification" in window;
+}
+
+function readShownBrowserNotificationIds() {
+  if (typeof window === "undefined") {
+    return [];
+  }
+
+  try {
+    const storedValue = window.localStorage.getItem(BROWSER_NOTIFICATION_IDS_KEY);
+    const parsedValue = JSON.parse(storedValue || "[]");
+    return Array.isArray(parsedValue) ? parsedValue : [];
+  } catch {
+    window.localStorage.removeItem(BROWSER_NOTIFICATION_IDS_KEY);
+    return [];
+  }
+}
+
+function writeShownBrowserNotificationIds(ids) {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  window.localStorage.setItem(BROWSER_NOTIFICATION_IDS_KEY, JSON.stringify(ids));
+}
+
 export function useDashboardShellState({
   initialNav,
   initialConfig,
@@ -85,6 +114,9 @@ export function useDashboardShellState({
   const [globalSearchQuery, setGlobalSearchQuery] = useState("");
   const [sessionUser, setSessionUser] = useState(readStoredSessionUser);
   const [adminNotifications, setAdminNotifications] = useState([]);
+  const [browserNotificationPermission, setBrowserNotificationPermission] = useState(
+    getBrowserNotificationSupport() ? window.Notification.permission : "unsupported",
+  );
 
   useEffect(() => {
     function closeOnOutside(event) {
@@ -243,6 +275,15 @@ export function useDashboardShellState({
   }, [refreshNotifications]);
 
   useEffect(() => {
+    if (!getBrowserNotificationSupport()) {
+      setBrowserNotificationPermission("unsupported");
+      return;
+    }
+
+    setBrowserNotificationPermission(window.Notification.permission);
+  }, []);
+
+  useEffect(() => {
     const root = document.documentElement;
     const systemDark = window.matchMedia?.("(prefers-color-scheme: dark)")?.matches;
     const appliedPersonalization = getAppliedPersonalization(personalization, systemDark);
@@ -309,6 +350,7 @@ export function useDashboardShellState({
   const allNotifications = sessionUser.isSuperAdmin
     ? adminNotifications.map((item) => ({
       ...item,
+      title: getNotificationDisplayTitle(item),
       age: new Date(item.createdAt).toLocaleDateString("pt-BR"),
       ...getNotificationAction(item),
     }))
@@ -346,6 +388,66 @@ export function useDashboardShellState({
     router.push(item.route);
   }, [router]);
 
+  const requestBrowserNotificationPermission = useCallback(async () => {
+    if (!getBrowserNotificationSupport()) {
+      setBrowserNotificationPermission("unsupported");
+      return "unsupported";
+    }
+
+    const permission = await window.Notification.requestPermission();
+    setBrowserNotificationPermission(permission);
+    return permission;
+  }, []);
+
+  useEffect(() => {
+    const notificationsForBrowser = sessionUser.isSuperAdmin
+      ? adminNotifications.map((item) => ({
+        ...item,
+        title: getNotificationDisplayTitle(item),
+        age: new Date(item.createdAt).toLocaleDateString("pt-BR"),
+        ...getNotificationAction(item),
+      }))
+      : [];
+
+    if (!sessionUser.isSuperAdmin || browserNotificationPermission !== "granted" || !notificationsForBrowser.length) {
+      return;
+    }
+
+    const shownIds = new Set(readShownBrowserNotificationIds());
+    const shownCountBefore = shownIds.size;
+    const nextShownIds = [...shownIds];
+
+    notificationsForBrowser
+      .filter((item) => !item.read && item.id && !shownIds.has(item.id))
+      .forEach((item) => {
+        try {
+          const browserNotification = new window.Notification(item.title, {
+            body: item.body || item.tag || "Abra o SalesOps para ver os detalhes.",
+            tag: `salesops-${item.id}`,
+            icon: "/favicon.ico",
+            badge: "/favicon.ico",
+          });
+
+          browserNotification.onclick = () => {
+            window.focus();
+            if (item.route) {
+              router.push(item.route);
+            }
+            browserNotification.close();
+          };
+
+          shownIds.add(item.id);
+          nextShownIds.push(item.id);
+        } catch {
+          // Ignore browser notification failures and keep the in-app center working.
+        }
+      });
+
+    if (shownIds.size !== shownCountBefore) {
+      writeShownBrowserNotificationIds([...new Set(nextShownIds)]);
+    }
+  }, [adminNotifications, browserNotificationPermission, router, sessionUser.isSuperAdmin]);
+
   return {
     menuRef,
     personalization,
@@ -366,6 +468,8 @@ export function useDashboardShellState({
     currentSection: getCurrentSection({ activeNav, activeConfig, accountSection, configSections }),
     visibleNotifications,
     unreadNotificationsCount,
+    browserNotificationPermission,
+    browserNotificationSupported: browserNotificationPermission !== "unsupported",
     globalSearchResults,
     globalSearchHint,
     setActiveConfig,
@@ -381,6 +485,7 @@ export function useDashboardShellState({
     navigateToMainSection,
     navigateToPath,
     refreshNotifications,
+    requestBrowserNotificationPermission,
     handleTwoFactorStatusChange,
     openGlobalSearchResult,
     handleLogout,

@@ -18,7 +18,7 @@ Blocos que podem usar dados reais hoje:
 
 ## Dados mockados ou derivados localmente
 
-- conteudo do agente de IA
+- conteudo da NORA
 - notificacoes do painel lateral
 - reunioes internas e detalhes de reuniao
 - boa parte das configuracoes e preferencias
@@ -27,6 +27,6 @@ Blocos que podem usar dados reais hoje:
 ## Observacoes
 
 - A shell ja suporta fallback visual quando a HubSpot nao responde.
-- O agente de IA ainda e uma experiencia de interface, nao um backend funcional.
+- A NORA ainda e uma experiencia de interface, nao um backend funcional.
 - O proximo passo para producao e reduzir blocos mockados nas areas operacionais.
 - A Sprint 2 passa a explicitar entidades de dominio e um payload mais rico (`pipeline`, `states`, `ownerDirectory`) sem quebrar o contrato base do dashboard.

@@ -3,6 +3,7 @@ import {
   buildMainSectionRoute,
   getAppliedPersonalization,
   getCurrentSection,
+  getNotificationDisplayTitle,
   getVisibleNotifications,
   personalizationDefaults,
   sellerToSlug,
@@ -59,5 +60,26 @@ describe("dashboard shell helpers", () => {
     expect(applied.font).toBe("manrope");
     expect(applied.fontSize).toBe("medium");
     expect(applied.density).toBe("comfortable");
+  });
+
+  it("normalizes notification titles by semantic type", () => {
+    expect(getNotificationDisplayTitle({
+      requestId: "req-1",
+      title: "david solicitou acesso ao sistema.",
+      body: "A solicitacao aguarda aprovacao.",
+      tag: "Solicitacao de acesso",
+    })).toBe("Solicitação de acesso");
+
+    expect(getNotificationDisplayTitle({
+      title: "Ligacao com cliente amanha",
+      body: "Existe uma ligacao marcada para 10h.",
+      tag: "Tarefa",
+    })).toBe("Próxima ligação");
+
+    expect(getNotificationDisplayTitle({
+      title: "Reuniao de alinhamento",
+      body: "Sua reuniao com o cliente sera em breve.",
+      tag: "Agenda",
+    })).toBe("Próxima reunião");
   });
 });

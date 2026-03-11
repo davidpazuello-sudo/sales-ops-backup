@@ -9,6 +9,7 @@ import {
   Row,
   SparkIcon,
 } from "../dashboard-ui";
+import PageAgentPanel from "../page-agent-panel";
 import styles from "../page.module.css";
 import { getInternalMeetingsForSeller, meetingToSlug, sellerToSlug } from "lib/dashboard-shell-helpers";
 import {
@@ -227,6 +228,10 @@ export function SellersContent({ dashboardData }) {
           <p>{sellerFilter.trim() ? "Tente ajustar o nome pesquisado ou limpar o filtro." : "Quando a HubSpot retornar owners reais, eles aparecerao nesta lista."}</p>
         </div>
       ) : null}
+
+      <div className={styles.grid}>
+        <PageAgentPanel agentId="sellers" dashboardData={dashboardData} />
+      </div>
 
       <div className={styles.sellerProfilesGrid}>
         {filteredSellers.map((seller) => {

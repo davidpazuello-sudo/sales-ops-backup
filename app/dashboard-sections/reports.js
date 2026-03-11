@@ -1,6 +1,7 @@
 "use client";
 
 import { Card, Metric, Table } from "../dashboard-ui";
+import PageAgentPanel from "../page-agent-panel";
 import styles from "../page.module.css";
 
 export function ReportsContent({ dashboardData }) {
@@ -41,6 +42,8 @@ export function ReportsContent({ dashboardData }) {
         <Card eyebrow="TIME" title="Visao por vendedor" wide>
           <Table head={["Vendedor", "Meta", "Pipeline", "Status"]} rows={dashboardData.reports} />
         </Card>
+
+        <PageAgentPanel agentId="reports" dashboardData={dashboardData} />
       </div>
     </section>
   );

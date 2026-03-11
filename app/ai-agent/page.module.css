@@ -340,6 +340,66 @@
   align-items: start;
 }
 
+.agentDirectory {
+  margin-top: 22px;
+  padding: 20px 22px;
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--panel) 96%, transparent), color-mix(in srgb, var(--panel-soft) 68%, transparent));
+  box-shadow: var(--surface-shadow);
+}
+
+.agentDirectoryHeader h2 {
+  margin: 10px 0 0;
+  color: var(--heading);
+  font-size: calc(18px * var(--font-scale));
+}
+
+.agentDirectoryHeader p {
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: calc(13px * var(--font-scale));
+  line-height: 1.55;
+}
+
+.agentDirectoryGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.agentDirectoryCard {
+  display: grid;
+  gap: 6px;
+  min-height: 100%;
+  padding: 16px;
+  border: 1px solid color-mix(in srgb, var(--accent) 14%, var(--border));
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--panel-soft) 82%, transparent);
+}
+
+.agentDirectoryCard strong {
+  color: var(--heading);
+  font-size: calc(13px * var(--font-scale));
+}
+
+.agentDirectoryCard span {
+  color: var(--accent);
+  font-size: calc(11px * var(--font-scale));
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.agentDirectoryCard p {
+  margin: 0;
+  color: var(--muted);
+  font-size: calc(12px * var(--font-scale));
+  line-height: 1.5;
+}
+
 .historyPanel,
 .chatPanel {
   border-radius: var(--surface-radius);
@@ -464,6 +524,36 @@
   flex-wrap: wrap;
   gap: 8px;
   margin-top: 12px;
+}
+
+.consultedAgentsRow {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.consultedAgentsRow small {
+  color: inherit;
+  font-size: calc(10px * var(--font-scale));
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  opacity: 0.7;
+  text-transform: uppercase;
+}
+
+.consultedAgentsList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.consultedAgentChip {
+  padding: 7px 10px;
+  border-radius: 999px;
+  background: color-mix(in srgb, currentColor 12%, transparent);
+  color: inherit;
+  font-size: calc(11px * var(--font-scale));
+  font-weight: 700;
 }
 
 .attachmentChip {
@@ -621,6 +711,7 @@
 }
 
 @media (max-width: 1080px) {
+  .agentDirectoryGrid,
   .agentPanels {
     grid-template-columns: 1fr;
   }

@@ -59,6 +59,8 @@ export default function DashboardShell({
     currentSection,
     visibleNotifications,
     unreadNotificationsCount,
+    browserNotificationPermission,
+    browserNotificationSupported,
     globalSearchResults,
     globalSearchHint,
     setActiveConfig,
@@ -74,6 +76,7 @@ export default function DashboardShell({
     navigateToMainSection,
     navigateToPath,
     refreshNotifications,
+    requestBrowserNotificationPermission,
     handleTwoFactorStatusChange,
     openGlobalSearchResult,
     handleLogout,
@@ -138,9 +141,9 @@ export default function DashboardShell({
           >
             <SearchIcon />
           </button>
-          <button type="button" className={styles.aiButton} onClick={() => navigateToPath("/ai-agent")} title="Agente de IA para análise completa do sistema respeitando perfil e acesso">
+          <button type="button" className={styles.aiButton} onClick={() => navigateToPath("/ai-agent")} title="NORA para análise completa de todo o sistema respeitando perfil e acesso">
             <SparkIcon />
-            <span>Agente de IA</span>
+            <span>NORA</span>
           </button>
           <button type="button" className={styles.logoutButton} onClick={() => setLogoutPromptOpen(true)}>
             <LogoutIcon />
@@ -313,6 +316,36 @@ export default function DashboardShell({
                 Todos
               </button>
             </div>
+
+            {browserNotificationSupported ? (
+              <div className={styles.notificationsPermissionCard}>
+                <div className={styles.notificationsPermissionCopy}>
+                  <strong>Notificacoes no computador</strong>
+                  <p>
+                    {browserNotificationPermission === "granted"
+                      ? "Ativas no navegador. Novos alertas do SalesOps tambem aparecem no Windows e no Chrome."
+                      : browserNotificationPermission === "denied"
+                        ? "A permissao foi bloqueada no navegador. Libere o SalesOps nas configuracoes do Chrome para receber alertas no computador."
+                        : "Ative para receber alertas do SalesOps tambem como notificacao no navegador do seu computador."}
+                  </p>
+                </div>
+                {browserNotificationPermission === "default" ? (
+                  <button
+                    type="button"
+                    className={styles.notificationsPermissionButton}
+                    onClick={requestBrowserNotificationPermission}
+                  >
+                    Permitir
+                  </button>
+                ) : (
+                  <span
+                    className={`${styles.notificationsPermissionBadge} ${browserNotificationPermission === "granted" ? styles.notificationsPermissionBadgeActive : ""}`.trim()}
+                  >
+                    {browserNotificationPermission === "granted" ? "Ativas" : "Bloqueadas"}
+                  </span>
+                )}
+              </div>
+            ) : null}
 
             <div className={styles.notificationsList}>
               {visibleNotifications.length ? visibleNotifications.map((item) => (

@@ -1235,6 +1235,31 @@
   outline: none;
 }
 
+.dealsFilterSelect {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  padding: 0 36px 0 14px !important;
+  background-color: #ffffff !important;
+  background-image:
+    linear-gradient(45deg, transparent 50%, #8ca0ba 50%),
+    linear-gradient(135deg, #8ca0ba 50%, transparent 50%);
+  background-position:
+    calc(100% - 18px) calc(50% - 2px),
+    calc(100% - 12px) calc(50% - 2px);
+  background-size: 6px 6px, 6px 6px;
+  background-repeat: no-repeat;
+  color: var(--heading) !important;
+  font-size: calc(13px * var(--font-scale)) !important;
+  font-weight: 700;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72);
+}
+
+.dealsFilterSelect option {
+  color: var(--text);
+  background: #ffffff;
+}
+
 .dealsFilterInput {
   height: 36px;
   padding: 0 10px;
@@ -1250,6 +1275,13 @@
 .dealsFilterField select:focus {
   border-color: #a8bacf;
   box-shadow: 0 0 0 3px rgba(74, 105, 143, 0.12);
+}
+
+.dealsFilterSelect:focus {
+  border-color: #90a7c4;
+  box-shadow:
+    0 0 0 3px rgba(74, 105, 143, 0.12),
+    0 8px 18px rgba(28, 53, 94, 0.08);
 }
 
 .dealsFilterInput:focus {
@@ -1965,6 +1997,141 @@
 .aiAssistantBox input:focus {
   border-color: rgba(222, 131, 0, 0.58);
   box-shadow: 0 0 0 4px rgba(222, 131, 0, 0.08);
+}
+
+.pageAgentPanel {
+  display: grid;
+  gap: 16px;
+  margin-top: 18px;
+}
+
+.pageAgentHeader {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 12px;
+  align-items: start;
+}
+
+.pageAgentBadge {
+  width: 40px;
+  height: 40px;
+  border-radius: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, rgba(222, 131, 0, 0.16), rgba(243, 164, 61, 0.24));
+  color: var(--accent);
+}
+
+.pageAgentBadge svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.pageAgentIntro {
+  display: grid;
+  gap: 4px;
+}
+
+.pageAgentIntro strong {
+  color: var(--heading);
+  font-size: calc(14px * var(--font-scale));
+}
+
+.pageAgentIntro p {
+  margin: 0;
+  color: var(--muted);
+  font-size: calc(12px * var(--font-scale));
+  line-height: 1.55;
+}
+
+.pageAgentPromptRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.pageAgentPromptChip {
+  min-height: 34px;
+  padding: 0 14px;
+  border: 1px solid color-mix(in srgb, var(--accent) 18%, var(--border));
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--panel) 32%, var(--panel-soft));
+  color: var(--heading);
+  font: inherit;
+  font-size: calc(12px * var(--font-scale));
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    transform var(--motion-fast) ease,
+    border-color var(--motion-fast) ease,
+    background var(--motion-fast) ease;
+}
+
+.pageAgentPromptChip:hover {
+  transform: translateY(-1px);
+  border-color: color-mix(in srgb, var(--accent) 30%, var(--border));
+  background: color-mix(in srgb, var(--accent-soft) 48%, var(--panel));
+}
+
+.pageAgentComposer {
+  display: grid;
+  gap: 12px;
+}
+
+.pageAgentComposer input {
+  width: 100%;
+  height: 44px;
+  padding: 0 14px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--panel);
+  color: var(--text);
+  font: inherit;
+  outline: none;
+}
+
+.pageAgentComposer input:focus {
+  border-color: rgba(222, 131, 0, 0.58);
+  box-shadow: 0 0 0 4px rgba(222, 131, 0, 0.08);
+}
+
+.pageAgentActions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.pageAgentResponse {
+  display: grid;
+  gap: 8px;
+  padding: calc(14px * var(--density-scale)) calc(16px * var(--density-scale));
+  border-radius: 18px;
+  background: linear-gradient(180deg, var(--panel), var(--panel-soft));
+  border: 1px solid color-mix(in srgb, var(--border) 88%, transparent);
+}
+
+.pageAgentResponse span,
+.pageAgentResponse small {
+  color: var(--muted);
+  font-size: calc(11px * var(--font-scale));
+}
+
+.pageAgentResponse strong {
+  color: var(--heading);
+  font-size: calc(14px * var(--font-scale));
+}
+
+.pageAgentResponse p {
+  margin: 0;
+  color: var(--text);
+  font-size: calc(13px * var(--font-scale));
+  line-height: 1.65;
 }
 
 .kpiRow {
@@ -2822,6 +2989,66 @@
   font-size: 12px;
 }
 
+.notificationsPermissionCard {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 14px 16px;
+  background: linear-gradient(180deg, #fdfefe 0%, #f5f8fc 100%);
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 92%, #d5dde8);
+}
+
+.notificationsPermissionCopy {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.notificationsPermissionCopy strong {
+  color: #173a5e;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.notificationsPermissionCopy p {
+  margin: 0;
+  color: #647890;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.notificationsPermissionButton,
+.notificationsPermissionBadge {
+  flex: 0 0 auto;
+  min-height: 34px;
+  padding: 0 14px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.notificationsPermissionButton {
+  border: 1px solid #cfd9e6;
+  background: #ffffff;
+  color: #173a5e;
+  cursor: pointer;
+}
+
+.notificationsPermissionBadge {
+  border: 1px solid #d4deea;
+  background: #f4f7fb;
+  color: #71839c;
+  display: inline-flex;
+  align-items: center;
+}
+
+.notificationsPermissionBadgeActive {
+  border-color: rgba(21, 128, 61, 0.22);
+  background: rgba(22, 163, 74, 0.1);
+  color: #166534;
+}
+
 .notificationsCheckbox {
   display: inline-flex;
   align-items: center;
@@ -3184,6 +3411,11 @@
     justify-content: space-between;
     justify-items: start;
     align-items: center;
+  }
+
+  .notificationsPermissionCard {
+    flex-direction: column;
+    align-items: flex-start;
   }
 
   .logoutButton span {

@@ -10,6 +10,7 @@ import {
   SendIcon,
   SparkIcon,
 } from "../dashboard-ui";
+import PageAgentPanel from "../page-agent-panel";
 import styles from "../page.module.css";
 import { findDealByRouteId, sellerToSlug } from "lib/dashboard-shell-helpers";
 import {
@@ -61,7 +62,11 @@ export function DealsContent({ dashboardData }) {
       <div className={styles.dealsFilters}>
         <label className={styles.dealsFilterField}>
           <span>Por proprietario</span>
-          <select value={ownerFilter} onChange={(event) => setOwnerFilter(event.target.value)}>
+          <select
+            className={styles.dealsFilterSelect}
+            value={ownerFilter}
+            onChange={(event) => setOwnerFilter(event.target.value)}
+          >
             <option value="todos">Todos</option>
             {ownerOptions.map((owner) => (
               <option key={owner} value={owner}>{owner}</option>
@@ -71,7 +76,11 @@ export function DealsContent({ dashboardData }) {
 
         <label className={styles.dealsFilterField}>
           <span>Tempo da ultima atividade</span>
-          <select value={activityWeeksFilter} onChange={(event) => setActivityWeeksFilter(event.target.value)}>
+          <select
+            className={styles.dealsFilterSelect}
+            value={activityWeeksFilter}
+            onChange={(event) => setActivityWeeksFilter(event.target.value)}
+          >
             <option value="1">1 semana</option>
             <option value="2">2 semanas</option>
             <option value="3">3 semanas</option>
@@ -94,6 +103,10 @@ export function DealsContent({ dashboardData }) {
           <p>Assim que a HubSpot retornar etapas e negocios reais, elas aparecerao aqui.</p>
         </div>
       ) : null}
+
+      <div className={styles.grid}>
+        <PageAgentPanel agentId="deals" dashboardData={dashboardData} />
+      </div>
 
       <section className={styles.pipelineBoard}>
         {boardColumns.map((column) => (

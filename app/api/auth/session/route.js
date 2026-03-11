@@ -31,9 +31,11 @@ export async function GET() {
 
   const role = await resolveAuthorizedRole(supabase, user);
   const mfa = await readMfaState(supabase);
+  const authorizedAccess = Boolean(role);
 
   return NextResponse.json({
     authenticated: true,
+    authorizedAccess,
     user: mapSupabaseUser(user, role),
     requiresTwoFactor: mfa.requiresTwoFactor,
     twoFactorEnabled: mfa.hasTotpFactor,

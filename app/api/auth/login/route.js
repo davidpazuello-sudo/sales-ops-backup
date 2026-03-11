@@ -44,6 +44,14 @@ export async function POST(request) {
   }
 
   const role = await resolveAuthorizedRole(supabase, data.user);
+  if (!role) {
+    await supabase.auth.signOut().catch(() => null);
+    return NextResponse.json(
+      { ok: false, error: "Sua conta ainda nao foi liberada. Solicite acesso para continuar." },
+      { status: 403 },
+    );
+  }
+
   const mfa = await readMfaState(supabase);
 
   return NextResponse.json({

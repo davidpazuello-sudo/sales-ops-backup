@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Card } from "../dashboard-ui";
+import { Card, Table } from "../dashboard-ui";
+import PageAgentPanel from "../page-agent-panel";
+import { permissionRows } from "../dashboard-shell-config";
 import styles from "../page.module.css";
 
 export function AccessPermissionsContent({ sessionUser, onNotificationsRefresh }) {
@@ -125,6 +127,16 @@ export function AccessPermissionsContent({ sessionUser, onNotificationsRefresh }
             </div>
           )}
         </Card>
+
+        <Card eyebrow="PERMISSOES" title="Permissoes por cargo" wide>
+          <Table head={["Cargo", "Acesso"]} rows={permissionRows} />
+        </Card>
+
+        <PageAgentPanel
+          agentId="access"
+          dashboardData={null}
+          context={{ requests, sessionUser }}
+        />
       </div>
     </section>
   );

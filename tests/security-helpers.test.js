@@ -25,6 +25,6 @@ describe("security helpers", () => {
     });
 
     expect(mapped.isSuperAdmin).toBe(false);
-    expect(mapped.role).toBe("Vendedor");
+    expect(mapped.role).toBe("");
   });
 });
