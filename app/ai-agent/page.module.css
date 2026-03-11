@@ -334,9 +334,14 @@
 .agentContent {
   height: 100%;
   min-height: 0;
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 236px minmax(0, 1fr);
+  grid-template-rows: auto 1fr;
   padding: calc(28px * var(--density-scale)) calc(30px * var(--density-scale)) calc(34px * var(--density-scale));
+}
+
+.agentContentHistoryCollapsed {
+  grid-template-columns: 72px minmax(0, 1fr);
 }
 
 .agentHeader h1 {
@@ -362,17 +367,7 @@
 }
 
 .agentPanels {
-  display: grid;
-  grid-template-columns: 236px minmax(0, 1fr);
-  gap: 0;
-  margin-top: 24px;
-  align-items: start;
-  flex: 1;
-  min-height: 0;
-}
-
-.agentPanelsHistoryCollapsed {
-  grid-template-columns: 72px minmax(0, 1fr);
+  display: contents;
 }
 
 .agentDirectory {
@@ -436,11 +431,12 @@
 }
 
 .historySidebar {
+  grid-column: 1;
+  grid-row: 1 / span 2;
   position: sticky;
-  top: 0;
+  top: calc(-28px * var(--density-scale));
   align-self: start;
-  height: 100%;
-  min-height: 100%;
+  height: calc(100vh - 60px);
   overflow: auto;
   padding: calc(22px * var(--density-scale)) 12px;
   background: var(--sidebar);
@@ -565,14 +561,22 @@
 }
 
 .chatPanel {
+  grid-column: 2;
+  grid-row: 2;
   min-height: 0;
   padding: calc(22px * var(--density-scale));
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  border-radius: 0 var(--surface-radius) var(--surface-radius) 0;
+  border-radius: var(--surface-radius);
   background: color-mix(in srgb, var(--panel) 94%, transparent);
   box-shadow: var(--surface-shadow);
+}
+
+.agentHeader {
+  grid-column: 2;
+  grid-row: 1;
+  margin-bottom: 24px;
 }
 
 .chatWorkspace {
@@ -1057,16 +1061,24 @@
 
 @media (max-width: 1080px) {
   .agentDirectoryGrid,
-  .agentPanels,
-  .agentPanelsHistoryCollapsed {
+  .agentContent,
+  .agentContentHistoryCollapsed {
     grid-template-columns: 1fr;
+  }
+
+  .agentContent {
+    grid-template-rows: auto auto 1fr;
   }
 
   .historySidebar,
   .historySidebarCollapsed {
+    grid-column: 1;
+    grid-row: 2;
     position: static;
     min-height: 0;
     height: auto;
+    border-right: 0;
+    border-bottom: 1px solid var(--border);
   }
 
   .historySidebarCollapsed {
@@ -1084,7 +1096,14 @@
   }
 
   .chatPanel {
+    grid-column: 1;
+    grid-row: 3;
     border-radius: 0 0 var(--surface-radius) var(--surface-radius);
+  }
+
+  .agentHeader {
+    grid-column: 1;
+    grid-row: 1;
   }
 }
 

@@ -438,7 +438,7 @@ export default function AIAgentPage() {
       </aside>
 
       <section className={styles.content}>
-        <div className={styles.agentContent}>
+        <div className={`${styles.agentContent} ${historyCollapsed ? styles.agentContentHistoryCollapsed : ""}`.trim()}>
           <header className={styles.agentHeader}>
             <span className={styles.eyebrow}>NORA</span>
             <h1>NORA analisa todo o sistema</h1>
@@ -464,7 +464,7 @@ export default function AIAgentPage() {
             </section>
           ) : null}
 
-          <div className={`${styles.agentPanels} ${historyCollapsed ? styles.agentPanelsHistoryCollapsed : ""}`.trim()}>
+          <div className={styles.agentPanels}>
             <aside className={`${styles.historySidebar} ${historyCollapsed ? styles.historySidebarCollapsed : ""}`.trim()} aria-label={"Hist\u00F3rico de perguntas"}>
               <div className={styles.historySidebarToggleRow}>
                 <button
