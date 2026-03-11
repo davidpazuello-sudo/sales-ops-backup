@@ -99,6 +99,8 @@ export default function LoginPage() {
       setView("request");
     } else if (params.get("authError") === "middleware") {
       setLoginError("Nao foi possivel validar a sessao agora. Tente novamente em instantes.");
+    } else if (params.get("authError") === "oauth") {
+      setLoginError("Nao foi possivel concluir o login com Google. Tente novamente.");
     } else if (params.get("mfa") === "required") {
       setView("twoFactor");
       setLoginError("");
@@ -173,7 +175,11 @@ export default function LoginPage() {
       const authCode = params.get("code");
       const recoveryType = params.get("type") || hash.get("type");
 
-      if (!hasRecoveryHash && !authCode) {
+      const isRecoveryCode = Boolean(authCode) && (
+        recoveryType === FIRST_ACCESS_MODE || recoveryType === "password-recovery"
+      );
+
+      if (!hasRecoveryHash && !isRecoveryCode) {
         return;
       }
 
@@ -196,7 +202,7 @@ export default function LoginPage() {
           if (error) {
             throw error;
           }
-        } else if (authCode) {
+        } else if (isRecoveryCode) {
           const { error } = await supabase.auth.exchangeCodeForSession(authCode);
           if (error) {
             throw error;
@@ -432,15 +438,13 @@ export default function LoginPage() {
       return;
     }
 
-    const targetUrl = new URL("/login", window.location.origin);
-    if (redirectPath && redirectPath !== "/relatorios") {
-      targetUrl.searchParams.set("redirect", redirectPath);
-    }
+    const callbackUrl = new URL("/auth/callback", window.location.origin);
+    callbackUrl.searchParams.set("next", redirectPath || "/relatorios");
 
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: targetUrl.toString(),
+        redirectTo: callbackUrl.toString(),
       },
     });
 
