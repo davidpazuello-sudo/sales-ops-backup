@@ -2,8 +2,8 @@
 
 ## 1) Visao geral
 
-O sistema usa Next.js (App Router) com React e uma arquitetura de frontend orientada a um shell unico.
-A maior parte da interface principal e centralizada em `app/dashboard-shell.js`, com rotas server-side leves que apenas inicializam o estado da tela.
+O sistema usa Next.js (App Router) com React e uma arquitetura de frontend orientada a um shell modular.
+As rotas de pagina continuam leves, mas o runtime principal agora esta dividido entre orquestracao de layout, estado compartilhado, componentes visuais e secoes de dominio.
 
 ## 2) Stack tecnica
 
@@ -18,7 +18,11 @@ A maior parte da interface principal e centralizada em `app/dashboard-shell.js`,
 - `app/`
   - `layout.js`: layout raiz e fontes
   - `globals.css`: tokens globais (cores, tipografia, densidade, motion)
-  - `dashboard-shell.js`: shell principal, navegacao, estado e views
+  - `dashboard-shell.js`: orquestracao do shell principal, layout, sidebar, topbar e overlays
+  - `dashboard-ui.js`: componentes visuais e icones reutilizados do dashboard
+  - `dashboard-sections.js`: secoes funcionais da aplicacao (relatorios, negocios, vendedores, configuracoes etc.)
+  - `dashboard-shell-config.js`: configuracao estatica do shell e recursos de navegacao
+  - `use-dashboard-shell-state.js`: estado compartilhado, efeitos e integracoes do shell
   - `page.js`: redirect para `/relatorios`
   - `ai-agent/`, `relatorios/`, `vendedores/`, `negocios/`, `perfil/`, `configuracoes/`, `login/`
   - `api/hubspot/dashboard/route.js`: endpoint interno de dashboard
@@ -53,7 +57,7 @@ As rotas de pagina sao wrappers simples que chamam `DashboardShell` com props de
 
 ## 6) Estado e interacao
 
-O estado principal e local via hooks (`useState`, `useEffect`, `useRef`), sem store global externa.
+O estado principal continua local via hooks, sem store global externa, mas agora foi consolidado no controller `app/use-dashboard-shell-state.js`.
 
 Principais blocos de estado:
 - navegacao ativa
@@ -61,7 +65,7 @@ Principais blocos de estado:
 - colapso de sidebar e colunas
 - notificacoes e busca global
 - personalizacao visual (persistida em localStorage)
-- perfil e foto
+- perfil, sessao e foto
 
 ## 7) Integracao HubSpot
 
@@ -87,13 +91,13 @@ Esse script bloqueia build se detectar:
 
 ## 9) Riscos arquiteturais atuais
 
-- `dashboard-shell.js` concentra muitas responsabilidades (render + regra + estado)
-- baixo desacoplamento entre modulos de dominio
-- ausencia de testes automatizados cobrindo fluxo critico
+- ainda existem componentes de dominio grandes em `app/dashboard-sections.js`
+- parte da interacao operacional continua local e ainda nao persiste no backend
+- ausencia de testes E2E cobrindo fluxo critico
 
 ## 10) Direcao arquitetural recomendada
 
-- extrair `dashboard-shell.js` em modulos por dominio
+- continuar quebrando `app/dashboard-sections.js` em modulos por dominio
 - criar camada de `services` para regras de negocio
 - tipar payload de integracao (TypeScript ou schema runtime)
 - adicionar testes de contrato para API HubSpot

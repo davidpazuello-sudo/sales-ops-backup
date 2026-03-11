@@ -1,28 +1,49 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
-import { isDashboardData } from "lib/dashboard-contracts";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { createDashboardFallbackData } from "lib/dashboard-fallback";
 import {
   buildMainSectionRoute,
+  getAiSearchHint,
   getAppliedPersonalization,
   getCurrentSection,
+  getGlobalSearchResults,
+  getNotificationAction,
   getVisibleNotifications,
   personalizationDefaults,
   PROFILE_PHOTO_KEY,
   STORAGE_KEY,
 } from "lib/dashboard-shell-helpers";
+import {
+  accountSection,
+  configSections,
+  globalSearchIndex,
+} from "./dashboard-shell-config";
+
+const defaultDashboardData = createDashboardFallbackData({
+  loading: "loading",
+  status: "Carregando HubSpot",
+});
+
+const defaultSessionUser = {
+  name: "Usuario",
+  role: "Cargo",
+  email: "",
+  isSuperAdmin: false,
+  twoFactorEnabled: false,
+  twoFactorLevel: null,
+};
 
 export function useDashboardShellState({
   initialNav,
   initialConfig,
   initialProfileView,
-  defaultDashboardData,
-  notificationItems,
-  accountSection,
-  configSections,
 }) {
   const router = useRouter();
+  const pathname = usePathname();
+  const lastPathnameRef = useRef(pathname);
+  const menuRef = useRef(null);
   const [personalization, setPersonalization] = useState(personalizationDefaults);
   const [dashboardData, setDashboardData] = useState(defaultDashboardData);
   const [hubspotMessage, setHubspotMessage] = useState("Carregando dados da HubSpot...");
@@ -35,7 +56,19 @@ export function useDashboardShellState({
   const [logoutPromptOpen, setLogoutPromptOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [notificationTab, setNotificationTab] = useState("unread");
-  const menuRef = useRef(null);
+  const [globalSearchOpen, setGlobalSearchOpen] = useState(false);
+  const [globalSearchQuery, setGlobalSearchQuery] = useState("");
+  const [sessionUser, setSessionUser] = useState(defaultSessionUser);
+  const [adminNotifications, setAdminNotifications] = useState([]);
+
+  useEffect(() => {
+    if (!pathname || lastPathnameRef.current === pathname) {
+      return;
+    }
+
+    lastPathnameRef.current = pathname;
+    window.location.reload();
+  }, [pathname]);
 
   useEffect(() => {
     function closeOnOutside(event) {
@@ -49,6 +82,7 @@ export function useDashboardShellState({
         setMenuOpen(false);
         setLogoutPromptOpen(false);
         setNotificationsOpen(false);
+        setGlobalSearchOpen(false);
       }
     }
 
@@ -95,14 +129,15 @@ export function useDashboardShellState({
         }
 
         if (!response.ok) {
-          setDashboardData(defaultDashboardData);
-          setHubspotMessage(payload.error || "Nao foi possivel consultar a HubSpot.");
-          return;
-        }
-
-        if (!isDashboardData(payload)) {
-          setDashboardData(defaultDashboardData);
-          setHubspotMessage("Os dados retornados pela HubSpot vieram em formato inesperado.");
+          const errorMessage = payload.error || "Nao foi possivel consultar a HubSpot.";
+          setDashboardData(
+            createDashboardFallbackData({
+              loading: response.status === 503 ? "config_required" : "error",
+              status: response.status === 503 ? "Configuracao pendente" : "Falha na sincronizacao",
+              error: errorMessage,
+            }),
+          );
+          setHubspotMessage(errorMessage);
           return;
         }
 
@@ -113,8 +148,15 @@ export function useDashboardShellState({
           return;
         }
 
-        setDashboardData(defaultDashboardData);
-        setHubspotMessage("Nao foi possivel consultar a HubSpot.");
+        const errorMessage = "Nao foi possivel consultar a HubSpot.";
+        setDashboardData(
+          createDashboardFallbackData({
+            loading: "error",
+            status: "Falha na sincronizacao",
+            error: errorMessage,
+          }),
+        );
+        setHubspotMessage(errorMessage);
       }
     }
 
@@ -123,7 +165,53 @@ export function useDashboardShellState({
     return () => {
       cancelled = true;
     };
-  }, [defaultDashboardData]);
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadSessionUser() {
+      const response = await fetch("/api/auth/session", { cache: "no-store" }).catch(() => null);
+      if (!response?.ok || cancelled) {
+        return;
+      }
+
+      const payload = await response.json().catch(() => null);
+      if (!payload?.user || cancelled) {
+        return;
+      }
+
+      setSessionUser({
+        name: payload.user.name || "Usuario",
+        role: payload.user.role || "Cargo",
+        email: payload.user.email || "",
+        isSuperAdmin: Boolean(payload.user.isSuperAdmin),
+        twoFactorEnabled: Boolean(payload.twoFactorEnabled),
+        twoFactorLevel: payload.twoFactorLevel || null,
+      });
+    }
+
+    loadSessionUser();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const refreshNotifications = useCallback(async (currentUser = sessionUser) => {
+    if (!currentUser?.isSuperAdmin) {
+      setAdminNotifications([]);
+      return;
+    }
+
+    const response = await fetch("/api/notifications", { cache: "no-store" }).catch(() => null);
+    const payload = await response?.json().catch(() => null);
+    setAdminNotifications(Array.isArray(payload?.notifications) ? payload.notifications : []);
+  }, [sessionUser]);
+
+  useEffect(() => {
+    refreshNotifications();
+  }, [refreshNotifications]);
 
   useEffect(() => {
     const root = document.documentElement;
@@ -177,8 +265,56 @@ export function useDashboardShellState({
     router.push(buildMainSectionRoute(section));
   }
 
+  function navigateToPath(path) {
+    router.push(path);
+  }
+
+  const handleTwoFactorStatusChange = useCallback((mfaState) => {
+    setSessionUser((current) => ({
+      ...current,
+      twoFactorEnabled: Boolean(mfaState?.hasTotpFactor),
+      twoFactorLevel: mfaState?.currentLevel || null,
+    }));
+  }, []);
+
+  const allNotifications = sessionUser.isSuperAdmin
+    ? adminNotifications.map((item) => ({
+      ...item,
+      age: new Date(item.createdAt).toLocaleDateString("pt-BR"),
+      ...getNotificationAction(item),
+    }))
+    : [];
+  const visibleNotifications = getVisibleNotifications(allNotifications, notificationTab);
+  const unreadNotificationsCount = allNotifications.filter((item) => !item.read && !item.trash).length;
+  const globalSearchResults = getGlobalSearchResults(globalSearchQuery, globalSearchIndex);
+  const globalSearchHint = getAiSearchHint(globalSearchQuery, globalSearchResults);
+
+  const openGlobalSearchResult = useCallback((item) => {
+    if (item.id === "notifications") {
+      setNotificationsOpen(true);
+    } else if (item.route) {
+      router.push(item.route);
+    }
+
+    setGlobalSearchOpen(false);
+    setGlobalSearchQuery("");
+  }, [router]);
+
+  const handleLogout = useCallback(async () => {
+    await fetch("/api/auth/logout", { method: "POST" }).catch(() => null);
+    router.replace("/login");
+  }, [router]);
+
+  const openNotificationAction = useCallback((item) => {
+    if (!item?.route) {
+      return;
+    }
+
+    setNotificationsOpen(false);
+    router.push(item.route);
+  }, [router]);
+
   return {
-    router,
     menuRef,
     personalization,
     dashboardData,
@@ -192,16 +328,30 @@ export function useDashboardShellState({
     logoutPromptOpen,
     notificationsOpen,
     notificationTab,
+    globalSearchOpen,
+    globalSearchQuery,
+    sessionUser,
     currentSection: getCurrentSection({ activeNav, activeConfig, accountSection, configSections }),
-    visibleNotifications: getVisibleNotifications(notificationItems, notificationTab),
+    visibleNotifications,
+    unreadNotificationsCount,
+    globalSearchResults,
+    globalSearchHint,
     setActiveConfig,
     setCollapsed,
     setMenuOpen,
     setLogoutPromptOpen,
     setNotificationsOpen,
     setNotificationTab,
+    setGlobalSearchOpen,
+    setGlobalSearchQuery,
     updatePersonalization,
     handlePhotoChange,
     navigateToMainSection,
+    navigateToPath,
+    refreshNotifications,
+    handleTwoFactorStatusChange,
+    openGlobalSearchResult,
+    handleLogout,
+    openNotificationAction,
   };
 }
