@@ -1341,6 +1341,173 @@
   gap: 10px;
 }
 
+.twoFactorPanel {
+  display: grid;
+  gap: 14px;
+}
+
+.twoFactorStatusRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: linear-gradient(180deg, var(--panel), var(--panel-soft));
+}
+
+.twoFactorStatusRow strong {
+  display: block;
+  margin-top: 4px;
+  color: var(--heading);
+  font-size: calc(15px * var(--font-scale));
+}
+
+.twoFactorStatusRow p {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: calc(12px * var(--font-scale));
+  line-height: 1.55;
+}
+
+.twoFactorEyebrow {
+  color: var(--muted);
+  font-size: calc(10px * var(--font-scale));
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.twoFactorBadge {
+  min-width: 82px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(222, 131, 0, 0.12);
+  color: var(--accent);
+  text-align: center;
+  font-size: calc(11px * var(--font-scale));
+  font-weight: 800;
+}
+
+.twoFactorBadgeActive {
+  background: rgba(31, 136, 61, 0.14);
+  color: #1f883d;
+}
+
+.twoFactorEnrollment {
+  display: grid;
+  grid-template-columns: minmax(0, 220px) minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.twoFactorQrBox {
+  display: grid;
+  gap: 12px;
+  justify-items: center;
+}
+
+.twoFactorQrImage {
+  width: 200px;
+  height: 200px;
+  padding: 12px;
+  border-radius: 18px;
+  background: #fff;
+  border: 1px solid var(--border);
+  box-shadow: 0 12px 32px rgba(17, 32, 58, 0.08);
+}
+
+.twoFactorSecretBox {
+  width: 100%;
+  display: grid;
+  gap: 6px;
+  padding: 12px;
+  border: 1px dashed var(--border);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--panel) 56%, var(--panel-soft));
+}
+
+.twoFactorSecretBox span,
+.twoFactorSummary span {
+  color: var(--muted);
+  font-size: calc(11px * var(--font-scale));
+  font-weight: 700;
+}
+
+.twoFactorSecretBox strong,
+.twoFactorSummary strong {
+  color: var(--heading);
+  font-size: calc(13px * var(--font-scale));
+  line-height: 1.45;
+  word-break: break-word;
+}
+
+.twoFactorCodeForm {
+  display: grid;
+  gap: 12px;
+}
+
+.twoFactorHint,
+.twoFactorSummary small {
+  color: var(--muted);
+  font-size: calc(12px * var(--font-scale));
+  line-height: 1.55;
+}
+
+.twoFactorActions,
+.twoFactorSummary {
+  display: grid;
+  gap: 10px;
+}
+
+.twoFactorActions {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: linear-gradient(180deg, var(--panel), var(--panel-soft));
+}
+
+.twoFactorField {
+  display: grid;
+  gap: 8px;
+}
+
+.twoFactorField span {
+  color: var(--heading);
+  font-size: calc(12px * var(--font-scale));
+  font-weight: 700;
+}
+
+.twoFactorField input {
+  width: 100%;
+  height: 42px;
+  padding: 0 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--panel);
+  color: var(--text);
+  font: inherit;
+  outline: none;
+}
+
+.twoFactorField input:focus {
+  border-color: #a8bacf;
+  box-shadow: 0 0 0 3px rgba(74, 105, 143, 0.12);
+}
+
+.twoFactorFormInfo {
+  padding: 10px 12px;
+  border: 1px solid rgba(180, 72, 55, 0.18);
+  border-radius: 12px;
+  background: rgba(180, 72, 55, 0.08);
+  color: #7d3021;
+  font-size: calc(12px * var(--font-scale));
+  line-height: 1.5;
+}
+
 
 .pipelineColumn {
   display: grid;

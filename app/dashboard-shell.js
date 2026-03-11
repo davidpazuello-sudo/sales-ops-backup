@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { createDashboardFallbackData } from "lib/dashboard-fallback";
+import TwoFactorSettings from "./two-factor-settings";
 import styles from "./page.module.css";
 
 const STORAGE_KEY = "sales-ops-backup-personalization";
@@ -592,13 +593,21 @@ function PreferenceTable({ rows, values, onToggle }) {
   );
 }
 
-function SettingsContent({ section, personalization, updatePersonalization, profilePhoto, onPhotoChange, dashboardData, sessionUser }) {
+function SettingsContent({ section, personalization, updatePersonalization, profilePhoto, onPhotoChange, dashboardData, sessionUser, onTwoFactorStatusChange }) {
   const profileEmail = dashboardData.integration?.profileEmail || "";
   const profileRole = dashboardData.integration?.profileRole || "";
   const profileHelper = profileEmail || "Email vindo da HubSpot aparecera aqui";
   const userRole = profileRole || sessionUser?.role || "Cargo aguardando sincronizacao";
+  const twoFactorValue = sessionUser?.twoFactorEnabled ? "Ativo no autenticador" : "Nao configurado";
+  const twoFactorHelper = sessionUser?.twoFactorEnabled
+    ? (
+      sessionUser?.twoFactorLevel === "aal2"
+        ? "Sessao atual validada com segundo fator"
+        : "Sera solicitado um codigo do autenticador no proximo login"
+    )
+    : "Ative com Google Authenticator, Microsoft Authenticator ou app equivalente";
 
-  if (section === "account") return <div className={styles.grid}><Card eyebrow="PERFIL"><PhotoOption profilePhoto={profilePhoto} onPhotoChange={onPhotoChange} /><Row label="Nome" value={sessionUser?.name || "Usuario SalesOps"} helper={profileHelper} /><Row label="Cargo do usuário" value={userRole} /><Row label="Senha" value="Última troca há 14 dias" /><Row label="2FA" value="Obrigatório para gestão" helper="SMS + autenticador" /><Row label="Sessões ativas" value="5 dispositivos" helper="2 navegadores e 3 mobile" /></Card><Card eyebrow="PERMISSÕES" title="Permissões por cargo"><Table head={["Cargo", "Acesso"]} rows={permissionRows} /></Card></div>;
+  if (section === "account") return <div className={styles.grid}><Card eyebrow="PERFIL"><PhotoOption profilePhoto={profilePhoto} onPhotoChange={onPhotoChange} /><Row label="Nome" value={sessionUser?.name || "Usuario SalesOps"} helper={profileHelper} /><Row label="Cargo do usuário" value={userRole} /><Row label="Senha" value="Última troca há 14 dias" /><Row label="2FA" value={twoFactorValue} helper={twoFactorHelper} /><Row label="Sessões ativas" value="5 dispositivos" helper="2 navegadores e 3 mobile" /></Card><Card eyebrow="SEGURANÇA" title="Autenticação em dois fatores"><TwoFactorSettings sessionUser={sessionUser} onStatusChange={onTwoFactorStatusChange} /></Card><Card eyebrow="PERMISSÕES" title="Permissões por cargo" wide><Table head={["Cargo", "Acesso"]} rows={permissionRows} /></Card></div>;
   if (section === "hubspot") return <div className={styles.grid}><Card eyebrow="STATUS" title="Integração HubSpot"><Row label="Conexão" value={dashboardData.configured ? dashboardData.integration.status : "Pendente"} helper={dashboardData.configured ? `${dashboardData.integration.owners} proprietarios e ${dashboardData.integration.deals} negocios sincronizados` : "Configure o token para sincronizar com a HubSpot"} /><Row label="Origem dos dados" value="HubSpot API" helper="Private app access token" /><Row label="Pipeline ativo" value={`R$ ${Math.round((dashboardData.integration.pipelineAmount || 0) / 1000)}k`} /></Card><Card eyebrow="MAPEAMENTO" title="Campos sincronizados" wide><Table head={["SalesOps", "HubSpot", "Status"]} rows={mappingRows} /></Card><Card eyebrow="LOG" title="Erros recentes"><Table head={["Hora", "Erro", "Gravidade"]} rows={dashboardData.configured ? [["Agora", "Sincronizacao via API operando", "Baixo"]] : errorRows} /></Card></div>;
   if (section === "notifications") return <div className={styles.grid}><Card eyebrow="CANAIS" title="Notificações & Alertas"><Row label="Email" value="Ativo" helper="comercial@salesops.ai" /><Row label="Push" value="Ativo" helper="Chrome + mobile" /><Row label="Resumo automático" value="Diário" /></Card><Card eyebrow="THRESHOLDS" title="Metas e thresholds" wide><div className={styles.metrics}>{metricRows.map((item) => <Metric key={item[0]} title={item[0]} value={item[1]} note={item[2]} />)}</div></Card></div>;
   if (section === "ai") return <div className={styles.grid}><Card eyebrow="MODELO" title="IA & Diagnósticos"><Row label="Modelo ativo" value="GPT SalesOps Analyst" /><Row label="Assistente de voz" value="Habilitado" /><Row label="Sensibilidade" value="Moderada" helper="menos ruído, mais sinais de risco" /></Card><Card eyebrow="DADOS" title="Dados que alimentam a IA" wide><div className={styles.tags}><span>Negócios</span><span>Atividades</span><span>Calls gravadas</span><span>Sentimento do vendedor</span><span>Próximas tarefas</span></div></Card></div>;
@@ -1914,7 +1923,14 @@ export default function DashboardShell({
   const [notificationTab, setNotificationTab] = useState("unread");
   const [globalSearchOpen, setGlobalSearchOpen] = useState(false);
   const [globalSearchQuery, setGlobalSearchQuery] = useState("");
-  const [sessionUser, setSessionUser] = useState({ name: "Usuario", role: "Cargo", email: "", isSuperAdmin: false });
+  const [sessionUser, setSessionUser] = useState({
+    name: "Usuario",
+    role: "Cargo",
+    email: "",
+    isSuperAdmin: false,
+    twoFactorEnabled: false,
+    twoFactorLevel: null,
+  });
   const [adminNotifications, setAdminNotifications] = useState([]);
   const menuRef = useRef(null);
 
@@ -2025,6 +2041,8 @@ export default function DashboardShell({
         role: payload.user.role || "Cargo",
         email: payload.user.email || "",
         isSuperAdmin: Boolean(payload.user.isSuperAdmin),
+        twoFactorEnabled: Boolean(payload.twoFactorEnabled),
+        twoFactorLevel: payload.twoFactorLevel || null,
       });
     }
 
@@ -2044,6 +2062,14 @@ export default function DashboardShell({
     const payload = await response?.json().catch(() => null);
     setAdminNotifications(Array.isArray(payload?.notifications) ? payload.notifications : []);
   }, [sessionUser]);
+
+  const handleTwoFactorStatusChange = useCallback((mfaState) => {
+    setSessionUser((current) => ({
+      ...current,
+      twoFactorEnabled: Boolean(mfaState?.hasTotpFactor),
+      twoFactorLevel: mfaState?.currentLevel || null,
+    }));
+  }, []);
 
   useEffect(() => {
     refreshNotifications();
@@ -2268,7 +2294,7 @@ export default function DashboardShell({
                 <p>{currentSection?.description}</p>
               </header>
               {!dashboardData.configured && activeConfig === "hubspot" ? <div className={styles.integrationNotice}>{hubspotMessage}</div> : null}
-              <SettingsContent section={activeConfig} personalization={personalization} updatePersonalization={updatePersonalization} profilePhoto={profilePhoto} onPhotoChange={handlePhotoChange} dashboardData={dashboardData} sessionUser={sessionUser} />
+              <SettingsContent section={activeConfig} personalization={personalization} updatePersonalization={updatePersonalization} profilePhoto={profilePhoto} onPhotoChange={handlePhotoChange} dashboardData={dashboardData} sessionUser={sessionUser} onTwoFactorStatusChange={handleTwoFactorStatusChange} />
             </div>
           </section>
         ) : activeNav === "profile" ? (
@@ -2279,7 +2305,7 @@ export default function DashboardShell({
                 <p>{accountSection.description}</p>
               </header>
               <div className={styles.profileStandalone}>
-                <SettingsContent section="account" personalization={personalization} updatePersonalization={updatePersonalization} profilePhoto={profilePhoto} onPhotoChange={handlePhotoChange} dashboardData={dashboardData} sessionUser={sessionUser} />
+                <SettingsContent section="account" personalization={personalization} updatePersonalization={updatePersonalization} profilePhoto={profilePhoto} onPhotoChange={handlePhotoChange} dashboardData={dashboardData} sessionUser={sessionUser} onTwoFactorStatusChange={handleTwoFactorStatusChange} />
               </div>
             </div>
           </section>

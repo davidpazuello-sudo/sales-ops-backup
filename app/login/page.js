@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { FIRST_ACCESS_MODE } from "lib/auth-flows";
+import { readMfaState } from "lib/supabase/mfa";
 import styles from "./page.module.css";
 
 const qrCells = [
@@ -44,6 +45,11 @@ export default function LoginPage() {
   const [supabaseConfig, setSupabaseConfig] = useState(null);
   const [isPreparingRecovery, setIsPreparingRecovery] = useState(false);
   const [isRecoverySessionReady, setIsRecoverySessionReady] = useState(false);
+  const [twoFactorCode, setTwoFactorCode] = useState("");
+  const [twoFactorFactorId, setTwoFactorFactorId] = useState("");
+  const [twoFactorFactorLabel, setTwoFactorFactorLabel] = useState("Aplicativo autenticador");
+  const [twoFactorMessage, setTwoFactorMessage] = useState("");
+  const [isPreparingTwoFactor, setIsPreparingTwoFactor] = useState(false);
 
   const getSupabaseClientOrNull = useCallback(async () => {
     if (typeof window === "undefined") return null;
@@ -79,8 +85,41 @@ export default function LoginPage() {
       setLoginError("Supabase ainda nao esta configurado no ambiente publicado.");
     } else if (params.get("authError") === "middleware") {
       setLoginError("Nao foi possivel validar a sessao agora. Tente novamente em instantes.");
+    } else if (params.get("mfa") === "required") {
+      setView("twoFactor");
+      setLoginError("");
     }
   }, []);
+
+  const prepareTwoFactorChallenge = useCallback(async () => {
+    setIsPreparingTwoFactor(true);
+    setLoginError("");
+    setTwoFactorMessage("");
+
+    for (let attempt = 0; attempt < 4; attempt += 1) {
+      const supabase = await getSupabaseClientOrNull();
+      if (!supabase) {
+        break;
+      }
+
+      const mfa = await readMfaState(supabase);
+      if (mfa.hasTotpFactor && mfa.preferredFactorId) {
+        setTwoFactorFactorId(mfa.preferredFactorId);
+        setTwoFactorFactorLabel(mfa.preferredFactorName || "Aplicativo autenticador");
+        setView("twoFactor");
+        setIsPreparingTwoFactor(false);
+        return true;
+      }
+
+      await new Promise((resolve) => {
+        window.setTimeout(resolve, 250);
+      });
+    }
+
+    setIsPreparingTwoFactor(false);
+    setLoginError("Nao encontramos um autenticador configurado para esta conta. Ative o 2FA primeiro no perfil.");
+    return false;
+  }, [getSupabaseClientOrNull]);
 
   useEffect(() => {
     let cancelled = false;
@@ -192,6 +231,11 @@ export default function LoginPage() {
       if (cancelled || !response?.ok) return;
 
       const payload = await response.json().catch(() => null);
+      if (payload?.authenticated && payload?.requiresTwoFactor) {
+        await prepareTwoFactorChallenge();
+        return;
+      }
+
       if (payload?.authenticated) {
         router.replace(redirectPath);
       }
@@ -201,7 +245,7 @@ export default function LoginPage() {
     return () => {
       cancelled = true;
     };
-  }, [redirectPath, router]);
+  }, [prepareTwoFactorChallenge, redirectPath, router]);
 
   useEffect(() => {
     let subscription;
@@ -258,7 +302,69 @@ export default function LoginPage() {
       return;
     }
 
+    const payload = await response.json().catch(() => null);
+    if (payload?.requiresTwoFactor) {
+      setPassword("");
+      await prepareTwoFactorChallenge();
+      setIsSubmitting(false);
+      return;
+    }
+
+    setIsSubmitting(false);
     router.replace(redirectPath);
+  }
+
+  async function handleTwoFactorSubmit(event) {
+    event.preventDefault();
+    setLoginError("");
+    setTwoFactorMessage("");
+    setIsSubmitting(true);
+
+    const supabase = await getSupabaseClientOrNull();
+    if (!supabase) {
+      setLoginError("Nao foi possivel validar o codigo de 2FA neste ambiente.");
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (!twoFactorFactorId) {
+      const ready = await prepareTwoFactorChallenge();
+      if (!ready) {
+        setIsSubmitting(false);
+        return;
+      }
+    }
+
+    const code = twoFactorCode.trim();
+    if (code.length < 6) {
+      setLoginError("Digite o codigo de 6 digitos do aplicativo autenticador.");
+      setIsSubmitting(false);
+      return;
+    }
+
+    const { error } = await supabase.auth.mfa.challengeAndVerify({
+      factorId: twoFactorFactorId,
+      code,
+    });
+
+    if (error) {
+      setLoginError(error.message || "Nao foi possivel validar o codigo do autenticador.");
+      setIsSubmitting(false);
+      return;
+    }
+
+    setTwoFactorCode("");
+    setIsSubmitting(false);
+    router.replace(redirectPath);
+  }
+
+  async function handleBackToLoginFromTwoFactor() {
+    await fetch("/api/auth/logout", { method: "POST" }).catch(() => null);
+    setTwoFactorCode("");
+    setTwoFactorFactorId("");
+    setTwoFactorMessage("");
+    setLoginError("");
+    setView("login");
   }
 
   function handleRequestAccess(event) {
@@ -377,6 +483,8 @@ export default function LoginPage() {
         ? "Recuperar senha"
         : view === "firstAccess"
           ? "Primeiro acesso"
+          : view === "twoFactor"
+            ? "Confirmar segundo fator"
           : view === "reset"
             ? resetFlow === FIRST_ACCESS_MODE
               ? "Defina sua senha"
@@ -390,6 +498,8 @@ export default function LoginPage() {
         ? "Digite seu email corporativo para receber as instrucoes de redefinicao de senha."
         : view === "firstAccess"
           ? "Se sua conta ja foi habilitada, enviamos um link seguro para voce criar a senha do primeiro acesso."
+          : view === "twoFactor"
+            ? "Digite o codigo de 6 digitos do seu aplicativo autenticador para concluir a entrada."
           : view === "reset" && resetFlow === FIRST_ACCESS_MODE
             ? "Conclua o primeiro acesso definindo a senha que sera usada nas proximas entradas."
             : view === "reset"
@@ -562,6 +672,50 @@ export default function LoginPage() {
                   }}
                 >
                   Ir para login
+                </button>
+              </div>
+            </>
+          ) : view === "twoFactor" ? (
+            <>
+              <form className={styles.form} onSubmit={handleTwoFactorSubmit}>
+                <div className={styles.twoFactorInlineNotice}>
+                  <strong>{twoFactorFactorLabel}</strong>
+                  <span>
+                    {isPreparingTwoFactor
+                      ? "Preparando o desafio do segundo fator..."
+                      : "Abra o aplicativo autenticador e informe o codigo atual para concluir o login."}
+                  </span>
+                </div>
+
+                <label className={styles.field}>
+                  <span>Codigo de 2FA</span>
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    autoComplete="one-time-code"
+                    value={twoFactorCode}
+                    onChange={(event) => setTwoFactorCode(event.target.value.replace(/\D/g, "").slice(0, 6))}
+                    placeholder="000000"
+                    required
+                  />
+                </label>
+
+                {twoFactorMessage ? <div className={styles.sectionNotice}>{twoFactorMessage}</div> : null}
+                {loginError ? <div className={styles.formError}>{loginError}</div> : null}
+
+                <button type="submit" className={styles.primaryButton} disabled={isSubmitting || isPreparingTwoFactor}>
+                  Validar e entrar
+                </button>
+              </form>
+
+              <div className={styles.footerNote}>
+                <span>Esta nao era a conta certa?</span>
+                <button
+                  type="button"
+                  className={styles.inlineAction}
+                  onClick={handleBackToLoginFromTwoFactor}
+                >
+                  Voltar para login
                 </button>
               </div>
             </>

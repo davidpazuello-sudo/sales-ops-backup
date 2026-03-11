@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "lib/supabase/server";
 import { mapSupabaseUser } from "lib/supabase/shared";
+import { readMfaState } from "lib/supabase/mfa";
 
 export async function POST(request) {
   const body = await request.json().catch(() => null);
@@ -16,8 +17,12 @@ export async function POST(request) {
     );
   }
 
+  const mfa = await readMfaState(supabase);
+
   return NextResponse.json({
     ok: true,
     user: mapSupabaseUser(data.user),
+    requiresTwoFactor: mfa.requiresTwoFactor,
+    twoFactorEnabled: mfa.hasTotpFactor,
   });
 }
