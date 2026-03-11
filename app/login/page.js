@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { FIRST_ACCESS_MODE } from "lib/auth-flows";
 import styles from "./page.module.css";
@@ -45,7 +45,7 @@ export default function LoginPage() {
   const [isPreparingRecovery, setIsPreparingRecovery] = useState(false);
   const [isRecoverySessionReady, setIsRecoverySessionReady] = useState(false);
 
-  async function getSupabaseClientOrNull() {
+  const getSupabaseClientOrNull = useCallback(async () => {
     if (typeof window === "undefined") return null;
     if (!supabaseConfig) return null;
 
@@ -55,7 +55,7 @@ export default function LoginPage() {
     } catch {
       return null;
     }
-  }
+  }, [supabaseConfig]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -162,7 +162,7 @@ export default function LoginPage() {
     return () => {
       cancelled = true;
     };
-  }, [supabaseConfig]);
+  }, [getSupabaseClientOrNull, supabaseConfig]);
 
   useEffect(() => {
     let cancelled = false;
@@ -232,7 +232,7 @@ export default function LoginPage() {
       cancelled = true;
       subscription?.unsubscribe();
     };
-  }, [supabaseConfig]);
+  }, [getSupabaseClientOrNull, supabaseConfig]);
 
   async function handleSubmit(event) {
     event.preventDefault();
