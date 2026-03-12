@@ -11,7 +11,6 @@ import {
 import PageAgentPanel, { PageAgentToggleButton } from "../page-agent-panel";
 import {
   SectionEmptyState,
-  SectionLoadingState,
   SectionNotice,
 } from "../dashboard-section-feedback";
 import styles from "../page.module.css";
@@ -67,13 +66,6 @@ export function SellerMeetingsContent({ dashboardData, sellerSlug }) {
           </button>
         </div>
       </header>
-
-      {loadingState === "loading" ? (
-        <SectionLoadingState
-          title="Carregando reunioes"
-          description="Buscando reunioes da HubSpot e do workspace operacional."
-        />
-      ) : null}
 
       {stateErrors.length ? (
         <SectionNotice variant="error">{stateErrors[0] || "Nao foi possivel carregar as reunioes agora."}</SectionNotice>
@@ -318,15 +310,11 @@ export function SellersContent({ dashboardData }) {
         </label>
       </div>
 
-      {loadingState === "loading" ? (
-        <SectionLoadingState title="Carregando vendedores" description="Buscando owners e carteiras sincronizadas da HubSpot." />
-      ) : null}
-
       {stateErrors.length ? (
         <SectionNotice variant="error">{stateErrors[0] || "A lista de vendedores ainda nao conseguiu carregar dados reais."}</SectionNotice>
       ) : null}
 
-      {!filteredSellers.length ? (
+      {!filteredSellers.length && loadingState === "ready" && !stateErrors.length ? (
         <SectionEmptyState
           title={sellerFilter.trim() ? "Nenhum vendedor encontrado" : "Nenhum vendedor sincronizado"}
           description={sellerFilter.trim() ? "Tente ajustar o nome pesquisado ou limpar o filtro." : "Quando a HubSpot retornar owners reais, eles aparecerao nesta lista."}

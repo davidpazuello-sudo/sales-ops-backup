@@ -8,8 +8,15 @@ import { assertDashboardData } from "lib/dashboard-contracts";
 import { createDashboardFallbackData } from "lib/dashboard-fallback";
 import { enrichDashboardWithOperationalData } from "lib/operational-data";
 
+function normalizeDashboardScope(value) {
+  const normalized = String(value || "").trim().toLowerCase();
+  const allowedScopes = new Set(["default", "ai", "reports", "sellers", "deals", "campaigns", "tasks", "settings"]);
+  return allowedScopes.has(normalized) ? normalized : "default";
+}
+
 export async function GET(request) {
   const observation = startApiObservation(request, "api/hubspot/dashboard");
+  const scope = normalizeDashboardScope(request.nextUrl?.searchParams.get("scope"));
   const auth = await requireAuthenticatedUser({
     route: "api/hubspot/dashboard",
     action: "read-dashboard",
@@ -46,7 +53,7 @@ export async function GET(request) {
   }
 
   try {
-    const baseData = assertDashboardData(await getHubSpotDashboardData());
+    const baseData = assertDashboardData(await getHubSpotDashboardData({ scope }));
     const data = assertDashboardData(await enrichDashboardWithOperationalData(baseData, auth.user));
     return jsonWithApiObservation(
       observation,

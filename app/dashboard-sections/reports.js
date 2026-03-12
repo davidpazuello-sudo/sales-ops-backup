@@ -5,7 +5,6 @@ import { Card, Metric, Table } from "../dashboard-ui";
 import PageAgentPanel, { PageAgentToggleButton } from "../page-agent-panel";
 import {
   SectionEmptyState,
-  SectionLoadingState,
   SectionNotice,
 } from "../dashboard-section-feedback";
 import styles from "../page.module.css";
@@ -31,18 +30,11 @@ export function ReportsContent({ dashboardData }) {
         </div>
       ) : null}
 
-      {loadingState === "loading" ? (
-        <SectionLoadingState
-          title="Carregando relatorios"
-          description="Buscando o resumo executivo e os KPIs comerciais mais recentes."
-        />
-      ) : null}
-
       {stateErrors.length ? (
         <SectionNotice variant="error">{stateErrors[0] || "Os relatorios ainda nao conseguiram carregar dados reais."}</SectionNotice>
       ) : null}
 
-      {!dashboardData.reports.length ? (
+      {!dashboardData.reports.length && loadingState === "ready" && !stateErrors.length ? (
         <SectionEmptyState
           title="Sem relatorios consolidados"
           description="Assim que o dashboard receber dados reais da HubSpot, os resumos por vendedor aparecerao aqui."

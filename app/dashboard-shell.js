@@ -27,7 +27,8 @@ import {
   TasksContent,
 } from "./dashboard-sections";
 import {
-  configSections,
+  getResolvedConfigSection,
+  getVisibleConfigSections,
   navItems,
   topMenuItems,
 } from "./dashboard-shell-config";
@@ -93,6 +94,12 @@ export default function DashboardShell({
   });
   const notificationBadge = unreadNotificationsCount > 99 ? "99+" : String(unreadNotificationsCount);
   const settingsHeaderAgentId = activeNav === "profile" || profileViewOpen ? "profile" : "settings";
+  const visibleConfigSections = getVisibleConfigSections(sessionUser);
+  const resolvedConfigSection = getResolvedConfigSection(activeConfig, sessionUser);
+  const resolvedActiveConfig = resolvedConfigSection?.id || activeConfig;
+  const resolvedCurrentSection = activeNav === "settings" && !profileViewOpen
+    ? resolvedConfigSection
+    : currentSection;
 
   useEffect(() => {
     setPageAgentOpen(false);
@@ -213,8 +220,8 @@ export default function DashboardShell({
               <aside className={styles.settingsSidebar}>
                 <div className={styles.settingsSidebarTitle}>CONFIGURAÇÕES</div>
                 <div className={styles.settingsSidebarList}>
-                  {configSections.map((item) => (
-                    <button key={item.id} type="button" onClick={() => setActiveConfig(item.id)} className={`${styles.settingsSidebarItem} ${activeConfig === item.id ? styles.settingsSidebarItemActive : ""}`.trim()}>
+                  {visibleConfigSections.map((item) => (
+                    <button key={item.id} type="button" onClick={() => setActiveConfig(item.id)} className={`${styles.settingsSidebarItem} ${resolvedActiveConfig === item.id ? styles.settingsSidebarItemActive : ""}`.trim()}>
                       <span className={styles.settingsSidebarIcon}>{getConfigIcon(item.id)}</span>
                       <span className={styles.settingsSidebarLabel}>{item.label}</span>
                     </button>
@@ -225,8 +232,8 @@ export default function DashboardShell({
             <div className={`${styles.settingsContent} ${profileViewOpen ? styles.settingsContentFull : ""}`.trim()}>
               <header className={styles.sectionHeaderBar}>
                 <div className={styles.settingsHeader}>
-                  <h1>{currentSection?.label}</h1>
-                  <p>{currentSection?.description}</p>
+                  <h1>{resolvedCurrentSection?.label}</h1>
+                  <p>{resolvedCurrentSection?.description}</p>
                 </div>
                 <PageAgentToggleButton
                   agentId={settingsHeaderAgentId}
@@ -234,9 +241,11 @@ export default function DashboardShell({
                   onToggle={() => setPageAgentOpen((value) => !value)}
                 />
               </header>
-              {!dashboardData.configured && activeConfig === "hubspot" ? <div className={styles.integrationNotice}>{hubspotMessage}</div> : null}
+              {!dashboardData.configured && resolvedActiveConfig === "hubspot" && dashboardData.states?.loading !== "loading" ? (
+                <div className={styles.integrationNotice}>{hubspotMessage}</div>
+              ) : null}
               <SettingsContent
-                section={activeConfig}
+                section={resolvedActiveConfig}
                 personalization={personalization}
                 updatePersonalization={updatePersonalization}
                 profilePhoto={profilePhoto}

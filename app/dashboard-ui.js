@@ -193,9 +193,9 @@ export function PhotoOption({ profilePhoto, onPhotoChange }) {
   );
 }
 
-export function Card({ eyebrow, title, children, wide = false }) {
+export function Card({ eyebrow, title, children, wide = false, className = "" }) {
   return (
-    <section className={`${styles.card} ${wide ? styles.cardWide : ""}`.trim()}>
+    <section className={`${styles.card} ${wide ? styles.cardWide : ""} ${className}`.trim()}>
       <span className={styles.cardEyebrow}>{eyebrow}</span>
       {title ? <h2 className={styles.cardTitle}>{title}</h2> : null}
       {children}

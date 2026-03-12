@@ -5,7 +5,6 @@ import { Card, Metric, Table } from "../dashboard-ui";
 import PageAgentPanel, { PageAgentToggleButton } from "../page-agent-panel";
 import {
   SectionEmptyState,
-  SectionLoadingState,
   SectionNotice,
 } from "../dashboard-section-feedback";
 import styles from "../page.module.css";
@@ -106,13 +105,6 @@ export function CampaignsContent({ dashboardData }) {
           ? "Mostrando uma consolidacao geral das campanhas sincronizadas pela HubSpot."
           : `Mostrando o acompanhamento da campanha ${selectedCampaign?.name || "selecionada"}.`}
       </div>
-
-      {loadingState === "loading" ? (
-        <SectionLoadingState
-          title="Carregando campanhas"
-          description="Buscando campanhas, atividades SDR e resultados mais recentes."
-        />
-      ) : null}
 
       {stateErrors.length ? (
         <SectionNotice variant="error">{stateErrors[0] || "As campanhas ainda nao conseguiram carregar dados reais."}</SectionNotice>

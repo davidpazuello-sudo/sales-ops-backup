@@ -91,6 +91,19 @@ function writeShownBrowserNotificationIds(ids) {
   window.localStorage.setItem(BROWSER_NOTIFICATION_IDS_KEY, JSON.stringify(ids));
 }
 
+function getDashboardHubSpotScope({ initialNav, initialProfileView }) {
+  if (initialProfileView || initialNav === "profile" || initialNav === "settings") {
+    return "settings";
+  }
+
+  if (initialNav === "access") {
+    return "none";
+  }
+
+  const supportedScopes = new Set(["reports", "sellers", "deals", "campaigns", "tasks"]);
+  return supportedScopes.has(initialNav) ? initialNav : "default";
+}
+
 export function useDashboardShellState({
   initialNav,
   initialConfig,
@@ -180,10 +193,17 @@ export function useDashboardShellState({
 
   useEffect(() => {
     let cancelled = false;
+    const hubspotScope = getDashboardHubSpotScope({ initialNav, initialProfileView });
 
     async function loadHubSpotData() {
+      if (hubspotScope === "none") {
+        setDashboardData(createDashboardFallbackData());
+        setHubspotMessage("Sem consulta HubSpot nesta pagina.");
+        return;
+      }
+
       try {
-        const response = await fetch("/api/hubspot/dashboard", { cache: "no-store" });
+        const response = await fetch(`/api/hubspot/dashboard?scope=${encodeURIComponent(hubspotScope)}`, { cache: "no-store" });
         const payload = await response.json();
         if (cancelled) {
           return;
@@ -226,7 +246,7 @@ export function useDashboardShellState({
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [initialNav, initialProfileView]);
 
   useEffect(() => {
     let cancelled = false;

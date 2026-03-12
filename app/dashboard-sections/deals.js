@@ -9,7 +9,6 @@ import {
 import PageAgentPanel, { PageAgentToggleButton } from "../page-agent-panel";
 import {
   SectionEmptyState,
-  SectionLoadingState,
   SectionNotice,
 } from "../dashboard-section-feedback";
 import styles from "../page.module.css";
@@ -145,18 +144,11 @@ export function DealsContent({ dashboardData }) {
         </label>
       </div>
 
-      {loadingState === "loading" ? (
-        <SectionLoadingState
-          title="Carregando pipeline"
-          description="Buscando negocios e etapas reais da HubSpot."
-        />
-      ) : null}
-
       {stateErrors.length ? (
         <SectionNotice variant="error">{stateErrors[0] || "A pipeline ainda nao conseguiu carregar dados reais."}</SectionNotice>
       ) : null}
 
-      {!boardColumns.length ? (
+      {!boardColumns.length && loadingState === "ready" && !stateErrors.length ? (
         <SectionEmptyState
           title="Pipeline sem negocios sincronizados"
           description="Assim que a HubSpot retornar etapas e negocios reais, elas aparecerao aqui."

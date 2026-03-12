@@ -200,7 +200,7 @@ export default function AIAgentPage() {
     let cancelled = false;
 
     async function loadDashboardData() {
-      const response = await fetch("/api/hubspot/dashboard", { cache: "no-store" }).catch(() => null);
+      const response = await fetch("/api/hubspot/dashboard?scope=ai", { cache: "no-store" }).catch(() => null);
       if (!response || cancelled) return;
 
       const payload = await response.json().catch(() => null);
@@ -408,7 +408,7 @@ export default function AIAgentPage() {
             <BellIcon />
             <span className={styles.notificationBadge} aria-hidden="true">{notificationBadge}</span>
           </button>
-          <button type="button" className={styles.aiButton} title="NORA">
+          <button type="button" className={`${styles.aiButton} ${styles.aiButtonActive}`.trim()} title="NORA">
             <SparkIcon />
             <span>NORA</span>
           </button>

@@ -39,6 +39,9 @@ export function AccessPermissionsContent({ sessionUser, onNotificationsRefresh }
   const [agentOpen, setAgentOpen] = useState(false);
   const [roleOptions, setRoleOptions] = useState(fallbackRoleOptions);
   const [roleDrafts, setRoleDrafts] = useState({});
+  const requestsCardClassName = !loading && !requestsError && !requests.length
+    ? styles.compactCard
+    : "";
 
   async function loadRequests() {
     setLoading(true);
@@ -203,7 +206,7 @@ export function AccessPermissionsContent({ sessionUser, onNotificationsRefresh }
       {message ? <SectionNotice variant="success">{message}</SectionNotice> : null}
 
       <div className={styles.grid}>
-        <Card eyebrow="PENDENTES" title="Solicitacoes em aberto" wide>
+        <Card eyebrow="PENDENTES" title="Solicitacoes em aberto" wide className={requestsCardClassName}>
           {requestsError ? <SectionNotice variant="error">{requestsError}</SectionNotice> : null}
           {loading ? (
             <SectionLoadingState

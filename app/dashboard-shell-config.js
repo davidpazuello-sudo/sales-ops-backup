@@ -1,5 +1,7 @@
 "use client";
 
+import { hasMinimumRole } from "lib/role-access";
+
 export const navItems = [
   { id: "reports", label: "Relatórios" },
   { id: "sellers", label: "Vendedores" },
@@ -92,14 +94,25 @@ export const accountSection = {
 };
 
 export const configSections = [
-  { id: "hubspot", label: "Integração HubSpot", description: "Status da conexão, chave, sync, mapeamento e log de erros." },
+  { id: "hubspot", label: "Integração HubSpot", description: "Status da conexão, chave, sync, mapeamento e log de erros.", minimumRole: "Supervisor" },
   { id: "notifications", label: "Notificações & Alertas", description: "Canais, thresholds, metas e resumos automáticos." },
-  { id: "ai", label: "NORA & Diagnósticos", description: "Modelo ativo, voz, dados de contexto e sensibilidade diagnóstica da NORA." },
+  { id: "ai", label: "NORA & Diagnósticos", description: "Modelo ativo, voz, dados de contexto e sensibilidade diagnóstica da NORA.", minimumRole: "Supervisor" },
   { id: "personalize", label: "Personalizar", description: "Tema, fonte, escala, contraste e comportamento visual da interface." },
-  { id: "exports", label: "Relatórios & Exportação", description: "Agendamento, formato, marca d'água e templates por cargo." },
-  { id: "storage", label: "Gestão de Mídia & Storage", description: "Uso, retenção, STT, indexação e provedor com LGPD." },
-  { id: "compliance", label: "Auditoria & Compliance", description: "Trilha imutável, masking visual e governança LGPD." },
+  { id: "exports", label: "Relatórios & Exportação", description: "Agendamento, formato, marca d'água e templates por cargo.", minimumRole: "Supervisor" },
+  { id: "storage", label: "Gestão de Mídia & Storage", description: "Uso, retenção, STT, indexação e provedor com LGPD.", minimumRole: "Supervisor" },
+  { id: "compliance", label: "Auditoria & Compliance", description: "Trilha imutável, masking visual e governança LGPD.", minimumRole: "Supervisor" },
 ];
+
+export function getVisibleConfigSections(user) {
+  return configSections.filter((section) => (
+    !section.minimumRole || hasMinimumRole(user, section.minimumRole)
+  ));
+}
+
+export function getResolvedConfigSection(activeConfig, user) {
+  const visibleSections = getVisibleConfigSections(user);
+  return visibleSections.find((section) => section.id === activeConfig) || visibleSections[0] || null;
+}
 
 export const permissionRows = [
   ["Admin", "Total"],

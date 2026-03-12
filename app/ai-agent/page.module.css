@@ -113,6 +113,11 @@
   background: var(--accent-soft);
 }
 
+.aiButtonActive {
+  color: #7c3aed;
+  background: rgba(124, 58, 237, 0.12);
+}
+
 .logoutButton {
   color: var(--muted);
 }
@@ -125,6 +130,10 @@
 .navItem:hover,
 .profileBox:hover {
   background: var(--panel-soft);
+}
+
+.aiButtonActive:hover {
+  background: rgba(124, 58, 237, 0.16);
 }
 
 .topbarButton svg,

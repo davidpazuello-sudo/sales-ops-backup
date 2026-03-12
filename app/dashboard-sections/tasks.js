@@ -5,12 +5,11 @@ import { Card, Metric } from "../dashboard-ui";
 import PageAgentPanel, { PageAgentToggleButton } from "../page-agent-panel";
 import {
   SectionEmptyState,
-  SectionLoadingState,
   SectionNotice,
 } from "../dashboard-section-feedback";
 import styles from "../page.module.css";
 import {
-  buildTaskSummary,
+  buildUpcomingTaskSummary,
   canViewTeamTasks,
   getTaskOwnerOptions,
   getVisibleTasks,
@@ -92,7 +91,6 @@ export function TasksContent({ dashboardData, sessionUser = {} }) {
   const [agentOpen, setAgentOpen] = useState(false);
   const [ownerFilter, setOwnerFilter] = useState("todos");
   const [typeFilter, setTypeFilter] = useState("todos");
-  const [statusFilter, setStatusFilter] = useState("pending");
 
   const allTasks = dashboardData.tasks || [];
   const teamAccess = canViewTeamTasks(sessionUser);
@@ -102,22 +100,21 @@ export function TasksContent({ dashboardData, sessionUser = {} }) {
   const visibleTasks = getVisibleTasks(allTasks, sessionUser, {
     ownerFilter,
     typeFilter,
-    statusFilter,
   });
   const groupedTasks = groupTasksByKind(visibleTasks);
-  const summary = buildTaskSummary(visibleTasks);
+  const summary = buildUpcomingTaskSummary(visibleTasks);
   const scopeMessage = teamAccess
     ? (ownerFilter === "todos"
-      ? "Voce pode acompanhar todas as tarefas da HubSpot e filtrar por vendedor."
-      : `Mostrando tarefas do vendedor ${ownerFilter}.`)
-    : "Mostrando apenas tarefas ligadas ao seu usuario na HubSpot.";
+      ? "Voce pode acompanhar as proximas tarefas da HubSpot e filtrar por vendedor."
+      : `Mostrando as proximas tarefas do vendedor ${ownerFilter}.`)
+    : "Mostrando apenas tarefas futuras ligadas ao seu usuario na HubSpot.";
 
   return (
     <section className={styles.dashboardSection}>
       <header className={styles.sectionHeaderBar}>
         <div className={styles.settingsHeader}>
           <h1>Tarefas</h1>
-          <p>Reunioes, chamadas e tarefas comerciais sincronizadas com a HubSpot e respeitando o cargo do usuario.</p>
+          <p>Reunioes, chamadas e tarefas comerciais futuras sincronizadas com a HubSpot e respeitando o cargo do usuario.</p>
         </div>
         <PageAgentToggleButton agentId="tasks" open={agentOpen} onToggle={() => setAgentOpen((value) => !value)} />
       </header>
@@ -132,7 +129,6 @@ export function TasksContent({ dashboardData, sessionUser = {} }) {
               tasks: visibleTasks,
               ownerFilter,
               typeFilter,
-              statusFilter,
             }}
           />
         </div>
@@ -168,30 +164,9 @@ export function TasksContent({ dashboardData, sessionUser = {} }) {
             <option value="task">Outras tarefas</option>
           </select>
         </label>
-
-        <label className={styles.dealsFilterField}>
-          <span>Status</span>
-          <select
-            className={styles.dealsFilterSelect}
-            value={statusFilter}
-            onChange={(event) => setStatusFilter(event.target.value)}
-          >
-            <option value="pending">Em aberto</option>
-            <option value="overdue">Atrasadas</option>
-            <option value="completed">Concluidas</option>
-            <option value="todos">Todas</option>
-          </select>
-        </label>
       </div>
 
       <div className={styles.taskScopeHint}>{scopeMessage}</div>
-
-      {loadingState === "loading" ? (
-        <SectionLoadingState
-          title="Carregando tarefas"
-          description="Buscando reunioes, chamadas e tarefas reais sincronizadas."
-        />
-      ) : null}
 
       {stateErrors.length ? (
         <SectionNotice variant="error">{stateErrors[0] || "As tarefas ainda nao conseguiram carregar dados reais."}</SectionNotice>
@@ -199,18 +174,18 @@ export function TasksContent({ dashboardData, sessionUser = {} }) {
 
       {!allTasks.length && loadingState === "ready" && !stateErrors.length ? (
         <SectionEmptyState
-          title="Sem tarefas sincronizadas"
-          description="Quando a HubSpot retornar reunioes, chamadas e outras tarefas, elas aparecerao aqui."
+          title="Sem tarefas futuras"
+          description="Quando a HubSpot retornar reunioes, chamadas e outras tarefas a fazer, elas aparecerao aqui."
         />
       ) : null}
 
       <div className={styles.grid}>
         <Card eyebrow="HUBSPOT" title="Resumo operacional" wide>
           <div className={styles.metrics}>
-            <Metric title="Em aberto" value={`${summary.open}`} note="Tarefas visiveis ainda pendentes" />
-            <Metric title="Atrasadas" value={`${summary.overdue}`} note="Itens com prazo vencido" />
-            <Metric title="Concluidas" value={`${summary.completed}`} note="Atividades ja finalizadas" />
-            <Metric title="No filtro atual" value={`${summary.total}`} note="Total apos aplicar os filtros da pagina" />
+            <Metric title="A fazer" value={`${summary.total}`} note="Tarefas futuras visiveis no recorte atual" />
+            <Metric title="Hoje" value={`${summary.today}`} note="Itens agendados para o restante do dia" />
+            <Metric title="Proximos 7 dias" value={`${summary.thisWeek}`} note="Tarefas previstas ainda nesta semana" />
+            <Metric title="Depois" value={`${summary.later}`} note="Atividades futuras apos os proximos 7 dias" />
           </div>
         </Card>
 
@@ -219,7 +194,7 @@ export function TasksContent({ dashboardData, sessionUser = {} }) {
           title="Reunioes"
           tasks={groupedTasks.meeting}
           emptyTitle="Nenhuma reuniao neste recorte"
-          emptyDescription="Ajuste os filtros ou aguarde novas reunioes sincronizadas pela HubSpot."
+          emptyDescription="Ajuste os filtros ou aguarde novas reunioes futuras sincronizadas pela HubSpot."
         />
 
         <TaskGroupCard
@@ -227,7 +202,7 @@ export function TasksContent({ dashboardData, sessionUser = {} }) {
           title="Chamadas"
           tasks={groupedTasks.call}
           emptyTitle="Nenhuma chamada neste recorte"
-          emptyDescription="Quando houver chamadas ligadas ao usuario ou ao vendedor filtrado, elas aparecerao aqui."
+          emptyDescription="Quando houver chamadas futuras ligadas ao usuario ou ao vendedor filtrado, elas aparecerao aqui."
         />
 
         <TaskGroupCard
@@ -235,7 +210,7 @@ export function TasksContent({ dashboardData, sessionUser = {} }) {
           title="Outras tarefas"
           tasks={groupedTasks.task}
           emptyTitle="Nenhuma outra tarefa neste recorte"
-          emptyDescription="Use esta area para acompanhar follow-ups, lembretes e atividades gerais vindas da HubSpot."
+          emptyDescription="Use esta area para acompanhar follow-ups, lembretes e atividades gerais futuras vindas da HubSpot."
         />
       </div>
     </section>
