@@ -47,6 +47,7 @@ Hierarquia:
 
 - `public.audit_logs`
 - `public.system_events`
+- `public.idempotency_keys`
 
 ## Politicas RLS por tabela
 
@@ -93,6 +94,11 @@ Hierarquia:
 - leitura permitida para `Supervisor`, `Gerente` e `Admin`.
 - escrita feita pelo backend para eventos estruturados de auth, seguranca e operacao.
 
+### `public.idempotency_keys`
+
+- sem acesso direto para usuarios autenticados.
+- uso exclusivo do backend para deduplicar escritas sensiveis e retries controlados.
+
 ## Trilha de auditoria implementada
 
 Hoje o sistema grava:
@@ -106,6 +112,9 @@ Hoje o sistema grava:
 - `auth.login_sensitive` em `audit_logs`
 - `system_user.role_updated` em `audit_logs` e `system_events`
 - falhas, negacoes e rate limit de auth via `system_events`
+- `hubspot.rate_limited` em `system_events`
+- `hubspot.request_failed` em `system_events`
+- chaves de idempotencia para escritas sensiveis em `idempotency_keys`
 
 ## Fluxo seguro de migrations
 

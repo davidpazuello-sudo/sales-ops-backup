@@ -20,6 +20,12 @@ Este documento define onde cada segredo deve morar, como rotacionar e o que revi
 - `HUBSPOT_ACCESS_TOKEN`
   - Onde guardar: Vercel e `.env.local`
   - Uso: sincronizacao com HubSpot
+- `HUBSPOT_ACCESS_TOKEN_STAGING`
+  - Onde guardar: Vercel Preview/Staging e `.env.local` seguro
+  - Uso: homologacao isolada da integracao HubSpot
+- `HUBSPOT_ACCESS_TOKEN_PRODUCTION`
+  - Onde guardar: Vercel Production
+  - Uso: integracao oficial em producao
 - `SUPABASE_SERVICE_ROLE_KEY`
   - Onde guardar: Vercel e `.env.local`
   - Uso: operacoes administrativas do Supabase no servidor
@@ -83,6 +89,9 @@ Este documento define onde cada segredo deve morar, como rotacionar e o que revi
 
 1. Criar ou regenerar o token da Private App usada pelo sistema.
 2. Atualizar `HUBSPOT_ACCESS_TOKEN` na Vercel e no ambiente local seguro.
+2.1. Se houver separacao por ambiente, atualizar tambem:
+   - `HUBSPOT_ACCESS_TOKEN_STAGING`
+   - `HUBSPOT_ACCESS_TOKEN_PRODUCTION`
 3. Validar:
    - `/api/hubspot/dashboard`
    - carregamento de relatorios

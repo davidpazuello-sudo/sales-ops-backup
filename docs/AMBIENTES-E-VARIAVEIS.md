@@ -15,7 +15,8 @@ Obrigatorias em `staging` e `production`:
 - `APP_ENVIRONMENT`
 - `NEXT_PUBLIC_APP_ENV`
 - `NEXT_PUBLIC_APP_URL`
-- `HUBSPOT_ACCESS_TOKEN`
+- `HUBSPOT_ACCESS_TOKEN_STAGING` em `staging`
+- `HUBSPOT_ACCESS_TOKEN_PRODUCTION` em `production`
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
 - `SUPABASE_SERVICE_ROLE_KEY`
@@ -24,6 +25,8 @@ Obrigatorias em `staging` e `production`:
 
 Compativeis com projetos antigos:
 
+- `HUBSPOT_ACCESS_TOKEN`
+- `HUBSPOT_ACCESS_TOKEN_DEVELOPMENT`
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 
 ## Variaveis do GitHub Actions
@@ -60,3 +63,12 @@ vercel pull --yes --environment=production
 - manter secrets do app no ambiente da Vercel
 - manter migrations no diretorio `supabase/migrations`
 - qualquer mudanca de banco precisa acompanhar rollout e rollback documentados
+
+## Regra da HubSpot por ambiente
+
+- `development`: preferir `HUBSPOT_ACCESS_TOKEN_DEVELOPMENT`
+- `staging`: usar `HUBSPOT_ACCESS_TOKEN_STAGING`
+- `production`: usar `HUBSPOT_ACCESS_TOKEN_PRODUCTION`
+- `HUBSPOT_ACCESS_TOKEN` fica apenas como fallback legada
+
+Nao reutilize o token de producao em staging.

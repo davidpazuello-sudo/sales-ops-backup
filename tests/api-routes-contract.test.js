@@ -86,6 +86,11 @@ describe("API route contracts", () => {
 
   it("returns the health contract with environment and checks", async () => {
     const route = await loadModule("../app/api/health/route.js", {
+      "lib/hubspot-runtime": () => ({
+        getAppEnvironment: vi.fn(() => "staging"),
+        getHubSpotTokenSource: vi.fn(() => "HUBSPOT_ACCESS_TOKEN_STAGING"),
+        hasHubSpotTokenConfigured: vi.fn(() => true),
+      }),
       "lib/supabase/shared": () => ({
         getPublicSupabaseConfig: vi.fn(() => ({
           url: "https://example.supabase.co",
@@ -107,8 +112,10 @@ describe("API route contracts", () => {
     expect(payload.body).toMatchObject({
       ok: true,
       service: "sales-ops-backup",
+      environment: "staging",
       checks: {
-        hubspotConfigured: false,
+        hubspotConfigured: true,
+        hubspotTokenSource: "HUBSPOT_ACCESS_TOKEN_STAGING",
         supabaseConfigured: true,
       },
     });
@@ -638,6 +645,10 @@ describe("API route contracts", () => {
       }),
       "lib/hubspot": () => ({
         updateHubSpotDealStage: vi.fn(async () => ({ id: "deal-1" })),
+      }),
+      "lib/idempotency-store": () => ({
+        reserveIdempotencyKey: vi.fn(async () => ({ ok: true, record: null })),
+        finalizeIdempotencyKey: vi.fn(async () => null),
       }),
       "lib/audit-log-store": () => ({
         writeAuditLog: vi.fn().mockResolvedValue(null),

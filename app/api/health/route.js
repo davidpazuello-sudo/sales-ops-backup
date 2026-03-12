@@ -1,13 +1,6 @@
 import { jsonWithApiObservation, startApiObservation } from "lib/api-observability.js";
+import { getAppEnvironment, getHubSpotTokenSource, hasHubSpotTokenConfigured } from "lib/hubspot-runtime";
 import { getPublicSupabaseConfig } from "lib/supabase/shared";
-
-function getRuntimeEnvironment() {
-  return process.env.APP_ENVIRONMENT
-    || process.env.NEXT_PUBLIC_APP_ENV
-    || process.env.VERCEL_ENV
-    || process.env.NODE_ENV
-    || "development";
-}
 
 export async function GET(request) {
   const observation = startApiObservation(request, "api/health");
@@ -20,12 +13,13 @@ export async function GET(request) {
     {
       ok: true,
       service: "sales-ops-backup",
-      environment: getRuntimeEnvironment(),
+      environment: getAppEnvironment(),
       timestamp: now.toISOString(),
       uptimeSeconds: Math.floor(startedAt),
       version: process.env.VERCEL_GIT_COMMIT_SHA || process.env.npm_package_version || "local",
       checks: {
-        hubspotConfigured: Boolean(process.env.HUBSPOT_ACCESS_TOKEN),
+        hubspotConfigured: hasHubSpotTokenConfigured(),
+        hubspotTokenSource: getHubSpotTokenSource(),
         supabaseConfigured: Boolean(supabase?.url && supabase?.publishableKey),
       },
     },

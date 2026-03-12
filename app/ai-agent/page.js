@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import styles from "./page.module.css";
+import { navItems as dashboardNavItems } from "../dashboard-shell-config";
 import { buildNoraResponse } from "lib/ai-agent-orchestration";
 import {
   getNotificationAction,
@@ -148,6 +149,9 @@ export default function AIAgentPage() {
   const recognitionRef = useRef(null);
   const chatEndRef = useRef(null);
   const notificationBadge = notificationCount > 99 ? "99+" : String(notificationCount);
+  const visibleNavItems = (dashboardNavItems.length ? dashboardNavItems : navItems)
+    .filter((item) => item.id !== "settings")
+    .filter((item) => item.id !== "access" || ["Admin"].includes(String(sessionUser.role || "")) || sessionUser.isSuperAdmin);
 
   async function handleLogout() {
     await fetch("/api/auth/logout", { method: "POST" }).catch(() => null);
@@ -365,7 +369,9 @@ export default function AIAgentPage() {
       reports: "/relatorios",
       sellers: "/vendedores",
       deals: "/negocios",
+      campaigns: "/campanhas",
       tasks: "/tarefas",
+      access: "/permissoes-e-acessos",
       settings: "/configuracoes",
       profile: "/perfil",
     };
@@ -417,7 +423,7 @@ export default function AIAgentPage() {
         <div>
           <div className={styles.logoRow}><span className={styles.logoDark}>SALES</span><span className={styles.logoAccent}>OPS</span></div>
           <nav className={styles.navigation} aria-label="Principal">
-            {navItems.map((item) => (
+            {visibleNavItems.map((item) => (
               <button key={item.id} type="button" onClick={() => openMainView(item.id)} className={styles.navItem} title={collapsed ? item.label : undefined}>
                 <span className={styles.navIcon}>{getNavIcon(item.id)}</span>
                 <span className={styles.navLabel}>{item.label}</span>

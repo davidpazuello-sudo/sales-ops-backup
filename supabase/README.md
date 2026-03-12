@@ -9,6 +9,7 @@ Este diretorio agora segue a seguinte regra:
 
 - `migrations/20260311110000_access_control_baseline.sql`
 - `migrations/20260311111000_operational_tables_audit_and_events.sql`
+- `migrations/20260312113000_hubspot_idempotency_keys.sql`
 
 ## Fluxo recomendado
 
