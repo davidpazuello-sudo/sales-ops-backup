@@ -63,6 +63,21 @@ export function DealsContent({ dashboardData }) {
     ? selectedPipeline.stages
     : pipelineStages;
 
+  function handlePipelineFilterChange(nextPipelineId) {
+    const targetPipelineId = String(nextPipelineId || "").trim();
+    const searchParams = new URLSearchParams();
+
+    if (targetPipelineId) {
+      searchParams.set("pipeline", targetPipelineId);
+    }
+
+    const nextRoute = searchParams.toString()
+      ? `/negocios?${searchParams.toString()}`
+      : "/negocios";
+
+    router.replace(nextRoute, { scroll: false });
+  }
+
   async function handleStageUpdate(dealId, stageId, stageLabel) {
     if (!dealId || !stageId) {
       return;
@@ -139,7 +154,7 @@ export function DealsContent({ dashboardData }) {
           <select
             className={styles.dealsFilterSelect}
             value={pipelineFilter}
-            onChange={(event) => setPipelineFilter(event.target.value)}
+            onChange={(event) => handlePipelineFilterChange(event.target.value)}
           >
             {pipelineOptions.map((pipeline) => (
               <option key={pipeline.id} value={pipeline.id}>{pipeline.label}</option>
@@ -225,7 +240,19 @@ export function DealsContent({ dashboardData }) {
                   key={deal.id}
                   className={styles.pipelineDealCard}
                   draggable={busyDealId !== deal.id}
-                  onClick={() => router.push(`/negocios/${sellerToSlug(deal.name)}-${deal.id}`)}
+                  onClick={() => {
+                    const searchParams = new URLSearchParams();
+                    const activePipelineId = deal.pipelineId || pipelineFilter;
+                    if (activePipelineId) {
+                      searchParams.set("pipeline", activePipelineId);
+                    }
+
+                    router.push(
+                      searchParams.toString()
+                        ? `/negocios/${sellerToSlug(deal.name)}-${deal.id}?${searchParams.toString()}`
+                        : `/negocios/${sellerToSlug(deal.name)}-${deal.id}`,
+                    );
+                  }}
                   onDragStart={() => setDraggedDealId(deal.id)}
                   onDragEnd={() => setDraggedDealId("")}
                 >

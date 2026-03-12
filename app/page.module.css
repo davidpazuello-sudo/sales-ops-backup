@@ -1988,13 +1988,13 @@
 
 .pipelineColumnCollapsed {
   grid-template-rows: auto;
-  flex: 0 0 44px !important;
-  width: 44px !important;
-  min-width: 44px;
-  max-width: 44px;
+  flex: 0 0 72px !important;
+  width: 72px !important;
+  min-width: 72px;
+  max-width: 72px;
   min-height: 460px;
   padding: 0;
-  justify-items: center;
+  justify-items: stretch;
   gap: 0;
 }
 
@@ -2166,23 +2166,55 @@
 
 .pipelineColumnCollapsed .pipelineColumnHeader {
   display: grid;
+  grid-template-rows: 1fr auto;
   justify-items: center;
-  align-content: start;
-  gap: 10px;
+  align-content: stretch;
+  gap: 14px;
   width: 100%;
-  min-height: 0;
-  padding: 10px 4px;
-  border-bottom: 0;
-  background: transparent;
+  min-height: 100%;
+  padding: 14px 8px 12px;
+  border-bottom: 1px solid #d8dee8;
+  background: linear-gradient(180deg, #f7f9fc 0%, #eef2f6 100%);
+}
+
+.pipelineColumnCollapsed .pipelineColumnTitleBlock {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 250px;
 }
 
 .pipelineColumnCollapsed .pipelineColumnHeader span {
   writing-mode: vertical-rl;
   text-orientation: mixed;
-  white-space: nowrap;
+  white-space: normal;
   color: #19395a;
   font-size: calc(11px * var(--font-scale));
   font-weight: 700;
+  line-height: 1.15;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.pipelineColumnCollapsed .pipelineColumnActions {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.pipelineColumnCollapsed .pipelineColumnHeader small {
+  min-width: 30px;
+  height: 24px;
+  padding: 0 8px;
+  border-radius: 999px;
+}
+
+.pipelineColumnCollapsed .pipelineCollapseButton {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
 }
 
 .pipelineColumnCollapsed .pipelineColumnBody {

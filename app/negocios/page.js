@@ -1,5 +1,12 @@
 import DashboardShell from "../dashboard-shell";
 
-export default function DealsPage() {
-  return <DashboardShell initialNav="deals" />;
+export default async function DealsPage({ searchParams }) {
+  const resolvedSearchParams = await searchParams;
+
+  return (
+    <DashboardShell
+      initialNav="deals"
+      initialPipelineId={resolvedSearchParams?.pipeline || ""}
+    />
+  );
 }

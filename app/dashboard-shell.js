@@ -39,6 +39,7 @@ export default function DashboardShell({
   initialNav = "reports",
   initialConfig = "hubspot",
   initialProfileView = false,
+  initialPipelineId = "",
   sellerSlug = "",
   sellerMeetingsView = false,
   sellerMeetingId = "",
@@ -91,6 +92,7 @@ export default function DashboardShell({
     initialNav,
     initialConfig,
     initialProfileView,
+    initialPipelineId,
   });
   const notificationBadge = unreadNotificationsCount > 99 ? "99+" : String(unreadNotificationsCount);
   const settingsHeaderAgentId = activeNav === "profile" || profileViewOpen ? "profile" : "settings";

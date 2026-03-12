@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Card, Metric, Table } from "../dashboard-ui";
 import PageAgentPanel, { PageAgentToggleButton } from "../page-agent-panel";
 import {
@@ -11,8 +11,11 @@ import styles from "../page.module.css";
 import {
   aggregateCampaignSummary,
   getCampaignById,
+  getDefaultCampaignId,
   getCampaignOptions,
 } from "lib/services/dashboard-campaigns";
+
+const EMPTY_CAMPAIGNS = [];
 
 function formatDateTime(value) {
   if (!value) {
@@ -57,12 +60,23 @@ function GoalList({ goals }) {
 export function CampaignsContent({ dashboardData }) {
   const [agentOpen, setAgentOpen] = useState(false);
   const [campaignFilter, setCampaignFilter] = useState("all");
-  const campaigns = Array.isArray(dashboardData.campaigns) ? dashboardData.campaigns : [];
+  const campaigns = Array.isArray(dashboardData.campaigns) ? dashboardData.campaigns : EMPTY_CAMPAIGNS;
   const campaignOptions = getCampaignOptions(campaigns);
   const selectedCampaign = getCampaignById(campaigns, campaignFilter);
   const summary = selectedCampaign || aggregateCampaignSummary(campaigns);
   const loadingState = dashboardData.states?.loading || "ready";
   const stateErrors = dashboardData.states?.errors || [];
+
+  useEffect(() => {
+    const nextDefaultCampaignId = getDefaultCampaignId(campaigns);
+    setCampaignFilter((current) => {
+      if (current !== "all" && campaigns.some((campaign) => campaign.id === current)) {
+        return current;
+      }
+
+      return nextDefaultCampaignId;
+    });
+  }, [campaigns]);
 
   return (
     <section className={styles.dashboardSection}>

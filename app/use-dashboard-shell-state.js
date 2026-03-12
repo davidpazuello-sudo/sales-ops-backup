@@ -93,13 +93,23 @@ function writeShownBrowserNotificationIds(ids) {
   window.localStorage.setItem(BROWSER_NOTIFICATION_IDS_KEY, JSON.stringify(ids));
 }
 
-function readDashboardScopeCache(scope) {
-  if (typeof window === "undefined" || !scope || scope === "none") {
+function buildDashboardScopeCacheKey(scope, options = {}) {
+  if (!scope || scope === "none") {
+    return "";
+  }
+
+  const pipelineId = String(options.pipelineId || "").trim();
+  return pipelineId ? `${scope}:${pipelineId}` : scope;
+}
+
+function readDashboardScopeCache(scope, options = {}) {
+  const cacheKey = buildDashboardScopeCacheKey(scope, options);
+  if (typeof window === "undefined" || !cacheKey) {
     return null;
   }
 
   try {
-    const storedValue = window.sessionStorage.getItem(`${DASHBOARD_SCOPE_CACHE_PREFIX}${scope}`);
+    const storedValue = window.sessionStorage.getItem(`${DASHBOARD_SCOPE_CACHE_PREFIX}${cacheKey}`);
     if (!storedValue) {
       return null;
     }
@@ -107,24 +117,25 @@ function readDashboardScopeCache(scope) {
     const parsedValue = JSON.parse(storedValue);
     const cachedAt = Number(parsedValue?.cachedAt || 0);
     if (!cachedAt || (Date.now() - cachedAt) > DASHBOARD_SCOPE_CACHE_TTL_MS) {
-      window.sessionStorage.removeItem(`${DASHBOARD_SCOPE_CACHE_PREFIX}${scope}`);
+      window.sessionStorage.removeItem(`${DASHBOARD_SCOPE_CACHE_PREFIX}${cacheKey}`);
       return null;
     }
 
     return parsedValue?.payload || null;
   } catch {
-    window.sessionStorage.removeItem(`${DASHBOARD_SCOPE_CACHE_PREFIX}${scope}`);
+    window.sessionStorage.removeItem(`${DASHBOARD_SCOPE_CACHE_PREFIX}${cacheKey}`);
     return null;
   }
 }
 
-function writeDashboardScopeCache(scope, payload) {
-  if (typeof window === "undefined" || !scope || scope === "none" || !payload) {
+function writeDashboardScopeCache(scope, payload, options = {}) {
+  const cacheKey = buildDashboardScopeCacheKey(scope, options);
+  if (typeof window === "undefined" || !cacheKey || !payload) {
     return;
   }
 
   window.sessionStorage.setItem(
-    `${DASHBOARD_SCOPE_CACHE_PREFIX}${scope}`,
+    `${DASHBOARD_SCOPE_CACHE_PREFIX}${cacheKey}`,
     JSON.stringify({
       cachedAt: Date.now(),
       payload,
@@ -149,6 +160,7 @@ export function useDashboardShellState({
   initialNav,
   initialConfig,
   initialProfileView,
+  initialPipelineId = "",
 }) {
   const router = useRouter();
   const menuRef = useRef(null);
@@ -235,6 +247,7 @@ export function useDashboardShellState({
   useEffect(() => {
     let cancelled = false;
     const hubspotScope = getDashboardHubSpotScope({ initialNav, initialProfileView });
+    const pipelineId = hubspotScope === "deals" ? String(initialPipelineId || "").trim() : "";
 
     async function loadHubSpotData() {
       if (hubspotScope === "none") {
@@ -243,7 +256,7 @@ export function useDashboardShellState({
         return;
       }
 
-      const cachedPayload = readDashboardScopeCache(hubspotScope);
+      const cachedPayload = readDashboardScopeCache(hubspotScope, { pipelineId });
       if (cachedPayload) {
         setDashboardData(cachedPayload);
         setHubspotMessage("Dados recentes da HubSpot carregados.");
@@ -251,7 +264,12 @@ export function useDashboardShellState({
       }
 
       try {
-        const response = await fetch(`/api/hubspot/dashboard?scope=${encodeURIComponent(hubspotScope)}`);
+        const searchParams = new URLSearchParams({ scope: hubspotScope });
+        if (pipelineId) {
+          searchParams.set("pipelineId", pipelineId);
+        }
+
+        const response = await fetch(`/api/hubspot/dashboard?${searchParams.toString()}`);
         const payload = await response.json();
         if (cancelled) {
           return;
@@ -271,7 +289,7 @@ export function useDashboardShellState({
         }
 
         setDashboardData(payload);
-        writeDashboardScopeCache(hubspotScope, payload);
+        writeDashboardScopeCache(hubspotScope, payload, { pipelineId });
         setHubspotMessage("Dados da HubSpot sincronizados.");
       } catch {
         if (cancelled) {
@@ -295,7 +313,7 @@ export function useDashboardShellState({
     return () => {
       cancelled = true;
     };
-  }, [initialNav, initialProfileView]);
+  }, [initialNav, initialPipelineId, initialProfileView]);
 
   useEffect(() => {
     let cancelled = false;
