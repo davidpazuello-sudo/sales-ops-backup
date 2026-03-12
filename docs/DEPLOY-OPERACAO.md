@@ -1,54 +1,94 @@
 ﻿# Deploy e Operacao
 
-## 1) Ambiente
+## 1) Ambientes oficiais
 
-Obrigatorio:
-- `HUBSPOT_ACCESS_TOKEN`
+- `development`: ambiente local
+- `staging`: homologacao usando Vercel Preview
+- `production`: dominio oficial `https://opssales.com.br`
 
-Opcional (futuro):
-- chaves para observabilidade e monitoramento
+Consulte tambem:
 
-## 2) Pipeline de build
+- `AMBIENTES-E-VARIAVEIS.md`
+- `RELEASE-CHECKLIST.md`
+
+## 2) Gates e validacao antes do deploy
 
 Scripts principais:
+
 - `npm run dev`
 - `npm run check:copy`
+- `npm run lint`
+- `npm run test`
 - `npm run build`
-- `npm run start`
+- `npm run e2e`
+- `npm run verify`
+- `npm run release:check`
 
-`build` depende de `check:copy`, evitando publicar texto com codificacao quebrada.
+`release:check` e o comando oficial antes de publicar.
 
-## 3) Vercel
+## 3) Deploy padronizado
 
-Passos:
-1. Importar repo no Vercel
-2. Definir framework Next.js
-3. Configurar env vars
-4. Deploy
+Scripts locais:
 
-## 4) Diagnostico rapido de erro
+- `npm run deploy:preview`
+- `npm run deploy:production`
+
+Workflows versionados:
+
+- `.github/workflows/ci.yml`
+- `.github/workflows/deploy-staging.yml`
+- `.github/workflows/deploy-production.yml`
+
+## 4) Observabilidade basica
+
+Ja configurado no app:
+
+- logs estruturados de seguranca e API
+- trilha de eventos criticos em `system_events`
+- endpoint de saude em `/api/health`
+- informacoes de uptime, ambiente e checks basicos no health endpoint
+
+Monitorar pelo menos:
+
+- status de `/api/health`
+- falhas em `/api/auth/*`
+- falhas em `/api/hubspot/dashboard`
+- falhas em `/api/deals/stage`
+- falhas em `/api/meetings`
+
+## 5) Diagnostico rapido
 
 Checklist:
+
 - token HubSpot existe no ambiente?
-- API retornando 503 por token ausente?
-- check de copy bloqueou build?
-- rotas dinamicas resolvendo params corretamente?
+- Supabase publico e service role configurados?
+- `/api/health` retorna `ok: true`?
+- `check:copy` bloqueou build?
+- logs estruturados mostram aumento de status `429`, `500` ou `503`?
 
-## 5) Observabilidade recomendada
+## 6) Rollback
 
-- log estruturado no endpoint HubSpot
-- metrica de latencia da API
-- metrica de taxa de erro por endpoint
-- alerta de token invalido/expirado
+### Vercel
 
-## 6) Backups
+1. Abrir o ultimo deploy estavel em Production.
+2. Promover o deploy estavel anterior na Vercel ou fazer `redeploy` do commit bom.
+3. Validar `/api/health`, login e dashboard principal.
+
+### Banco / Supabase
+
+1. Nunca aplicar migration em producao sem backup logico recente.
+2. Reverter por nova migration corretiva, nao por edicao manual no historico.
+3. Se a migration alterou dados, registrar script de restauracao ou compensacao.
+4. Validar tabelas operacionais, RLS e auditoria apos rollback.
+
+## 7) Backups
 
 Recomendacoes:
 - manter backup remoto em repo espelho
 - gerar backup bundle periodico (`git bundle`)
 - armazenar bundles em local seguro com versionamento de data
 
-## 7) Publicacao para usuarios reais
+## 8) Publicacao para usuarios reais
 
 Guia operacional completo:
 - ver `PUBLICACAO-USUARIOS-REAIS.md`

@@ -1,0 +1,62 @@
+# Ambientes e Variaveis
+
+## Mapa de ambientes
+
+| Ambiente | Objetivo | Arquivo base versionado | URL esperada |
+| --- | --- | --- | --- |
+| development | desenvolvimento local | `.env.development.example` | `http://localhost:3000` |
+| staging | homologacao antes de producao | `.env.staging.example` | `https://staging.opssales.com.br` |
+| production | ambiente oficial | `.env.production.example` | `https://opssales.com.br` |
+
+## Variaveis comuns
+
+Obrigatorias em `staging` e `production`:
+
+- `APP_ENVIRONMENT`
+- `NEXT_PUBLIC_APP_ENV`
+- `NEXT_PUBLIC_APP_URL`
+- `HUBSPOT_ACCESS_TOKEN`
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `SUPER_ADMIN_EMAILS`
+- `CORPORATE_EMAIL_DOMAINS`
+
+Compativeis com projetos antigos:
+
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+
+## Variaveis do GitHub Actions
+
+Configurar como `Actions secrets`:
+
+- `VERCEL_TOKEN`
+- `VERCEL_ORG_ID`
+- `VERCEL_PROJECT_ID`
+
+## Regras
+
+- Segredos reais nao devem ser commitados
+- `.env.local` continua local e nao rastreado
+- os arquivos `*.example` sao a referencia oficial do que cada ambiente precisa
+- qualquer nova integracao externa deve atualizar este documento e o arquivo de exemplo correspondente
+
+## Sincronizacao com Vercel
+
+Preview/staging:
+
+```bash
+vercel pull --yes --environment=preview
+```
+
+Production:
+
+```bash
+vercel pull --yes --environment=production
+```
+
+## Sincronizacao com Supabase
+
+- manter secrets do app no ambiente da Vercel
+- manter migrations no diretorio `supabase/migrations`
+- qualquer mudanca de banco precisa acompanhar rollout e rollback documentados

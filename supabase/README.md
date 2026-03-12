@@ -31,7 +31,16 @@ npx supabase@latest link --project-ref <project-ref>
 npx supabase@latest db push
 ```
 
+Rollback recomendado:
+
+```bash
+npx supabase@latest migration new rollback_nome_da_mudanca
+```
+
+Evite editar migrations antigas ja publicadas. O caminho oficial e criar uma migration corretiva para staging e producao.
+
 Consulte tambem:
 
 - `docs/SUPABASE-MIGRATIONS-E-RLS.md`
 - `docs/SEGURANCA-E-ROTACAO-DE-SEGREDOS.md`
+- `docs/DEPLOY-OPERACAO.md`

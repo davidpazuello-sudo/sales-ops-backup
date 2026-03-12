@@ -11,9 +11,11 @@ Este diretorio concentra a documentacao tecnica e de produto do sistema.
 5. [Publicacao para Usuarios Reais](PUBLICACAO-USUARIOS-REAIS.md)
 6. [Seguranca e Rotacao de Segredos](SEGURANCA-E-ROTACAO-DE-SEGREDOS.md)
 7. [Supabase, Migrations e RLS](SUPABASE-MIGRATIONS-E-RLS.md)
-8. [Melhorias e Sugestoes](MELHORIAS-E-SUGESTOES.md)
-9. [Sprint 1 Update](sprint-1-update.md)
-10. [Sprint 2 Update](sprint-2-update.md)
+8. [Ambientes e Variaveis](AMBIENTES-E-VARIAVEIS.md)
+9. [Release Checklist](RELEASE-CHECKLIST.md)
+10. [Melhorias e Sugestoes](MELHORIAS-E-SUGESTOES.md)
+11. [Sprint 1 Update](sprint-1-update.md)
+12. [Sprint 2 Update](sprint-2-update.md)
 
 ## Publico alvo
 
@@ -31,5 +33,6 @@ Atualizar este pacote sempre que houver mudancas em:
 - comportamento do pipeline
 - padroes visuais e nomenclaturas
 - estrategia de deploy ou observabilidade
+- ambientes, release e rollback
 - processo de seguranca, credenciais e rotacao de segredos
 - migrations, politicas RLS e governanca do Supabase

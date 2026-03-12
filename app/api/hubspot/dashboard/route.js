@@ -3,18 +3,20 @@ import { requireAuthenticatedUser } from "lib/admin-access";
 import { consumeRateLimit, getRequestClientKey } from "lib/auth-rate-limit";
 import { getHubSpotDashboardData } from "lib/hubspot";
 import { logAuthRouteError, logRateLimitEvent } from "lib/auth-logging";
+import { jsonWithApiObservation, startApiObservation } from "lib/api-observability.js";
 import { assertDashboardData } from "lib/dashboard-contracts";
 import { createDashboardFallbackData } from "lib/dashboard-fallback";
 import { enrichDashboardWithOperationalData } from "lib/operational-data";
 
 export async function GET(request) {
+  const observation = startApiObservation(request, "api/hubspot/dashboard");
   const auth = await requireAuthenticatedUser({
     route: "api/hubspot/dashboard",
     action: "read-dashboard",
     minimumRole: "Vendedor",
   });
   if (!auth.ok) {
-    return NextResponse.json({ ok: false, error: auth.error }, { status: auth.status });
+    return jsonWithApiObservation(observation, { ok: false, error: auth.error }, { status: auth.status });
   }
 
   const clientKey = getRequestClientKey(request);
@@ -31,20 +33,27 @@ export async function GET(request) {
       clientKey,
       retryAfter: rateLimit.retryAfter,
     });
-    return NextResponse.json(
+    return jsonWithApiObservation(
+      observation,
       createDashboardFallbackData({
         loading: "error",
         status: "Limite temporario",
         error: "Muitas consultas ao dashboard em pouco tempo. Aguarde alguns instantes.",
       }),
       { status: 429 },
+      { actorEmail: auth.user.email, actorUserId: auth.user.id, actorRole: auth.user.role, clientKey },
     );
   }
 
   try {
     const baseData = assertDashboardData(await getHubSpotDashboardData());
     const data = assertDashboardData(await enrichDashboardWithOperationalData(baseData, auth.user));
-    return NextResponse.json(data);
+    return jsonWithApiObservation(
+      observation,
+      data,
+      undefined,
+      { actorEmail: auth.user.email, actorUserId: auth.user.id, actorRole: auth.user.role, clientKey },
+    );
   } catch (error) {
     logAuthRouteError("api/hubspot/dashboard", "load-dashboard", error, {
       actorEmail: auth.user.email,
@@ -55,13 +64,15 @@ export async function GET(request) {
       ? "Configure HUBSPOT_ACCESS_TOKEN para carregar os dados reais da HubSpot."
       : "Nao foi possivel consultar a HubSpot no momento.";
 
-    return NextResponse.json(
+    return jsonWithApiObservation(
+      observation,
       createDashboardFallbackData({
         loading: missingToken ? "config_required" : "error",
         status: missingToken ? "Configuracao pendente" : "Falha na sincronizacao",
         error: errorMessage,
       }),
       { status: missingToken ? 503 : 500 },
+      { actorEmail: auth.user.email, actorUserId: auth.user.id, actorRole: auth.user.role, clientKey },
     );
   }
 }

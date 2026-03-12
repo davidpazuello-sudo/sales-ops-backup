@@ -3,14 +3,16 @@ import { requireSuperAdmin } from "lib/admin-access";
 import { listNotificationsForUser } from "lib/access-requests-store";
 import { consumeRateLimit, getRequestClientKey } from "lib/auth-rate-limit";
 import { logAuthRouteError, logRateLimitEvent } from "lib/auth-logging";
+import { jsonWithApiObservation, startApiObservation } from "lib/api-observability.js";
 
 export async function GET(request) {
+  const observation = startApiObservation(request, "api/notifications");
   const auth = await requireSuperAdmin({
     route: "api/notifications",
     action: "list-admin-notifications",
   });
   if (!auth.ok) {
-    return NextResponse.json({ ok: false, error: auth.error, notifications: [] }, { status: auth.status });
+    return jsonWithApiObservation(observation, { ok: false, error: auth.error, notifications: [] }, { status: auth.status });
   }
 
   const clientKey = getRequestClientKey(request);
@@ -27,26 +29,35 @@ export async function GET(request) {
       clientKey,
       retryAfter: rateLimit.retryAfter,
     });
-    return NextResponse.json(
+    return jsonWithApiObservation(
+      observation,
       { ok: false, error: "Muitas consultas de notificacoes. Aguarde alguns instantes.", notifications: [] },
       { status: 429 },
+      { actorEmail: auth.user.email, actorUserId: auth.user.id, actorRole: auth.user.role, clientKey },
     );
   }
 
   try {
     const notifications = await listNotificationsForUser(auth.user.email);
-    return NextResponse.json({ ok: true, notifications });
+    return jsonWithApiObservation(
+      observation,
+      { ok: true, notifications },
+      undefined,
+      { actorEmail: auth.user.email, actorUserId: auth.user.id, actorRole: auth.user.role, clientKey },
+    );
   } catch (error) {
     logAuthRouteError("api/notifications", "list-admin-notifications", error, {
       actorEmail: auth.user.email,
     });
-    return NextResponse.json(
+    return jsonWithApiObservation(
+      observation,
       {
         ok: false,
         error: error instanceof Error ? error.message : "Nao foi possivel carregar as notificacoes.",
         notifications: [],
       },
       { status: 503 },
+      { actorEmail: auth.user.email, actorUserId: auth.user.id, actorRole: auth.user.role, clientKey },
     );
   }
 }

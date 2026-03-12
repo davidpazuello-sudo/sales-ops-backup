@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { jsonWithApiObservation, startApiObservation } from "lib/api-observability.js";
 import { normalizeEmail } from "lib/auth-flows";
 import { logAuthRouteError, logRateLimitEvent, logSecurityEvent } from "lib/auth-logging";
 import { queueAccessRequest } from "lib/access-requests-store";
@@ -7,6 +8,7 @@ import { consumeRateLimit, getRequestClientKey } from "lib/auth-rate-limit";
 import { PUBLIC_AUTH_ERRORS } from "lib/public-auth-errors";
 
 export async function POST(request) {
+  const observation = startApiObservation(request, "api/auth/first-access");
   const body = await request.json().catch(() => null);
   const email = normalizeEmail(body?.email);
   const clientKey = getRequestClientKey(request);
@@ -23,30 +25,38 @@ export async function POST(request) {
       clientKey,
       retryAfter: rateLimit.retryAfter,
     });
-    return NextResponse.json(
+    return jsonWithApiObservation(
+      observation,
       { ok: false, error: PUBLIC_AUTH_ERRORS.tooManyAttempts },
       { status: 429 },
+      { clientKey, actorEmail: email },
     );
   }
 
   if (!hasSupabaseEnv()) {
-    return NextResponse.json(
+    return jsonWithApiObservation(
+      observation,
       { ok: false, error: PUBLIC_AUTH_ERRORS.authUnavailable },
       { status: 503 },
+      { clientKey, actorEmail: email },
     );
   }
 
   if (!hasSupabaseAdminEnv()) {
-    return NextResponse.json(
+    return jsonWithApiObservation(
+      observation,
       { ok: false, error: PUBLIC_AUTH_ERRORS.authUnavailable },
       { status: 503 },
+      { clientKey, actorEmail: email },
     );
   }
 
   if (!getSuperAdminEmails().length) {
-    return NextResponse.json(
+    return jsonWithApiObservation(
+      observation,
       { ok: false, error: PUBLIC_AUTH_ERRORS.authUnavailable },
       { status: 503 },
+      { clientKey, actorEmail: email },
     );
   }
 
@@ -56,9 +66,11 @@ export async function POST(request) {
       email,
       clientKey,
     });
-    return NextResponse.json(
+    return jsonWithApiObservation(
+      observation,
       { ok: false, error: PUBLIC_AUTH_ERRORS.corporateEmailRequired },
       { status: 400 },
+      { clientKey, actorEmail: email },
     );
   }
 
@@ -73,18 +85,25 @@ export async function POST(request) {
       email,
     });
 
-    return NextResponse.json({
-      ok: true,
-      message: PUBLIC_AUTH_ERRORS.accessRequestSubmitted,
-    });
+    return jsonWithApiObservation(
+      observation,
+      {
+        ok: true,
+        message: PUBLIC_AUTH_ERRORS.accessRequestSubmitted,
+      },
+      undefined,
+      { clientKey, actorEmail: email },
+    );
   } catch (error) {
     logAuthRouteError("api/auth/first-access", "queue-first-access", error, { email, requestUrl: request.url });
-    return NextResponse.json(
+    return jsonWithApiObservation(
+      observation,
       {
         ok: false,
         error: PUBLIC_AUTH_ERRORS.authUnavailable,
       },
       { status: 503 },
+      { clientKey, actorEmail: email },
     );
   }
 }

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { jsonWithApiObservation, startApiObservation } from "lib/api-observability.js";
 import { requireSuperAdmin } from "lib/admin-access";
 import { writeAuditLog, writeSystemEvent } from "lib/audit-log-store";
 import { consumeRateLimit, getRequestClientKey } from "lib/auth-rate-limit";
@@ -10,12 +11,13 @@ import {
 } from "lib/system-users";
 
 export async function GET(request) {
+  const observation = startApiObservation(request, "api/admin/system-users");
   const auth = await requireSuperAdmin({
     route: "api/admin/system-users",
     action: "list-system-users",
   });
   if (!auth.ok) {
-    return NextResponse.json({ ok: false, error: auth.error }, { status: auth.status });
+    return jsonWithApiObservation(observation, { ok: false, error: auth.error }, { status: auth.status });
   }
 
   const clientKey = getRequestClientKey(request);
@@ -32,19 +34,26 @@ export async function GET(request) {
       clientKey,
       retryAfter: rateLimit.retryAfter,
     });
-    return NextResponse.json(
+    return jsonWithApiObservation(
+      observation,
       { ok: false, error: "Muitas consultas de usuarios. Aguarde alguns instantes." },
       { status: 429 },
+      { actorEmail: auth.user.email, clientKey, actorUserId: auth.user.id, actorRole: auth.user.role },
     );
   }
 
   try {
     const users = await listSystemUsers();
-    return NextResponse.json({
-      ok: true,
-      users,
-      roleOptions: MANAGED_ROLE_OPTIONS,
-    });
+    return jsonWithApiObservation(
+      observation,
+      {
+        ok: true,
+        users,
+        roleOptions: MANAGED_ROLE_OPTIONS,
+      },
+      undefined,
+      { actorEmail: auth.user.email, clientKey, actorUserId: auth.user.id, actorRole: auth.user.role },
+    );
   } catch (error) {
     logAuthRouteError("api/admin/system-users", "list-users", error, {
       actorEmail: auth.user.email,
@@ -52,7 +61,8 @@ export async function GET(request) {
 
     const message = error instanceof Error ? error.message : "";
 
-    return NextResponse.json(
+    return jsonWithApiObservation(
+      observation,
       {
         ok: false,
         error: message === "SUPABASE_ADMIN_UNAVAILABLE"
@@ -60,17 +70,19 @@ export async function GET(request) {
           : "Nao foi possivel carregar os usuarios do sistema.",
       },
       { status: 503 },
+      { actorEmail: auth.user.email, clientKey, actorUserId: auth.user.id, actorRole: auth.user.role },
     );
   }
 }
 
 export async function POST(request) {
+  const observation = startApiObservation(request, "api/admin/system-users");
   const auth = await requireSuperAdmin({
     route: "api/admin/system-users",
     action: "save-system-user-role",
   });
   if (!auth.ok) {
-    return NextResponse.json({ ok: false, error: auth.error }, { status: auth.status });
+    return jsonWithApiObservation(observation, { ok: false, error: auth.error }, { status: auth.status });
   }
 
   const clientKey = getRequestClientKey(request);
@@ -87,9 +99,11 @@ export async function POST(request) {
       clientKey,
       retryAfter: rateLimit.retryAfter,
     });
-    return NextResponse.json(
+    return jsonWithApiObservation(
+      observation,
       { ok: false, error: "Muitas alteracoes de cargo em pouco tempo. Aguarde alguns minutos." },
       { status: 429 },
+      { actorEmail: auth.user.email, clientKey, actorUserId: auth.user.id, actorRole: auth.user.role },
     );
   }
 
@@ -99,9 +113,11 @@ export async function POST(request) {
   const role = String(body?.role || "");
 
   if (!userId || !email || !role) {
-    return NextResponse.json(
+    return jsonWithApiObservation(
+      observation,
       { ok: false, error: "Informe o usuario, email e cargo desejado." },
       { status: 400 },
+      { actorEmail: auth.user.email, clientKey, actorUserId: auth.user.id, actorRole: auth.user.role },
     );
   }
 
@@ -140,11 +156,16 @@ export async function POST(request) {
       },
     }).catch(() => null);
 
-    return NextResponse.json({
-      ok: true,
-      message: "Cargo atualizado com sucesso.",
-      user: savedRole,
-    });
+    return jsonWithApiObservation(
+      observation,
+      {
+        ok: true,
+        message: "Cargo atualizado com sucesso.",
+        user: savedRole,
+      },
+      undefined,
+      { actorEmail: auth.user.email, clientKey, actorUserId: auth.user.id, actorRole: auth.user.role },
+    );
   } catch (error) {
     logAuthRouteError("api/admin/system-users", "save-role", error, {
       actorEmail: auth.user.email,
@@ -168,9 +189,11 @@ export async function POST(request) {
           ? "Nao foi possivel identificar esse usuario."
           : "Nao foi possivel atualizar o cargo do usuario.";
 
-    return NextResponse.json(
+    return jsonWithApiObservation(
+      observation,
       { ok: false, error: errorMessage },
       { status },
+      { actorEmail: auth.user.email, clientKey, actorUserId: auth.user.id, actorRole: auth.user.role },
     );
   }
 }

@@ -21,6 +21,8 @@ Principais documentos:
 - [`docs/UI-UX.md`](docs/UI-UX.md)
 - [`docs/LAYOUT-INTERFACE.md`](docs/LAYOUT-INTERFACE.md)
 - [`docs/DEPLOY-OPERACAO.md`](docs/DEPLOY-OPERACAO.md)
+- [`docs/AMBIENTES-E-VARIAVEIS.md`](docs/AMBIENTES-E-VARIAVEIS.md)
+- [`docs/RELEASE-CHECKLIST.md`](docs/RELEASE-CHECKLIST.md)
 - [`docs/SEGURANCA-E-ROTACAO-DE-SEGREDOS.md`](docs/SEGURANCA-E-ROTACAO-DE-SEGREDOS.md)
 - [`docs/SUPABASE-MIGRATIONS-E-RLS.md`](docs/SUPABASE-MIGRATIONS-E-RLS.md)
 - [`docs/PUBLICACAO-USUARIOS-REAIS.md`](docs/PUBLICACAO-USUARIOS-REAIS.md)
@@ -29,6 +31,12 @@ Principais documentos:
 ## Ambiente
 
 Use o modelo de [`.env.example`](.env.example) e crie um arquivo `.env.local` com os valores do ambiente. Segredos operacionais nao devem ser enviados por chat ou salvos em documentos manuais; o processo de guarda e rotacao esta em [`docs/SEGURANCA-E-ROTACAO-DE-SEGREDOS.md`](docs/SEGURANCA-E-ROTACAO-DE-SEGREDOS.md).
+
+Arquivos base por ambiente:
+
+- [`.env.development.example`](.env.development.example)
+- [`.env.staging.example`](.env.staging.example)
+- [`.env.production.example`](.env.production.example)
 
 Variaveis minimas:
 
@@ -66,12 +74,19 @@ npm run check:copy
 npm run build
 ```
 
+Checklist oficial de release:
+
+```bash
+npm run release:check
+```
+
 ## Deploy no Vercel
 
 1. Importe este repositorio `sales-ops-backup` no Vercel.
 2. Framework preset: `Next.js`.
-3. Defina `HUBSPOT_ACCESS_TOKEN` em Production, Preview e Development.
-4. Faca deploy da branch desejada.
+3. Defina variaveis separadas para Preview (staging) e Production.
+4. Configure `VERCEL_TOKEN`, `VERCEL_ORG_ID` e `VERCEL_PROJECT_ID` nos secrets do GitHub se for usar os workflows versionados.
+5. Use `npm run deploy:preview` para staging e `npm run deploy:production` para producao.
 
 ## Dominio customizado
 

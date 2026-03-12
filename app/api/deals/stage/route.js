@@ -2,17 +2,19 @@ import { NextResponse } from "next/server";
 import { requireAuthenticatedUser } from "lib/admin-access";
 import { consumeRateLimit, getRequestClientKey } from "lib/auth-rate-limit";
 import { logAuthRouteError, logRateLimitEvent } from "lib/auth-logging";
+import { jsonWithApiObservation, startApiObservation } from "lib/api-observability.js";
 import { updateHubSpotDealStage } from "lib/hubspot";
 import { writeAuditLog, writeSystemEvent } from "lib/audit-log-store";
 
 export async function POST(request) {
+  const observation = startApiObservation(request, "api/deals/stage");
   const auth = await requireAuthenticatedUser({
     route: "api/deals/stage",
     action: "update-deal-stage",
     minimumRole: "Vendedor",
   });
   if (!auth.ok) {
-    return NextResponse.json({ ok: false, error: auth.error }, { status: auth.status });
+    return jsonWithApiObservation(observation, { ok: false, error: auth.error }, { status: auth.status });
   }
 
   const clientKey = getRequestClientKey(request);
@@ -29,9 +31,11 @@ export async function POST(request) {
       clientKey,
       retryAfter: rateLimit.retryAfter,
     });
-    return NextResponse.json(
+    return jsonWithApiObservation(
+      observation,
       { ok: false, error: "Muitas mudancas de etapa em pouco tempo. Aguarde alguns instantes." },
       { status: 429 },
+      { actorEmail: auth.user.email, actorUserId: auth.user.id, actorRole: auth.user.role, clientKey },
     );
   }
 
@@ -42,9 +46,11 @@ export async function POST(request) {
     const stageLabel = String(payload?.stageLabel || "").trim();
 
     if (!dealId || !stageId) {
-      return NextResponse.json(
+      return jsonWithApiObservation(
+        observation,
         { ok: false, error: "Informe o negocio e a etapa de destino." },
         { status: 400 },
+        { actorEmail: auth.user.email, actorUserId: auth.user.id, actorRole: auth.user.role, clientKey },
       );
     }
 
@@ -81,23 +87,30 @@ export async function POST(request) {
       }),
     ]);
 
-    return NextResponse.json({
-      ok: true,
-      message: `Etapa atualizada para ${stageLabel || stageId}.`,
-      deal: {
-        id: dealId,
-        stageId,
-        stageLabel,
+    return jsonWithApiObservation(
+      observation,
+      {
+        ok: true,
+        message: `Etapa atualizada para ${stageLabel || stageId}.`,
+        deal: {
+          id: dealId,
+          stageId,
+          stageLabel,
+        },
       },
-    });
+      undefined,
+      { actorEmail: auth.user.email, actorUserId: auth.user.id, actorRole: auth.user.role, clientKey },
+    );
   } catch (error) {
     logAuthRouteError("api/deals/stage", "update-deal-stage", error, {
       actorEmail: auth.user.email,
       clientKey,
     });
-    return NextResponse.json(
+    return jsonWithApiObservation(
+      observation,
       { ok: false, error: "Nao foi possivel atualizar a etapa do negocio agora." },
       { status: 503 },
+      { actorEmail: auth.user.email, actorUserId: auth.user.id, actorRole: auth.user.role, clientKey },
     );
   }
 }

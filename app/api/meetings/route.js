@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { requireAuthenticatedUser } from "lib/admin-access";
 import { consumeRateLimit, getRequestClientKey } from "lib/auth-rate-limit";
 import { logAuthRouteError, logRateLimitEvent } from "lib/auth-logging";
+import { jsonWithApiObservation, startApiObservation } from "lib/api-observability.js";
 import {
   createOperationalMeeting,
   listPersistedMeetingsForUser,
@@ -9,13 +10,14 @@ import {
 import { writeAuditLog, writeSystemEvent } from "lib/audit-log-store";
 
 export async function GET(request) {
+  const observation = startApiObservation(request, "api/meetings");
   const auth = await requireAuthenticatedUser({
     route: "api/meetings",
     action: "list-operational-meetings",
     minimumRole: "Vendedor",
   });
   if (!auth.ok) {
-    return NextResponse.json({ ok: false, error: auth.error, meetings: [] }, { status: auth.status });
+    return jsonWithApiObservation(observation, { ok: false, error: auth.error, meetings: [] }, { status: auth.status });
   }
 
   const clientKey = getRequestClientKey(request);
@@ -32,35 +34,45 @@ export async function GET(request) {
       clientKey,
       retryAfter: rateLimit.retryAfter,
     });
-    return NextResponse.json(
+    return jsonWithApiObservation(
+      observation,
       { ok: false, error: "Muitas consultas de reunioes. Aguarde alguns instantes.", meetings: [] },
       { status: 429 },
+      { actorEmail: auth.user.email, actorUserId: auth.user.id, actorRole: auth.user.role, clientKey },
     );
   }
 
   try {
     const meetings = await listPersistedMeetingsForUser(auth.user);
-    return NextResponse.json({ ok: true, meetings });
+    return jsonWithApiObservation(
+      observation,
+      { ok: true, meetings },
+      undefined,
+      { actorEmail: auth.user.email, actorUserId: auth.user.id, actorRole: auth.user.role, clientKey },
+    );
   } catch (error) {
     logAuthRouteError("api/meetings", "list-operational-meetings", error, {
       actorEmail: auth.user.email,
       clientKey,
     });
-    return NextResponse.json(
+    return jsonWithApiObservation(
+      observation,
       { ok: false, error: "Nao foi possivel carregar as reunioes operacionais.", meetings: [] },
       { status: 503 },
+      { actorEmail: auth.user.email, actorUserId: auth.user.id, actorRole: auth.user.role, clientKey },
     );
   }
 }
 
 export async function POST(request) {
+  const observation = startApiObservation(request, "api/meetings");
   const auth = await requireAuthenticatedUser({
     route: "api/meetings",
     action: "create-operational-meeting",
     minimumRole: "Vendedor",
   });
   if (!auth.ok) {
-    return NextResponse.json({ ok: false, error: auth.error }, { status: auth.status });
+    return jsonWithApiObservation(observation, { ok: false, error: auth.error }, { status: auth.status });
   }
 
   const clientKey = getRequestClientKey(request);
@@ -77,9 +89,11 @@ export async function POST(request) {
       clientKey,
       retryAfter: rateLimit.retryAfter,
     });
-    return NextResponse.json(
+    return jsonWithApiObservation(
+      observation,
       { ok: false, error: "Muitas reunioes criadas em pouco tempo. Aguarde alguns instantes." },
       { status: 429 },
+      { actorEmail: auth.user.email, actorUserId: auth.user.id, actorRole: auth.user.role, clientKey },
     );
   }
 
@@ -126,16 +140,23 @@ export async function POST(request) {
       }),
     ]);
 
-    return NextResponse.json({
-      ok: true,
-      message: "Reuniao registrada com sucesso.",
-      meeting,
-    });
+    return jsonWithApiObservation(
+      observation,
+      {
+        ok: true,
+        message: "Reuniao registrada com sucesso.",
+        meeting,
+      },
+      undefined,
+      { actorEmail: auth.user.email, actorUserId: auth.user.id, actorRole: auth.user.role, clientKey },
+    );
   } catch (error) {
     if (error instanceof Error && error.message === "MEETING_FIELDS_REQUIRED") {
-      return NextResponse.json(
+      return jsonWithApiObservation(
+        observation,
         { ok: false, error: "Preencha titulo, data e horario para registrar a reuniao." },
         { status: 400 },
+        { actorEmail: auth.user.email, actorUserId: auth.user.id, actorRole: auth.user.role, clientKey },
       );
     }
 
@@ -143,9 +164,11 @@ export async function POST(request) {
       actorEmail: auth.user.email,
       clientKey,
     });
-    return NextResponse.json(
+    return jsonWithApiObservation(
+      observation,
       { ok: false, error: "Nao foi possivel salvar a reuniao agora." },
       { status: 503 },
+      { actorEmail: auth.user.email, actorUserId: auth.user.id, actorRole: auth.user.role, clientKey },
     );
   }
 }

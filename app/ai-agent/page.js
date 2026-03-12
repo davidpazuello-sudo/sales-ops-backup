@@ -483,7 +483,7 @@ export default function AIAgentPage() {
                   <span className={styles.historySidebarRailLabel}>{"Hist\u00F3rico"}</span>
                 </div>
               ) : (
-                <>
+                <div className={styles.historySidebarContent}>
                   <div className={styles.historySidebarTitle}>{"HIST\u00D3RICO"}</div>
                   <div className={styles.historySidebarList}>
                     <button type="button" className={`${styles.historySidebarItem} ${styles.historySidebarItemActive}`.trim()} onClick={startNewChat}>
@@ -495,7 +495,7 @@ export default function AIAgentPage() {
                       </button>
                     ))}
                   </div>
-                </>
+                </div>
               )}
             </aside>
 

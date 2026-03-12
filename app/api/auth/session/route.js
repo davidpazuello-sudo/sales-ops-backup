@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
+import { jsonWithApiObservation, startApiObservation } from "lib/api-observability.js";
 import { consumeRateLimit, getRequestClientKey } from "lib/auth-rate-limit";
 import { logAuthRouteError, logRateLimitEvent, logSecurityEvent } from "lib/auth-logging";
 import { readE2EUserFromCookies } from "lib/e2e-auth";
@@ -9,6 +10,7 @@ import { readMfaState } from "lib/supabase/mfa";
 import { resolveAuthorizedRole } from "lib/user-roles";
 
 export async function GET(request) {
+  const observation = startApiObservation(request, "api/auth/session");
   const clientKey = getRequestClientKey(request);
   const rateLimit = await consumeRateLimit({
     scope: "session",
@@ -22,9 +24,11 @@ export async function GET(request) {
       clientKey,
       retryAfter: rateLimit.retryAfter,
     });
-    return NextResponse.json(
+    return jsonWithApiObservation(
+      observation,
       { authenticated: false, error: "Muitas consultas de sessao. Tente novamente em instantes." },
       { status: 429 },
+      { clientKey },
     );
   }
 
@@ -32,13 +36,18 @@ export async function GET(request) {
   const e2eUser = readE2EUserFromCookies(cookieStore);
 
   if (e2eUser) {
-    return NextResponse.json({
-      authenticated: true,
-      user: e2eUser,
-      requiresTwoFactor: false,
-      twoFactorEnabled: false,
-      twoFactorLevel: null,
-    });
+    return jsonWithApiObservation(
+      observation,
+      {
+        authenticated: true,
+        user: e2eUser,
+        requiresTwoFactor: false,
+        twoFactorEnabled: false,
+        twoFactorLevel: null,
+      },
+      undefined,
+      { clientKey, actorEmail: e2eUser.email, actorUserId: e2eUser.id, actorRole: e2eUser.role },
+    );
   }
 
   const supabase = await createClient();
@@ -46,13 +55,13 @@ export async function GET(request) {
 
   if (error) {
     logAuthRouteError("api/auth/session", "get-user", error, { clientKey });
-    return NextResponse.json({ authenticated: false }, { status: 401 });
+    return jsonWithApiObservation(observation, { authenticated: false }, { status: 401 }, { clientKey });
   }
 
   const user = data?.user;
 
   if (!user) {
-    return NextResponse.json({ authenticated: false }, { status: 401 });
+    return jsonWithApiObservation(observation, { authenticated: false }, { status: 401 }, { clientKey });
   }
 
   const role = await resolveAuthorizedRole(supabase, user);
@@ -78,12 +87,17 @@ export async function GET(request) {
     });
   }
 
-  return NextResponse.json({
-    authenticated: true,
-    authorizedAccess,
-    user: mapSupabaseUser(user, role),
-    requiresTwoFactor: mfa.requiresTwoFactor,
-    twoFactorEnabled: mfa.hasTotpFactor,
-    twoFactorLevel: mfa.currentLevel,
-  });
+  return jsonWithApiObservation(
+    observation,
+    {
+      authenticated: true,
+      authorizedAccess,
+      user: mapSupabaseUser(user, role),
+      requiresTwoFactor: mfa.requiresTwoFactor,
+      twoFactorEnabled: mfa.hasTotpFactor,
+      twoFactorLevel: mfa.currentLevel,
+    },
+    undefined,
+    { clientKey, actorEmail: user.email || "", actorUserId: user.id, actorRole: role || "" },
+  );
 }

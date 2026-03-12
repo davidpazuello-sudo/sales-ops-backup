@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { jsonWithApiObservation, startApiObservation } from "lib/api-observability.js";
 import { buildLoginRedirectUrl, normalizeEmail } from "lib/auth-flows";
 import { logAuthRouteError, logRateLimitEvent, logSecurityEvent } from "lib/auth-logging";
 import { createClient } from "lib/supabase/server";
@@ -7,6 +8,7 @@ import { PUBLIC_AUTH_ERRORS } from "lib/public-auth-errors";
 import { isCorporateEmail } from "lib/supabase/shared";
 
 export async function POST(request) {
+  const observation = startApiObservation(request, "api/auth/forgot-password");
   const body = await request.json().catch(() => null);
   const email = normalizeEmail(body?.email);
   const clientKey = getRequestClientKey(request);
@@ -23,9 +25,11 @@ export async function POST(request) {
       clientKey,
       retryAfter: rateLimit.retryAfter,
     });
-    return NextResponse.json(
+    return jsonWithApiObservation(
+      observation,
       { ok: false, error: PUBLIC_AUTH_ERRORS.tooManyAttempts },
       { status: 429 },
+      { clientKey, actorEmail: email },
     );
   }
 
@@ -35,9 +39,11 @@ export async function POST(request) {
       email,
       clientKey,
     });
-    return NextResponse.json(
+    return jsonWithApiObservation(
+      observation,
       { ok: false, error: PUBLIC_AUTH_ERRORS.corporateEmailRequired },
       { status: 400 },
+      { clientKey, actorEmail: email },
     );
   }
 
@@ -48,8 +54,11 @@ export async function POST(request) {
 
   if (error) {
     logAuthRouteError("api/auth/forgot-password", "reset-password", error, { email, clientKey });
-    return NextResponse.json(
+    return jsonWithApiObservation(
+      observation,
       { ok: true, message: PUBLIC_AUTH_ERRORS.forgotPasswordSubmitted },
+      undefined,
+      { clientKey, actorEmail: email },
     );
   }
 
@@ -58,8 +67,13 @@ export async function POST(request) {
     email,
   });
 
-  return NextResponse.json({
-    ok: true,
-    message: PUBLIC_AUTH_ERRORS.forgotPasswordSubmitted,
-  });
+  return jsonWithApiObservation(
+    observation,
+    {
+      ok: true,
+      message: PUBLIC_AUTH_ERRORS.forgotPasswordSubmitted,
+    },
+    undefined,
+    { clientKey, actorEmail: email },
+  );
 }

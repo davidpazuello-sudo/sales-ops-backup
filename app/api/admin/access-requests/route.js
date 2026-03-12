@@ -1,16 +1,18 @@
 import { NextResponse } from "next/server";
+import { jsonWithApiObservation, startApiObservation } from "lib/api-observability.js";
 import { approveAccessRequest, listPendingAccessRequests, rejectAccessRequest } from "lib/access-requests-store";
 import { requireSuperAdmin } from "lib/admin-access";
 import { consumeRateLimit, getRequestClientKey } from "lib/auth-rate-limit";
 import { logAuthRouteError, logRateLimitEvent } from "lib/auth-logging";
 
 export async function GET(request) {
+  const observation = startApiObservation(request, "api/admin/access-requests");
   const auth = await requireSuperAdmin({
     route: "api/admin/access-requests",
     action: "list-access-requests",
   });
   if (!auth.ok) {
-    return NextResponse.json({ ok: false, error: auth.error }, { status: auth.status });
+    return jsonWithApiObservation(observation, { ok: false, error: auth.error }, { status: auth.status });
   }
 
   const clientKey = getRequestClientKey(request);
@@ -27,36 +29,46 @@ export async function GET(request) {
       clientKey,
       retryAfter: rateLimit.retryAfter,
     });
-    return NextResponse.json(
+    return jsonWithApiObservation(
+      observation,
       { ok: false, error: "Muitas consultas de solicitacoes. Aguarde alguns instantes." },
       { status: 429 },
+      { actorEmail: auth.user.email, clientKey, actorUserId: auth.user.id, actorRole: auth.user.role },
     );
   }
 
   try {
     const requests = await listPendingAccessRequests();
-    return NextResponse.json({ ok: true, requests });
+    return jsonWithApiObservation(
+      observation,
+      { ok: true, requests },
+      undefined,
+      { actorEmail: auth.user.email, clientKey, actorUserId: auth.user.id, actorRole: auth.user.role },
+    );
   } catch (error) {
     logAuthRouteError("api/admin/access-requests", "list-pending", error, {
       actorEmail: auth.user.email,
     });
-    return NextResponse.json(
+    return jsonWithApiObservation(
+      observation,
       {
         ok: false,
         error: error instanceof Error ? error.message : "Nao foi possivel carregar as solicitacoes.",
       },
       { status: 503 },
+      { actorEmail: auth.user.email, clientKey, actorUserId: auth.user.id, actorRole: auth.user.role },
     );
   }
 }
 
 export async function POST(request) {
+  const observation = startApiObservation(request, "api/admin/access-requests");
   const auth = await requireSuperAdmin({
     route: "api/admin/access-requests",
     action: "resolve-access-request",
   });
   if (!auth.ok) {
-    return NextResponse.json({ ok: false, error: auth.error }, { status: auth.status });
+    return jsonWithApiObservation(observation, { ok: false, error: auth.error }, { status: auth.status });
   }
 
   const clientKey = getRequestClientKey(request);
@@ -73,9 +85,11 @@ export async function POST(request) {
       clientKey,
       retryAfter: rateLimit.retryAfter,
     });
-    return NextResponse.json(
+    return jsonWithApiObservation(
+      observation,
       { ok: false, error: "Muitas decisoes de acesso em pouco tempo. Aguarde alguns minutos." },
       { status: 429 },
+      { actorEmail: auth.user.email, clientKey, actorUserId: auth.user.id, actorRole: auth.user.role },
     );
   }
 
@@ -84,9 +98,11 @@ export async function POST(request) {
   const decision = String(body?.decision || "").toLowerCase();
 
   if (!requestId || !["approved", "rejected"].includes(decision)) {
-    return NextResponse.json(
+    return jsonWithApiObservation(
+      observation,
       { ok: false, error: "Informe uma solicitacao valida e a decisao desejada." },
       { status: 400 },
+      { actorEmail: auth.user.email, clientKey, actorUserId: auth.user.id, actorRole: auth.user.role },
     );
   }
 
@@ -99,17 +115,24 @@ export async function POST(request) {
     });
 
     if (!resolved) {
-      return NextResponse.json(
+      return jsonWithApiObservation(
+        observation,
         { ok: false, error: "Solicitacao nao encontrada ou ja resolvida." },
         { status: 404 },
+        { actorEmail: auth.user.email, clientKey, actorUserId: auth.user.id, actorRole: auth.user.role },
       );
     }
 
-    return NextResponse.json({
-      ok: true,
-      message: "Solicitacao recusada e removida das notificacoes.",
-      request: resolved,
-    });
+    return jsonWithApiObservation(
+      observation,
+      {
+        ok: true,
+        message: "Solicitacao recusada e removida das notificacoes.",
+        request: resolved,
+      },
+      undefined,
+      { actorEmail: auth.user.email, clientKey, actorUserId: auth.user.id, actorRole: auth.user.role },
+    );
   }
 
   const result = await approveAccessRequest({
@@ -125,18 +148,25 @@ export async function POST(request) {
       requestId,
       actorEmail: auth.user.email,
     });
-    return NextResponse.json(
+    return jsonWithApiObservation(
+      observation,
       {
         ok: false,
         error: `Nao foi possivel aprovar a solicitacao. ${result.error || "Erro desconhecido."}`,
       },
       { status: 400 },
+      { actorEmail: auth.user.email, clientKey, actorUserId: auth.user.id, actorRole: auth.user.role },
     );
   }
 
-  return NextResponse.json({
-    ok: true,
-    message: "Solicitacao aprovada. O email de primeiro acesso foi enviado.",
-    request: result.request,
-  });
+  return jsonWithApiObservation(
+    observation,
+    {
+      ok: true,
+      message: "Solicitacao aprovada. O email de primeiro acesso foi enviado.",
+      request: result.request,
+    },
+    undefined,
+    { actorEmail: auth.user.email, clientKey, actorUserId: auth.user.id, actorRole: auth.user.role },
+  );
 }

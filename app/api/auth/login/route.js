@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { jsonWithApiObservation, startApiObservation } from "lib/api-observability.js";
 import { writeAuditLog } from "lib/audit-log-store";
 import { createClient } from "lib/supabase/server";
 import { mapSupabaseUser } from "lib/supabase/shared";
@@ -14,6 +15,7 @@ function isSensitiveLoginRole(role) {
 }
 
 export async function POST(request) {
+  const observation = startApiObservation(request, "api/auth/login");
   const body = await request.json().catch(() => null);
   const email = normalizeEmail(body?.email);
   const password = String(body?.password || "");
@@ -31,9 +33,11 @@ export async function POST(request) {
       email,
       retryAfter: rateLimit.retryAfter,
     });
-    return NextResponse.json(
+    return jsonWithApiObservation(
+      observation,
       { ok: false, error: "Muitas tentativas no login. Aguarde alguns minutos e tente novamente." },
       { status: 429 },
+      { clientKey, actorEmail: email },
     );
   }
 
@@ -44,9 +48,11 @@ export async function POST(request) {
       hasPassword: Boolean(password),
       clientKey,
     });
-    return NextResponse.json(
+    return jsonWithApiObservation(
+      observation,
       { ok: false, error: "Email ou senha invalidos." },
       { status: 401 },
+      { clientKey, actorEmail: email },
     );
   }
 
@@ -58,9 +64,11 @@ export async function POST(request) {
       email,
       clientKey,
     });
-    return NextResponse.json(
+    return jsonWithApiObservation(
+      observation,
       { ok: false, error: "Email ou senha invalidos." },
       { status: 401 },
+      { clientKey, actorEmail: email },
     );
   }
 
@@ -73,9 +81,11 @@ export async function POST(request) {
       userId: data.user.id,
     });
     await supabase.auth.signOut().catch(() => null);
-    return NextResponse.json(
+    return jsonWithApiObservation(
+      observation,
       { ok: false, error: "Sua conta ainda nao foi liberada. Solicite acesso para continuar." },
       { status: 403 },
+      { clientKey, actorEmail: email, actorUserId: data.user.id },
     );
   }
 
@@ -116,10 +126,15 @@ export async function POST(request) {
     }).catch(() => null);
   }
 
-  return NextResponse.json({
-    ok: true,
-    user: mapSupabaseUser(data.user, role),
-    requiresTwoFactor: mfa.requiresTwoFactor,
-    twoFactorEnabled: mfa.hasTotpFactor,
-  });
+  return jsonWithApiObservation(
+    observation,
+    {
+      ok: true,
+      user: mapSupabaseUser(data.user, role),
+      requiresTwoFactor: mfa.requiresTwoFactor,
+      twoFactorEnabled: mfa.hasTotpFactor,
+    },
+    undefined,
+    { clientKey, actorEmail: email, actorUserId: data.user.id, actorRole: role },
+  );
 }

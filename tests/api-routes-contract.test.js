@@ -32,6 +32,22 @@ async function readJsonResponse(response) {
 async function loadModule(modulePath, mocks = {}) {
   vi.resetModules();
 
+  vi.doMock("lib/api-observability.js", () => ({
+    startApiObservation: vi.fn(() => ({
+      route: "test-route",
+      path: "/api/test",
+      method: "GET",
+      requestId: "request-1",
+      startedAt: Date.now(),
+    })),
+    jsonWithApiObservation: vi.fn((observation, body, init = {}) => new Response(JSON.stringify(body), {
+      status: init?.status || 200,
+      headers: {
+        "content-type": "application/json",
+      },
+    })),
+  }));
+
   Object.entries(mocks).forEach(([specifier, factory]) => {
     vi.doMock(specifier, factory);
   });
@@ -64,6 +80,36 @@ describe("API route contracts", () => {
       supabase: {
         url: "https://example.supabase.co",
         publishableKey: "sb_publishable_example",
+      },
+    });
+  });
+
+  it("returns the health contract with environment and checks", async () => {
+    const route = await loadModule("../app/api/health/route.js", {
+      "lib/supabase/shared": () => ({
+        getPublicSupabaseConfig: vi.fn(() => ({
+          url: "https://example.supabase.co",
+          publishableKey: "sb_publishable_example",
+        })),
+      }),
+      "lib/auth-logging": () => ({
+        logSecurityEvent: vi.fn(() => null),
+      }),
+    });
+
+    const response = await route.GET(createRequest({
+      method: "GET",
+      url: "http://localhost/api/health",
+    }));
+    const payload = await readJsonResponse(response);
+
+    expect(payload.status).toBe(200);
+    expect(payload.body).toMatchObject({
+      ok: true,
+      service: "sales-ops-backup",
+      checks: {
+        hubspotConfigured: false,
+        supabaseConfigured: true,
       },
     });
   });
