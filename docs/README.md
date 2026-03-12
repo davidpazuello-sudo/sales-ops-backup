@@ -14,8 +14,9 @@ Este diretorio concentra a documentacao tecnica e de produto do sistema.
 8. [Ambientes e Variaveis](AMBIENTES-E-VARIAVEIS.md)
 9. [Release Checklist](RELEASE-CHECKLIST.md)
 10. [Melhorias e Sugestoes](MELHORIAS-E-SUGESTOES.md)
-11. [Sprint 1 Update](sprint-1-update.md)
-12. [Sprint 2 Update](sprint-2-update.md)
+11. [Atualizacoes de 2026-03-11 a 2026-03-12](ATUALIZACOES-2026-03-11-2026-03-12.md)
+12. [Sprint 1 Update](sprint-1-update.md)
+13. [Sprint 2 Update](sprint-2-update.md)
 
 ## Publico alvo
 
@@ -36,3 +37,4 @@ Atualizar este pacote sempre que houver mudancas em:
 - ambientes, release e rollback
 - processo de seguranca, credenciais e rotacao de segredos
 - migrations, politicas RLS e governanca do Supabase
+- consolidado de handoff para retomada em outra maquina

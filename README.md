@@ -18,6 +18,7 @@ A documentacao tecnica e funcional esta em [`docs/README.md`](docs/README.md).
 
 Principais documentos:
 - [`docs/ARQUITETURA.md`](docs/ARQUITETURA.md)
+- [`docs/ATUALIZACOES-2026-03-11-2026-03-12.md`](docs/ATUALIZACOES-2026-03-11-2026-03-12.md)
 - [`docs/UI-UX.md`](docs/UI-UX.md)
 - [`docs/LAYOUT-INTERFACE.md`](docs/LAYOUT-INTERFACE.md)
 - [`docs/DEPLOY-OPERACAO.md`](docs/DEPLOY-OPERACAO.md)
@@ -79,6 +80,14 @@ Checklist oficial de release:
 ```bash
 npm run release:check
 ```
+
+## Handoff recente
+
+Se voce for retomar o sistema em outra maquina, comecar por:
+
+- [`docs/ATUALIZACOES-2026-03-11-2026-03-12.md`](docs/ATUALIZACOES-2026-03-11-2026-03-12.md)
+- [`docs/AMBIENTES-E-VARIAVEIS.md`](docs/AMBIENTES-E-VARIAVEIS.md)
+- [`docs/SUPABASE-MIGRATIONS-E-RLS.md`](docs/SUPABASE-MIGRATIONS-E-RLS.md)
 
 ## Deploy no Vercel
 
