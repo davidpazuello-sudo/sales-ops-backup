@@ -1570,6 +1570,50 @@
   font-weight: 700;
 }
 
+.metricButton {
+  border: 1px solid color-mix(in srgb, var(--border) 88%, transparent);
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  transition:
+    transform var(--motion-fast) ease,
+    border-color var(--motion-fast) ease,
+    box-shadow var(--motion-fast) ease,
+    background var(--motion-fast) ease;
+}
+
+.metricButton:hover {
+  transform: translateY(-1px);
+  border-color: color-mix(in srgb, var(--accent) 32%, var(--border));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 16%, transparent);
+}
+
+.metricButton:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--accent) 52%, #ffffff);
+  outline-offset: 2px;
+}
+
+.campaignMeetingsModal {
+  width: min(1080px, calc(100vw - 40px));
+}
+
+.campaignMeetingsList {
+  display: grid;
+  gap: 12px;
+  overflow: auto;
+  padding-right: 4px;
+}
+
+.campaignMeetingItem {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  align-items: start;
+}
+
+.campaignMeetingItem div {
+  min-width: 0;
+}
+
 .campaignGoalList {
   display: grid;
   gap: 12px;
@@ -4098,7 +4142,8 @@
   .dealTaskItem,
   .dealAttachmentItem,
   .dealAiComposer,
-  .accessRequestCard {
+  .accessRequestCard,
+  .campaignMeetingItem {
     flex-direction: column;
     align-items: flex-start;
   }
@@ -4118,7 +4163,8 @@
   }
 
   .dealListItem,
-  .meetingRow {
+  .meetingRow,
+  .campaignMeetingItem {
     display: flex;
   }
 

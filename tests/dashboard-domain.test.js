@@ -98,6 +98,11 @@ describe("dashboard domain", () => {
         meetings: [
           {
             id: "m-1",
+            associations: {
+              deals: {
+                results: [{ id: "d-1" }],
+              },
+            },
             properties: {
               hs_meeting_title: "Reuniao de descoberta",
               hs_meeting_outcome: "SCHEDULED",
@@ -138,7 +143,77 @@ describe("dashboard domain", () => {
     expect(payload.tasks).toHaveLength(3);
     expect(payload.tasks.every((task) => task.ownerEmail === "ana@empresa.com")).toBe(true);
     expect(payload.tasks.map((task) => task.kind).sort()).toEqual(["call", "meeting", "task"]);
+    expect(payload.tasks.find((task) => task.kind === "meeting")?.leadName).toBe("Expansao Solaris");
     expect(payload.states.empty.deals).toBe(false);
+  });
+
+  it("sorts sellers alphabetically regardless of pipeline amount", () => {
+    const payload = buildDashboardDomainPayload(
+      [
+        {
+          id: "8",
+          firstName: "Bruno",
+          lastName: "Lima",
+          email: "bruno@empresa.com",
+          teams: [{ name: "Mid Market", primary: true }],
+        },
+        {
+          id: "7",
+          firstName: "Ana",
+          lastName: "Souza",
+          email: "ana@empresa.com",
+          teams: [{ name: "Enterprise", primary: true }],
+        },
+      ],
+      [
+        {
+          id: "d-1",
+          properties: {
+            dealname: "Conta Bruno",
+            amount: "300000",
+            dealstage: "stage-proposta",
+            pipeline: "pipeline-brasil-publico",
+            hubspot_owner_id: "8",
+            hs_lastmodifieddate: new Date().toISOString(),
+          },
+        },
+        {
+          id: "d-2",
+          properties: {
+            dealname: "Conta Ana",
+            amount: "1000",
+            dealstage: "stage-proposta",
+            pipeline: "pipeline-brasil-publico",
+            hubspot_owner_id: "7",
+            hs_lastmodifieddate: new Date().toISOString(),
+          },
+        },
+      ],
+      {
+        tasks: [],
+        calls: [],
+        meetings: [],
+      },
+      [
+        {
+          id: "pipeline-brasil-publico",
+          label: "Brasil Publico",
+          displayOrder: 0,
+          stages: [
+            {
+              id: "stage-proposta",
+              label: "Proposta Enviada",
+              displayOrder: 0,
+              metadata: {
+                isClosed: false,
+              },
+            },
+          ],
+        },
+      ],
+    );
+
+    expect(payload.sellers.map((seller) => seller.name)).toEqual(["Ana Souza", "Bruno Lima"]);
   });
 
   it("infers Aluno a Bordo campaign from deal names and contact markers", () => {

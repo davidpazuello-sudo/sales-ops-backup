@@ -14,6 +14,38 @@ import {
 } from "lib/services/dashboard-campaigns";
 
 const EMPTY_CAMPAIGNS = [];
+const OVERVIEW_DETAIL_CONFIG = {
+  totalLeads: {
+    eyebrow: "LEADS",
+    title: "Total de leads",
+    description: "Leads mapeados na campanha",
+    columns: ["Proprietario", "Lead", "Detalhe", "Status"],
+  },
+  sqls: {
+    eyebrow: "SQLS",
+    title: "Leads qualificados",
+    description: "Leads qualificados por vendas",
+    columns: ["Proprietario", "Lead", "Detalhe", "Status"],
+  },
+  meetings: {
+    eyebrow: "REUNIOES",
+    title: "Reunioes da campanha",
+    description: "Reunioes sincronizadas da HubSpot",
+    columns: ["Proprietario", "Lead", "Data", "Status"],
+  },
+  closedWon: {
+    eyebrow: "FECHADOS",
+    title: "Negocios fechados",
+    description: "Contratos fechados na campanha",
+    columns: ["Proprietario", "Negocio", "Valor", "Status"],
+  },
+  qualifiedOpportunities: {
+    eyebrow: "OPORTUNIDADES",
+    title: "Oportunidades qualificadas",
+    description: "Negocios qualificados em aberto na campanha",
+    columns: ["Proprietario", "Negocio", "Valor", "Status"],
+  },
+};
 
 function formatDateTime(value) {
   if (!value) {
@@ -55,12 +87,59 @@ function GoalList({ goals }) {
   );
 }
 
+function renderCampaignDetailRows(detailKey, summary) {
+  if (!summary) {
+    return [];
+  }
+
+  if (detailKey === "totalLeads") {
+    return summary.qualification.totalLeadItems || [];
+  }
+
+  if (detailKey === "sqls") {
+    return summary.qualification.sqlLeadItems || [];
+  }
+
+  if (detailKey === "meetings") {
+    return summary.meetings || [];
+  }
+
+  if (detailKey === "closedWon") {
+    return summary.sales.closedWonItems || [];
+  }
+
+  if (detailKey === "qualifiedOpportunities") {
+    return summary.qualifiedOpportunityItems || [];
+  }
+
+  return [];
+}
+
+function CampaignMetricButton({ title, value, note, onClick, expanded = false }) {
+  return (
+    <button
+      type="button"
+      className={`${styles.metric} ${styles.metricButton}`.trim()}
+      onClick={onClick}
+      aria-haspopup="dialog"
+      aria-expanded={expanded}
+    >
+      <span>{title}</span>
+      <strong>{value}</strong>
+      {note ? <small>{note}</small> : null}
+    </button>
+  );
+}
+
 export function CampaignsContent({ dashboardData }) {
   const [agentOpen, setAgentOpen] = useState(false);
+  const [activeDetail, setActiveDetail] = useState("");
   const campaigns = Array.isArray(dashboardData.campaigns) ? dashboardData.campaigns : EMPTY_CAMPAIGNS;
   const summary = getPrimaryCampaign(campaigns);
   const loadingState = dashboardData.states?.loading || "ready";
   const stateErrors = dashboardData.states?.errors || [];
+  const activeDetailConfig = OVERVIEW_DETAIL_CONFIG[activeDetail] || null;
+  const activeDetailRows = renderCampaignDetailRows(activeDetail, summary);
 
   return (
     <section className={styles.dashboardSection}>
@@ -105,10 +184,41 @@ export function CampaignsContent({ dashboardData }) {
         <div className={styles.grid}>
           <Card eyebrow="VISAO GERAL" title={summary.name} wide>
             <div className={styles.metrics}>
-              <Metric title="SQLs" value={`${summary.qualification.sqlCount}`} note="Meta da campanha: 40" />
-              <Metric title="Reunioes" value={`${summary.meetingCount}`} note="Meta da campanha: 70" />
-              <Metric title="Fechados" value={`${summary.sales.closedWonCount}`} note="Meta da campanha: 15" />
-              <Metric title="Oportunidades qualificadas" value={`${summary.qualifiedOpportunityCount}`} note="Objetivo principal: 65" />
+              <CampaignMetricButton
+                title="Total de leads"
+                value={`${summary.qualification.totalLeads}`}
+                note="Base total mapeada na campanha"
+                onClick={() => setActiveDetail("totalLeads")}
+                expanded={activeDetail === "totalLeads"}
+              />
+              <CampaignMetricButton
+                title="SQLs"
+                value={`${summary.qualification.sqlCount}`}
+                note="Meta da campanha: 40"
+                onClick={() => setActiveDetail("sqls")}
+                expanded={activeDetail === "sqls"}
+              />
+              <CampaignMetricButton
+                title="Reunioes"
+                value={`${summary.meetingCount}`}
+                note="Meta da campanha: 70"
+                onClick={() => setActiveDetail("meetings")}
+                expanded={activeDetail === "meetings"}
+              />
+              <CampaignMetricButton
+                title="Fechados"
+                value={`${summary.sales.closedWonCount}`}
+                note="Meta da campanha: 15"
+                onClick={() => setActiveDetail("closedWon")}
+                expanded={activeDetail === "closedWon"}
+              />
+              <CampaignMetricButton
+                title="Oportunidades qualificadas"
+                value={`${summary.qualifiedOpportunityCount}`}
+                note="Objetivo principal: 65"
+                onClick={() => setActiveDetail("qualifiedOpportunities")}
+                expanded={activeDetail === "qualifiedOpportunities"}
+              />
             </div>
             <div className={styles.campaignSummaryMeta}>
               <span>{`Ultima atividade: ${formatDateTime(summary.lastActivityAt)}`}</span>
@@ -128,6 +238,7 @@ export function CampaignsContent({ dashboardData }) {
 
           <Card eyebrow="QUALIFICACAO" title="Relatorios de qualificacao e conversao">
             <div className={styles.metrics}>
+              <Metric title="Total de leads" value={`${summary.qualification.totalLeads}`} note="Base total de contatos da campanha" />
               <Metric title="MQLs" value={`${summary.qualification.mqlCount}`} note="Leads de marketing mapeados" />
               <Metric title="SQLs" value={`${summary.qualification.sqlCount}`} note="Meta da campanha: 40 ate 17/05/2026" />
               <Metric title="Taxa MQL > SQL" value={`${summary.qualification.conversionRate}%`} note="Efetividade da qualificacao SDR" />
@@ -145,6 +256,61 @@ export function CampaignsContent({ dashboardData }) {
           <Card eyebrow="METAS SMART" title="Acompanhamento macro da campanha" wide>
             <GoalList goals={summary.smartGoals} />
           </Card>
+        </div>
+      ) : null}
+
+      {summary && activeDetailConfig ? (
+        <div className={styles.stageModalBackdrop} role="presentation" onClick={() => setActiveDetail("")}>
+          <div
+            className={`${styles.stageModal} ${styles.campaignMeetingsModal}`.trim()}
+            role="dialog"
+            aria-modal="true"
+            aria-label={`${activeDetailConfig.title} da campanha ${summary.name}`}
+            onClick={(event) => event.stopPropagation()}
+          >
+            <header className={styles.stageModalHeader}>
+              <div>
+                <span>{activeDetailConfig.eyebrow}</span>
+                <h3>{summary.name}</h3>
+                <p>{`${activeDetailRows.length} item(ns) em ${activeDetailConfig.description.toLowerCase()}`}</p>
+              </div>
+              <button type="button" className={styles.secondaryActionButton} onClick={() => setActiveDetail("")}>
+                Fechar
+              </button>
+            </header>
+
+            <div className={`${styles.stageModalList} ${styles.campaignMeetingsList}`.trim()}>
+              {activeDetailRows.length ? (
+                <>
+                  <div className={`${styles.tableHead} ${styles.campaignMeetingItem}`.trim()}>
+                    {activeDetailConfig.columns.map((column) => <span key={column}>{column}</span>)}
+                  </div>
+                  {activeDetailRows.map((item) => (
+                    <article key={item.id} className={`${styles.stageModalItem} ${styles.campaignMeetingItem}`.trim()}>
+                      <div>
+                        <strong>{item.ownerName}</strong>
+                        <span>{activeDetailConfig.columns[0]}</span>
+                      </div>
+                      <div>
+                        <strong>{item.leadName || item.recordName || "Sem registro"}</strong>
+                        <span>{activeDetailConfig.columns[1]}</span>
+                      </div>
+                      <div>
+                        <strong>{item.dateLabel || item.detailLabel || "Sem detalhe"}</strong>
+                        <span>{activeDetailConfig.columns[2]}</span>
+                      </div>
+                      <div>
+                        <strong>{item.statusLabel}</strong>
+                        <span>{activeDetailConfig.columns[3]}</span>
+                      </div>
+                    </article>
+                  ))}
+                </>
+              ) : (
+                <p className={styles.sellerDetailNote}>Nenhum item sincronizado para este indicador no momento.</p>
+              )}
+            </div>
+          </div>
         </div>
       ) : null}
     </section>

@@ -64,6 +64,10 @@ describe("dashboard campaigns service", () => {
           id: "meeting-1",
           campaignName: PRIMARY_CAMPAIGN_NAME,
           kind: "meeting",
+          ownerName: "Ana Souza",
+          leadName: "Conta Solaris",
+          dueLabel: "12/03/2026, 10:00",
+          statusLabel: "Agendada",
           updatedAt: new Date().toISOString(),
         },
         {
@@ -83,11 +87,25 @@ describe("dashboard campaigns service", () => {
 
     expect(campaigns).toHaveLength(1);
     expect(campaigns[0].name).toBe(PRIMARY_CAMPAIGN_CONTACT_VALUE);
+    expect(campaigns[0].qualification.totalLeads).toBe(2);
+    expect(campaigns[0].qualification.totalLeadItems).toHaveLength(2);
     expect(campaigns[0].qualification.mqlCount).toBe(1);
     expect(campaigns[0].qualification.sqlCount).toBe(1);
+    expect(campaigns[0].qualification.sqlLeadItems).toHaveLength(1);
     expect(campaigns[0].sales.proposalCount).toBe(1);
     expect(campaigns[0].sales.closedWonCount).toBe(1);
+    expect(campaigns[0].sales.closedWonItems).toHaveLength(1);
     expect(campaigns[0].meetingCount).toBe(1);
+    expect(campaigns[0].meetings).toEqual([
+      {
+        id: "meeting-1",
+        ownerName: "Ana Souza",
+        leadName: "Conta Solaris",
+        dateLabel: "12/03/2026, 10:00",
+        statusLabel: "Agendada",
+      },
+    ]);
+    expect(campaigns[0].qualifiedOpportunityItems).toHaveLength(1);
     expect(campaigns[0].smartGoals).toHaveLength(4);
   });
 
@@ -111,6 +129,7 @@ describe("dashboard campaigns service", () => {
 
     expect(campaigns).toHaveLength(1);
     expect(campaigns[0].name).toBe(PRIMARY_CAMPAIGN_CONTACT_VALUE);
+    expect(campaigns[0].qualification.totalLeads).toBe(2);
     expect(campaigns[0].qualification.mqlCount).toBe(1);
     expect(campaigns[0].qualification.sqlCount).toBe(1);
   });
@@ -138,6 +157,7 @@ describe("dashboard campaigns service", () => {
 
     expect(campaigns).toHaveLength(1);
     expect(campaigns[0].name).toBe(PRIMARY_CAMPAIGN_CONTACT_VALUE);
+    expect(campaigns[0].qualification.totalLeads).toBe(1);
     expect(campaigns[0].qualification.sqlCount).toBe(1);
     expect(campaigns[0].qualifiedOpportunityCount).toBe(1);
   });
@@ -157,6 +177,7 @@ describe("dashboard campaigns service", () => {
           dailyConnectionTarget: 7,
         },
         qualification: {
+          totalLeads: 10,
           mqlCount: 10,
           sqlCount: 4,
           conversionRate: 40,
@@ -191,6 +212,7 @@ describe("dashboard campaigns service", () => {
           dailyConnectionTarget: 7,
         },
         qualification: {
+          totalLeads: 20,
           mqlCount: 20,
           sqlCount: 8,
           conversionRate: 40,
@@ -215,6 +237,8 @@ describe("dashboard campaigns service", () => {
     ]);
 
     expect(aggregate.name).toBe("Todas as campanhas");
+    expect(aggregate.qualification.totalLeads).toBe(30);
+    expect(aggregate.qualification.totalLeadItems).toHaveLength(0);
     expect(aggregate.qualification.sqlCount).toBe(12);
     expect(aggregate.sales.closedWonCount).toBe(5);
     expect(aggregate.meetingCount).toBe(17);
