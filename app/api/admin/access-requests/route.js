@@ -1,12 +1,36 @@
 import { NextResponse } from "next/server";
 import { approveAccessRequest, listPendingAccessRequests, rejectAccessRequest } from "lib/access-requests-store";
 import { requireSuperAdmin } from "lib/admin-access";
-import { logAuthRouteError } from "lib/auth-logging";
+import { consumeRateLimit, getRequestClientKey } from "lib/auth-rate-limit";
+import { logAuthRouteError, logRateLimitEvent } from "lib/auth-logging";
 
-export async function GET() {
-  const auth = await requireSuperAdmin();
+export async function GET(request) {
+  const auth = await requireSuperAdmin({
+    route: "api/admin/access-requests",
+    action: "list-access-requests",
+  });
   if (!auth.ok) {
     return NextResponse.json({ ok: false, error: auth.error }, { status: auth.status });
+  }
+
+  const clientKey = getRequestClientKey(request);
+  const rateLimit = await consumeRateLimit({
+    scope: "admin-access-requests-list",
+    bucket: `${clientKey}:${auth.user.email}`,
+    limit: 20,
+    windowMs: 60 * 1000,
+  });
+
+  if (!rateLimit.ok) {
+    logRateLimitEvent("api/admin/access-requests", "admin-access-requests-list", {
+      actorEmail: auth.user.email,
+      clientKey,
+      retryAfter: rateLimit.retryAfter,
+    });
+    return NextResponse.json(
+      { ok: false, error: "Muitas consultas de solicitacoes. Aguarde alguns instantes." },
+      { status: 429 },
+    );
   }
 
   try {
@@ -27,9 +51,32 @@ export async function GET() {
 }
 
 export async function POST(request) {
-  const auth = await requireSuperAdmin();
+  const auth = await requireSuperAdmin({
+    route: "api/admin/access-requests",
+    action: "resolve-access-request",
+  });
   if (!auth.ok) {
     return NextResponse.json({ ok: false, error: auth.error }, { status: auth.status });
+  }
+
+  const clientKey = getRequestClientKey(request);
+  const rateLimit = await consumeRateLimit({
+    scope: "admin-access-requests-resolve",
+    bucket: `${clientKey}:${auth.user.email}`,
+    limit: 12,
+    windowMs: 10 * 60 * 1000,
+  });
+
+  if (!rateLimit.ok) {
+    logRateLimitEvent("api/admin/access-requests", "admin-access-requests-resolve", {
+      actorEmail: auth.user.email,
+      clientKey,
+      retryAfter: rateLimit.retryAfter,
+    });
+    return NextResponse.json(
+      { ok: false, error: "Muitas decisoes de acesso em pouco tempo. Aguarde alguns minutos." },
+      { status: 429 },
+    );
   }
 
   const body = await request.json().catch(() => null);

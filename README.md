@@ -21,12 +21,15 @@ Principais documentos:
 - [`docs/UI-UX.md`](docs/UI-UX.md)
 - [`docs/LAYOUT-INTERFACE.md`](docs/LAYOUT-INTERFACE.md)
 - [`docs/DEPLOY-OPERACAO.md`](docs/DEPLOY-OPERACAO.md)
+- [`docs/SEGURANCA-E-ROTACAO-DE-SEGREDOS.md`](docs/SEGURANCA-E-ROTACAO-DE-SEGREDOS.md)
 - [`docs/PUBLICACAO-USUARIOS-REAIS.md`](docs/PUBLICACAO-USUARIOS-REAIS.md)
 - [`docs/MELHORIAS-E-SUGESTOES.md`](docs/MELHORIAS-E-SUGESTOES.md)
 
 ## Ambiente
 
-Crie um arquivo `.env.local` com:
+Use o modelo de [`.env.example`](.env.example) e crie um arquivo `.env.local` com os valores do ambiente. Segredos operacionais nao devem ser enviados por chat ou salvos em documentos manuais; o processo de guarda e rotacao esta em [`docs/SEGURANCA-E-ROTACAO-DE-SEGREDOS.md`](docs/SEGURANCA-E-ROTACAO-DE-SEGREDOS.md).
+
+Variaveis minimas:
 
 ```bash
 HUBSPOT_ACCESS_TOKEN=seu_token_de_private_app_hubspot
