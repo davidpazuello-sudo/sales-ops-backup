@@ -329,6 +329,7 @@
   min-width: 0;
   height: calc(100vh - 60px);
   overflow: hidden;
+  background: var(--bg);
 }
 
 .agentContent {
@@ -337,7 +338,7 @@
   display: grid;
   grid-template-columns: 236px minmax(0, 1fr);
   grid-template-rows: auto 1fr;
-  padding: calc(28px * var(--density-scale)) calc(30px * var(--density-scale)) calc(34px * var(--density-scale));
+  padding: 0;
 }
 
 .agentContentHistoryCollapsed {
@@ -433,10 +434,10 @@
 .historySidebar {
   grid-column: 1;
   grid-row: 1 / span 2;
-  position: sticky;
-  top: calc(-28px * var(--density-scale));
-  align-self: start;
-  height: calc(100vh - 60px);
+  position: relative;
+  top: 0;
+  align-self: stretch;
+  height: 100%;
   overflow: auto;
   padding: calc(22px * var(--density-scale)) 12px;
   background: var(--sidebar);
@@ -564,6 +565,11 @@
   grid-column: 2;
   grid-row: 2;
   min-height: 0;
+  margin:
+    0
+    calc(30px * var(--density-scale))
+    calc(34px * var(--density-scale))
+    calc(30px * var(--density-scale));
   padding: calc(22px * var(--density-scale));
   display: flex;
   flex-direction: column;
@@ -577,6 +583,11 @@
   grid-column: 2;
   grid-row: 1;
   margin-bottom: 24px;
+  padding:
+    calc(28px * var(--density-scale))
+    calc(30px * var(--density-scale))
+    0
+    calc(30px * var(--density-scale));
 }
 
 .chatWorkspace {
@@ -1098,12 +1109,20 @@
   .chatPanel {
     grid-column: 1;
     grid-row: 3;
+    margin:
+      0
+      calc(24px * var(--density-scale))
+      calc(24px * var(--density-scale));
     border-radius: 0 0 var(--surface-radius) var(--surface-radius);
   }
 
   .agentHeader {
     grid-column: 1;
     grid-row: 1;
+    padding:
+      calc(24px * var(--density-scale))
+      calc(24px * var(--density-scale))
+      0;
   }
 }
 
@@ -1126,12 +1145,16 @@
 }
 
 @media (max-width: 640px) {
-  .agentContent {
-    padding: 20px 16px 24px;
-  }
-
   .agentHeader h1 {
     font-size: calc(22px * var(--font-scale));
+  }
+
+  .agentHeader {
+    padding: 20px 16px 0;
+  }
+
+  .chatPanel {
+    margin: 0 16px 24px;
   }
 
   .chatComposer {

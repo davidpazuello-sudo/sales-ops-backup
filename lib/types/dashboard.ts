@@ -77,6 +77,46 @@ export type DashboardTask = {
   source: string;
 };
 
+export type CampaignGoalStatus = {
+  id: string;
+  label: string;
+  current: number;
+  target: number;
+  progress: number;
+  remaining: number;
+  status: string;
+};
+
+export type CampaignSummary = {
+  id: string;
+  name: string;
+  source: string;
+  prospecting: {
+    callsDaily: number;
+    callsWeekly: number;
+    connectionsDaily: number;
+    connectionsWeekly: number;
+    dailyCallTarget: number;
+    dailyConnectionTarget: number;
+  };
+  qualification: {
+    mqlCount: number;
+    sqlCount: number;
+    conversionRate: number;
+    targetSqls: number;
+  };
+  sales: {
+    proposalCount: number;
+    closedWonCount: number;
+    conversionRate: number;
+    targetClosedWon: number;
+  };
+  smartGoals: CampaignGoalStatus[];
+  meetingCount: number;
+  qualifiedOpportunityCount: number;
+  lastActivityAt: string | null;
+};
+
 export type PipelineStage = {
   id: string;
   label: string;
@@ -113,6 +153,7 @@ export type DashboardData = {
   alerts: string[][];
   deals: DashboardDeal[];
   tasks?: DashboardTask[];
+  campaigns?: CampaignSummary[];
   reports: string[][];
   error?: string;
 };

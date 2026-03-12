@@ -10,6 +10,7 @@ export function isDashboardData(data: unknown): data is DashboardData {
   if (!isRecord(data.integration) || !isRecord(data.summary)) return false;
   if (!Array.isArray(data.sellers) || !Array.isArray(data.alerts) || !Array.isArray(data.deals) || !Array.isArray(data.reports)) return false;
   if ("tasks" in data && !Array.isArray(data.tasks)) return false;
+  if ("campaigns" in data && !Array.isArray(data.campaigns)) return false;
 
   return (
     typeof data.integration.status === "string" &&

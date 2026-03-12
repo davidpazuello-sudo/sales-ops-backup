@@ -43,6 +43,7 @@ export function createDashboardFallbackData({
     alerts: [],
     deals: [],
     tasks: [],
+    campaigns: [],
     reports: [],
     error,
   };

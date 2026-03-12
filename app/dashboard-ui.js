@@ -113,6 +113,10 @@ export function getNavIcon(id) {
     return <BaseIcon><rect x="4" y="6" width="16" height="12" rx="1.5" /><path d="M12 6v12" /><path d="M4 10h16" /></BaseIcon>;
   }
 
+  if (id === "campaigns") {
+    return <BaseIcon><path d="M5 7h10l4 4-7 8H5z" /><circle cx="8.2" cy="9.2" r="1.1" /></BaseIcon>;
+  }
+
   if (id === "tasks") {
     return <BaseIcon><rect x="5" y="4.5" width="14" height="15" rx="2" /><path d="M8 9h7" /><path d="M8 13h4" /><path d="M8 17h5" /><path d="M15.5 13.5l1.3 1.3 2.7-3" /></BaseIcon>;
   }

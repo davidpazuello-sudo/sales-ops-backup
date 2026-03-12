@@ -15,6 +15,7 @@ import {
 import { PageAgentToggleButton } from "./page-agent-panel";
 import {
   AccessPermissionsContent,
+  CampaignsContent,
   DealProfileContent,
   DealsContent,
   ReportsContent,
@@ -290,6 +291,8 @@ export default function DashboardShell({
           <AccessPermissionsContent sessionUser={sessionUser} onNotificationsRefresh={refreshNotifications} />
         ) : activeNav === "reports" ? (
           <ReportsContent dashboardData={dashboardData} />
+        ) : activeNav === "campaigns" ? (
+          <CampaignsContent dashboardData={dashboardData} />
         ) : activeNav === "tasks" ? (
           <TasksContent dashboardData={dashboardData} sessionUser={sessionUser} />
         ) : activeNav === "deals" ? (

@@ -1,4 +1,5 @@
 export { AccessPermissionsContent } from "./access";
+export { CampaignsContent } from "./campaigns";
 export { DealsContent, DealProfileContent } from "./deals";
 export { ReportsContent } from "./reports";
 export { SettingsContent } from "./settings";
