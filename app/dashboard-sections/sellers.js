@@ -382,9 +382,9 @@ export function SellersContent({ dashboardData }) {
 
       <div className={styles.sellerProfilesGrid}>
         {filteredSellers.map((seller) => {
-          const sellerDeals = getSellerDeals(dashboardData, seller.name);
+          const sellerDeals = getSellerDeals(dashboardData, seller);
           const totalPipeline = getSellerPipelineValue(sellerDeals);
-          const pendingTasks = getPendingSellerTasks(sellerDeals);
+          const pendingTasks = getPendingSellerTasks(dashboardData, seller);
           const motivationStatus = getMotivationStatus(seller);
 
           return (
@@ -411,7 +411,7 @@ export function SellersContent({ dashboardData }) {
 
                 <div className={styles.sellerStats}>
                   <div>
-                    <span>Tarefas a fazer</span>
+                    <span>Atividades pendentes</span>
                     <strong>{pendingTasks}</strong>
                   </div>
                   <div>
@@ -456,10 +456,10 @@ export function SellerProfileContent({ dashboardData, sellerSlug }) {
     );
   }
 
-  const sellerDeals = getSellerDeals(dashboardData, seller.name);
+  const sellerDeals = getSellerDeals(dashboardData, seller);
   const conversionRate = getSellerConversionRate(seller);
   const totalPipelineValue = getSellerPipelineValue(sellerDeals);
-  const pendingTasks = getPendingSellerTasks(sellerDeals);
+  const pendingTasks = getPendingSellerTasks(dashboardData, seller);
   const motivationStatus = getMotivationStatus(seller);
   const activityKpis = getSellerActivityKpis(seller);
   const kanbanColumns = getSellerKanbanColumns(sellerDeals);
@@ -493,7 +493,7 @@ export function SellerProfileContent({ dashboardData, sellerSlug }) {
           <div className={styles.metrics}>
             <Metric title="Negocios abertos" value={`${seller.openDeals}`} />
             <Metric title="Valor total na pipeline" value={formatCurrency(totalPipelineValue)} />
-            <Metric title="Tarefas a fazer" value={`${pendingTasks}`} />
+            <Metric title="Atividades pendentes" value={`${pendingTasks}`} />
             <Metric title="Status motivacao" value={motivationStatus} />
           </div>
           <div className={styles.pipelineStageChart}>
@@ -538,7 +538,7 @@ export function SellerProfileContent({ dashboardData, sellerSlug }) {
               </div>
               <div className={styles.dealMeta}>
                 <strong>{pendingTasks}</strong>
-                <span>Tarefas em aberto</span>
+                <span>Atividades em aberto</span>
               </div>
             </article>
           </div>

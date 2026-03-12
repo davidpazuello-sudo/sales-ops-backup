@@ -138,8 +138,8 @@ describe("dashboard domain", () => {
     expect(payload.pipeline.stages[0].label).toBe("Proposta Enviada");
     expect(payload.deals[0].pipelineLabel).toBe("Brasil Publico");
     expect(payload.deals[0].ownerEmail).toBe("ana@empresa.com");
-    expect(payload.sellers).toHaveLength(2);
-    expect(payload.sellers.map((seller) => seller.name)).toEqual(["Ana Souza", "Bruno Lima"]);
+    expect(payload.sellers).toHaveLength(1);
+    expect(payload.sellers.map((seller) => seller.name)).toEqual(["Ana Souza"]);
     expect(payload.tasks).toHaveLength(3);
     expect(payload.tasks.every((task) => task.ownerEmail === "ana@empresa.com")).toBe(true);
     expect(payload.tasks.map((task) => task.kind).sort()).toEqual(["call", "meeting", "task"]);
@@ -214,6 +214,83 @@ describe("dashboard domain", () => {
     );
 
     expect(payload.sellers.map((seller) => seller.name)).toEqual(["Ana Souza", "Bruno Lima"]);
+  });
+
+  it("keeps only sellers with operational activity or active pipeline", () => {
+    const nextHour = new Date(Date.now() + 3600000).toISOString();
+    const payload = buildDashboardDomainPayload(
+      [
+        {
+          id: "7",
+          firstName: "Ana",
+          lastName: "Souza",
+          email: "ana@empresa.com",
+          teams: [{ name: "Enterprise", primary: true }],
+        },
+        {
+          id: "8",
+          firstName: "Bruno",
+          lastName: "Lima",
+          email: "bruno@empresa.com",
+          teams: [{ name: "Mid Market", primary: true }],
+        },
+        {
+          id: "9",
+          firstName: "Carla",
+          lastName: "Melo",
+          email: "carla@empresa.com",
+          teams: [{ name: "Sales", primary: true }],
+        },
+      ],
+      [
+        {
+          id: "d-1",
+          properties: {
+            dealname: "Conta Ana",
+            amount: "1000",
+            dealstage: "stage-proposta",
+            pipeline: "pipeline-brasil-publico",
+            hubspot_owner_id: "7",
+            hs_lastmodifieddate: new Date().toISOString(),
+          },
+        },
+      ],
+      {
+        tasks: [],
+        calls: [],
+        meetings: [
+          {
+            id: "m-1",
+            properties: {
+              hs_meeting_title: "Reuniao de Carla",
+              hs_meeting_outcome: "SCHEDULED",
+              hubspot_owner_id: "9",
+              hs_meeting_start_time: nextHour,
+              hs_lastmodifieddate: nextHour,
+            },
+          },
+        ],
+      },
+      [
+        {
+          id: "pipeline-brasil-publico",
+          label: "Brasil Publico",
+          displayOrder: 0,
+          stages: [
+            {
+              id: "stage-proposta",
+              label: "Proposta Enviada",
+              displayOrder: 0,
+              metadata: {
+                isClosed: false,
+              },
+            },
+          ],
+        },
+      ],
+    );
+
+    expect(payload.sellers.map((seller) => seller.name)).toEqual(["Ana Souza", "Carla Melo"]);
   });
 
   it("infers Aluno a Bordo campaign from deal names and contact markers", () => {
