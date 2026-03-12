@@ -7,6 +7,8 @@ export default async function DealsPage({ searchParams }) {
     <DashboardShell
       initialNav="deals"
       initialPipelineId={resolvedSearchParams?.pipeline || ""}
+      initialOwnerFilter={resolvedSearchParams?.owner || "todos"}
+      initialActivityWeeksFilter={resolvedSearchParams?.activityWeeks || "1"}
     />
   );
 }

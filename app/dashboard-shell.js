@@ -40,6 +40,8 @@ export default function DashboardShell({
   initialConfig = "hubspot",
   initialProfileView = false,
   initialPipelineId = "",
+  initialOwnerFilter = "todos",
+  initialActivityWeeksFilter = "1",
   sellerSlug = "",
   sellerMeetingsView = false,
   sellerMeetingId = "",
@@ -93,6 +95,8 @@ export default function DashboardShell({
     initialConfig,
     initialProfileView,
     initialPipelineId,
+    initialOwnerFilter,
+    initialActivityWeeksFilter,
   });
   const notificationBadge = unreadNotificationsCount > 99 ? "99+" : String(unreadNotificationsCount);
   const settingsHeaderAgentId = activeNav === "profile" || profileViewOpen ? "profile" : "settings";
@@ -307,7 +311,11 @@ export default function DashboardShell({
         ) : activeNav === "tasks" ? (
           <TasksContent dashboardData={dashboardData} sessionUser={sessionUser} />
         ) : activeNav === "deals" ? (
-          <DealsContent dashboardData={dashboardData} />
+          <DealsContent
+            dashboardData={dashboardData}
+            initialOwnerFilter={initialOwnerFilter}
+            initialActivityWeeksFilter={initialActivityWeeksFilter}
+          />
         ) : (
           <div className={styles.emptyState}>
             <div className={styles.placeholderBadge}>Em breve</div>

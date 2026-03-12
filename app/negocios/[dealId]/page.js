@@ -9,6 +9,8 @@ export default async function DealProfilePage({ params, searchParams }) {
       initialNav="deals"
       dealId={resolvedParams?.dealId || ""}
       initialPipelineId={resolvedSearchParams?.pipeline || ""}
+      initialOwnerFilter={resolvedSearchParams?.owner || "todos"}
+      initialActivityWeeksFilter={resolvedSearchParams?.activityWeeks || "1"}
     />
   );
 }

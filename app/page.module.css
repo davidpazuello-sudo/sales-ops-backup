@@ -408,11 +408,22 @@
 .content {
   min-width: 0;
   height: calc(100vh - 60px);
-  overflow: auto;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 .dashboardSection {
+  min-width: 0;
   padding: calc(34px * var(--density-scale)) calc(38px * var(--density-scale)) calc(42px * var(--density-scale));
+}
+
+.dealsSection {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .integrationNotice {
@@ -1275,11 +1286,17 @@
 
 .pipelineBoard {
   display: flex;
+  flex: 1 1 auto;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  min-height: 0;
   gap: 14px;
-  align-items: flex-start;
+  align-items: stretch;
   overflow-x: auto;
   overflow-y: hidden;
-  padding-bottom: 10px;
+  overscroll-behavior-x: contain;
+  padding: 0 4px 10px 0;
   scrollbar-width: thin;
 }
 
@@ -1975,9 +1992,11 @@
   display: grid;
   grid-template-rows: auto 1fr auto;
   flex: 0 0 272px;
+  min-width: 272px;
   width: 272px;
-  gap: 8px;
-  min-height: 460px;
+  max-width: 272px;
+  height: 100%;
+  min-height: 0;
   padding: 0;
   border-radius: 6px;
   background: #eef2f6;
@@ -1992,7 +2011,8 @@
   width: 72px !important;
   min-width: 72px;
   max-width: 72px;
-  min-height: 460px;
+  height: 100%;
+  min-height: 0;
   padding: 0;
   justify-items: stretch;
   gap: 0;
@@ -2072,7 +2092,11 @@
   flex-direction: column;
   gap: 8px;
   justify-content: flex-start;
+  min-height: 0;
   padding: 8px;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  scrollbar-width: thin;
 }
 
 .pipelineCollapsedSummary {

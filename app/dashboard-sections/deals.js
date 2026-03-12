@@ -23,13 +23,17 @@ import {
   moveDealToStage,
 } from "lib/services/dashboard-deals";
 
-export function DealsContent({ dashboardData }) {
+export function DealsContent({
+  dashboardData,
+  initialOwnerFilter = "todos",
+  initialActivityWeeksFilter = "1",
+}) {
   const router = useRouter();
   const [boardDeals, setBoardDeals] = useState(dashboardData.deals);
   const [draggedDealId, setDraggedDealId] = useState("");
   const [pipelineFilter, setPipelineFilter] = useState("");
-  const [ownerFilter, setOwnerFilter] = useState("todos");
-  const [activityWeeksFilter, setActivityWeeksFilter] = useState("1");
+  const [ownerFilter, setOwnerFilter] = useState(initialOwnerFilter || "todos");
+  const [activityWeeksFilter, setActivityWeeksFilter] = useState(initialActivityWeeksFilter || "1");
   const [collapsedStages, setCollapsedStages] = useState({});
   const [stageDrafts, setStageDrafts] = useState({});
   const [agentOpen, setAgentOpen] = useState(false);
@@ -50,6 +54,14 @@ export function DealsContent({ dashboardData }) {
     });
   }, [dashboardData.pipeline]);
 
+  useEffect(() => {
+    setOwnerFilter(String(initialOwnerFilter || "todos"));
+  }, [initialOwnerFilter]);
+
+  useEffect(() => {
+    setActivityWeeksFilter(String(initialActivityWeeksFilter || "1"));
+  }, [initialActivityWeeksFilter]);
+
   const ownerOptions = getOwnerOptions(boardDeals);
   const pipelineOptions = getPipelineOptions(dashboardData.pipeline);
   const loadingState = dashboardData.states?.loading || "ready";
@@ -63,12 +75,21 @@ export function DealsContent({ dashboardData }) {
     ? selectedPipeline.stages
     : pipelineStages;
 
-  function handlePipelineFilterChange(nextPipelineId) {
-    const targetPipelineId = String(nextPipelineId || "").trim();
+  function updateDealsRoute(nextFilters = {}) {
+    const fallbackPipelineId = pipelineFilter || getDefaultPipelineId(dashboardData.pipeline);
+    const targetPipelineId = String((nextFilters.pipelineId ?? fallbackPipelineId) || "").trim();
+    const targetOwnerFilter = String((nextFilters.ownerFilter ?? ownerFilter) || "todos").trim() || "todos";
+    const targetActivityWeeksFilter = String((nextFilters.activityWeeksFilter ?? activityWeeksFilter) || "1").trim() || "1";
     const searchParams = new URLSearchParams();
 
     if (targetPipelineId) {
       searchParams.set("pipeline", targetPipelineId);
+    }
+    if (targetOwnerFilter && targetOwnerFilter !== "todos") {
+      searchParams.set("owner", targetOwnerFilter);
+    }
+    if (targetActivityWeeksFilter && targetActivityWeeksFilter !== "1") {
+      searchParams.set("activityWeeks", targetActivityWeeksFilter);
     }
 
     const nextRoute = searchParams.toString()
@@ -76,6 +97,18 @@ export function DealsContent({ dashboardData }) {
       : "/negocios";
 
     router.replace(nextRoute, { scroll: false });
+  }
+
+  function handlePipelineFilterChange(nextPipelineId) {
+    updateDealsRoute({ pipelineId: nextPipelineId });
+  }
+
+  function handleOwnerFilterChange(nextOwnerFilter) {
+    updateDealsRoute({ ownerFilter: nextOwnerFilter });
+  }
+
+  function handleActivityWeeksFilterChange(nextActivityWeeksFilter) {
+    updateDealsRoute({ activityWeeksFilter: nextActivityWeeksFilter });
   }
 
   async function handleStageUpdate(dealId, stageId, stageLabel) {
@@ -128,7 +161,7 @@ export function DealsContent({ dashboardData }) {
   };
 
   return (
-    <section className={styles.dashboardSection}>
+    <section className={`${styles.dashboardSection} ${styles.dealsSection}`.trim()}>
       <header className={styles.sectionHeaderBar}>
         <div className={styles.settingsHeader}>
           <h1>Negocios</h1>
@@ -167,7 +200,7 @@ export function DealsContent({ dashboardData }) {
           <select
             className={styles.dealsFilterSelect}
             value={ownerFilter}
-            onChange={(event) => setOwnerFilter(event.target.value)}
+            onChange={(event) => handleOwnerFilterChange(event.target.value)}
           >
             <option value="todos">Todos</option>
             {ownerOptions.map((owner) => (
@@ -181,7 +214,7 @@ export function DealsContent({ dashboardData }) {
           <select
             className={styles.dealsFilterSelect}
             value={activityWeeksFilter}
-            onChange={(event) => setActivityWeeksFilter(event.target.value)}
+            onChange={(event) => handleActivityWeeksFilterChange(event.target.value)}
           >
             <option value="1">1 semana</option>
             <option value="2">2 semanas</option>
@@ -245,6 +278,12 @@ export function DealsContent({ dashboardData }) {
                     const activePipelineId = deal.pipelineId || pipelineFilter;
                     if (activePipelineId) {
                       searchParams.set("pipeline", activePipelineId);
+                    }
+                    if (ownerFilter && ownerFilter !== "todos") {
+                      searchParams.set("owner", ownerFilter);
+                    }
+                    if (activityWeeksFilter && activityWeeksFilter !== "1") {
+                      searchParams.set("activityWeeks", activityWeeksFilter);
                     }
 
                     router.push(

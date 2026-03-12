@@ -30,11 +30,26 @@ function normalizeDashboardPipelineId(value) {
   return String(value || "").trim();
 }
 
+function normalizeDashboardOwnerFilter(value) {
+  return String(value || "").trim() || "todos";
+}
+
+function normalizeDashboardActivityWeeks(value) {
+  const parsed = Number.parseInt(String(value || "1"), 10);
+  if (!Number.isFinite(parsed) || parsed <= 0) {
+    return "1";
+  }
+
+  return String(Math.min(parsed, 12));
+}
+
 export async function GET(request) {
   const observation = startApiObservation(request, "api/hubspot/dashboard");
   const searchParams = readRequestSearchParams(request);
   const scope = normalizeDashboardScope(searchParams.get("scope"));
   const pipelineId = scope === "deals" ? normalizeDashboardPipelineId(searchParams.get("pipelineId")) : "";
+  const ownerFilter = scope === "deals" ? normalizeDashboardOwnerFilter(searchParams.get("owner")) : "";
+  const activityWeeksFilter = scope === "deals" ? normalizeDashboardActivityWeeks(searchParams.get("activityWeeks")) : "";
   const auth = await requireAuthenticatedUser({
     route: "api/hubspot/dashboard",
     action: "read-dashboard",
@@ -71,7 +86,12 @@ export async function GET(request) {
   }
 
   try {
-    const baseData = assertDashboardData(await getHubSpotDashboardData({ scope, pipelineId }));
+    const baseData = assertDashboardData(await getHubSpotDashboardData({
+      scope,
+      pipelineId,
+      ownerFilter,
+      activityWeeksFilter,
+    }));
     const data = assertDashboardData(await enrichDashboardWithOperationalData(baseData, auth.user, { scope }));
     return jsonWithApiObservation(
       observation,

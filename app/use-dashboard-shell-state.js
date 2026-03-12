@@ -99,7 +99,10 @@ function buildDashboardScopeCacheKey(scope, options = {}) {
   }
 
   const pipelineId = String(options.pipelineId || "").trim();
-  return pipelineId ? `${scope}:${pipelineId}` : scope;
+  const ownerFilter = String(options.ownerFilter || "").trim();
+  const activityWeeksFilter = String(options.activityWeeksFilter || "").trim();
+  const suffixParts = [pipelineId, ownerFilter, activityWeeksFilter].filter(Boolean);
+  return suffixParts.length ? `${scope}:${suffixParts.join(":")}` : scope;
 }
 
 function readDashboardScopeCache(scope, options = {}) {
@@ -161,6 +164,8 @@ export function useDashboardShellState({
   initialConfig,
   initialProfileView,
   initialPipelineId = "",
+  initialOwnerFilter = "todos",
+  initialActivityWeeksFilter = "1",
 }) {
   const router = useRouter();
   const menuRef = useRef(null);
@@ -248,6 +253,8 @@ export function useDashboardShellState({
     let cancelled = false;
     const hubspotScope = getDashboardHubSpotScope({ initialNav, initialProfileView });
     const pipelineId = hubspotScope === "deals" ? String(initialPipelineId || "").trim() : "";
+    const ownerFilter = hubspotScope === "deals" ? String(initialOwnerFilter || "todos").trim() : "";
+    const activityWeeksFilter = hubspotScope === "deals" ? String(initialActivityWeeksFilter || "1").trim() : "";
 
     async function loadHubSpotData() {
       if (hubspotScope === "none") {
@@ -256,7 +263,11 @@ export function useDashboardShellState({
         return;
       }
 
-      const cachedPayload = readDashboardScopeCache(hubspotScope, { pipelineId });
+      const cachedPayload = readDashboardScopeCache(hubspotScope, {
+        pipelineId,
+        ownerFilter,
+        activityWeeksFilter,
+      });
       if (cachedPayload) {
         setDashboardData(cachedPayload);
         setHubspotMessage("Dados recentes da HubSpot carregados.");
@@ -267,6 +278,12 @@ export function useDashboardShellState({
         const searchParams = new URLSearchParams({ scope: hubspotScope });
         if (pipelineId) {
           searchParams.set("pipelineId", pipelineId);
+        }
+        if (ownerFilter) {
+          searchParams.set("owner", ownerFilter);
+        }
+        if (activityWeeksFilter) {
+          searchParams.set("activityWeeks", activityWeeksFilter);
         }
 
         const response = await fetch(`/api/hubspot/dashboard?${searchParams.toString()}`);
@@ -289,7 +306,11 @@ export function useDashboardShellState({
         }
 
         setDashboardData(payload);
-        writeDashboardScopeCache(hubspotScope, payload, { pipelineId });
+        writeDashboardScopeCache(hubspotScope, payload, {
+          pipelineId,
+          ownerFilter,
+          activityWeeksFilter,
+        });
         setHubspotMessage("Dados da HubSpot sincronizados.");
       } catch {
         if (cancelled) {
@@ -313,7 +334,7 @@ export function useDashboardShellState({
     return () => {
       cancelled = true;
     };
-  }, [initialNav, initialPipelineId, initialProfileView]);
+  }, [initialActivityWeeksFilter, initialNav, initialOwnerFilter, initialPipelineId, initialProfileView]);
 
   useEffect(() => {
     let cancelled = false;
