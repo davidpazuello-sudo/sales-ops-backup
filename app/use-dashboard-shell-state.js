@@ -298,6 +298,8 @@ export function useDashboardShellState({
     root.dataset.animations = appliedPersonalization.animations;
     root.dataset.shortcuts = appliedPersonalization.shortcuts;
     root.dataset.preview = appliedPersonalization.preview;
+    root.style.colorScheme = appliedPersonalization.theme;
+    root.style.backgroundColor = appliedPersonalization.theme === "dark" ? "#0f1726" : "#f6f7fa";
 
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(personalization));
   }, [personalization]);
