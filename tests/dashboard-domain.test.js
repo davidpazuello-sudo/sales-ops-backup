@@ -54,8 +54,8 @@ describe("dashboard domain", () => {
           properties: {
             dealname: "Expansao Solaris",
             amount: "95000",
-            dealstage: "proposta_enviada",
-            pipeline: "default",
+            dealstage: "stage-proposta",
+            pipeline: "pipeline-brasil-publico",
             hubspot_owner_id: "7",
             hs_lastmodifieddate: new Date().toISOString(),
           },
@@ -101,11 +101,30 @@ describe("dashboard domain", () => {
           },
         ],
       },
+      [
+        {
+          id: "pipeline-brasil-publico",
+          label: "Brasil Publico",
+          displayOrder: 0,
+          stages: [
+            {
+              id: "stage-proposta",
+              label: "Proposta Enviada",
+              displayOrder: 0,
+              metadata: {
+                isClosed: false,
+              },
+            },
+          ],
+        },
+      ],
     );
 
     expect(payload.integration.source).toBe("hubspot");
+    expect(payload.pipeline.defaultPipelineId).toBe("pipeline-brasil-publico");
     expect(payload.pipeline.stages).toHaveLength(1);
     expect(payload.pipeline.stages[0].label).toBe("Proposta Enviada");
+    expect(payload.deals[0].pipelineLabel).toBe("Brasil Publico");
     expect(payload.deals[0].ownerEmail).toBe("ana@empresa.com");
     expect(payload.tasks).toHaveLength(3);
     expect(payload.tasks.every((task) => task.ownerEmail === "ana@empresa.com")).toBe(true);

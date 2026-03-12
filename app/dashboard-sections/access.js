@@ -33,7 +33,7 @@ export function AccessPermissionsContent({ sessionUser, onNotificationsRefresh }
   const [usersLoading, setUsersLoading] = useState(true);
   const [requestsError, setRequestsError] = useState("");
   const [usersError, setUsersError] = useState("");
-  const [message, setMessage] = useState("");
+  const [feedback, setFeedback] = useState({ type: "", message: "" });
   const [busyRequestId, setBusyRequestId] = useState("");
   const [busyUserId, setBusyUserId] = useState("");
   const [agentOpen, setAgentOpen] = useState(false);
@@ -105,11 +105,11 @@ export function AccessPermissionsContent({ sessionUser, onNotificationsRefresh }
     setBusyRequestId("");
 
     if (!response?.ok) {
-      setMessage(payload?.error || "Nao foi possivel concluir a solicitacao.");
+      setFeedback({ type: "error", message: payload?.error || "Nao foi possivel concluir a solicitacao." });
       return;
     }
 
-    setMessage(payload?.message || "Solicitacao atualizada com sucesso.");
+    setFeedback({ type: "success", message: payload?.message || "Solicitacao atualizada com sucesso." });
     await loadRequests();
     await onNotificationsRefresh?.();
   }
@@ -150,7 +150,7 @@ export function AccessPermissionsContent({ sessionUser, onNotificationsRefresh }
     setBusyUserId("");
 
     if (!response?.ok) {
-      setMessage(payload?.error || "Nao foi possivel atualizar o cargo do usuario.");
+      setFeedback({ type: "error", message: payload?.error || "Nao foi possivel atualizar o cargo do usuario." });
       return;
     }
 
@@ -165,7 +165,44 @@ export function AccessPermissionsContent({ sessionUser, onNotificationsRefresh }
       ...current,
       [user.id]: savedRole,
     }));
-    setMessage(payload?.message || "Cargo atualizado com sucesso.");
+    setFeedback({ type: "success", message: payload?.message || "Cargo atualizado com sucesso." });
+  }
+
+  async function handleUserDelete(user) {
+    if (!user?.id || !user?.email) {
+      return;
+    }
+
+    const shouldDelete = window.confirm(`Deseja excluir o usuario ${user.email}? Essa acao remove o acesso dele do sistema.`);
+    if (!shouldDelete) {
+      return;
+    }
+
+    setBusyUserId(user.id);
+    const response = await fetch("/api/admin/system-users", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        userId: user.id,
+        email: user.email,
+      }),
+    }).catch(() => null);
+
+    const payload = await response?.json().catch(() => null);
+    setBusyUserId("");
+
+    if (!response?.ok) {
+      setFeedback({ type: "error", message: payload?.error || "Nao foi possivel excluir o usuario." });
+      return;
+    }
+
+    setUsers((current) => current.filter((item) => item.id !== user.id));
+    setRoleDrafts((current) => {
+      const next = { ...current };
+      delete next[user.id];
+      return next;
+    });
+    setFeedback({ type: "success", message: payload?.message || "Usuario excluido com sucesso." });
   }
 
   if (!sessionUser?.isSuperAdmin) {
@@ -203,7 +240,7 @@ export function AccessPermissionsContent({ sessionUser, onNotificationsRefresh }
         </div>
       ) : null}
 
-      {message ? <SectionNotice variant="success">{message}</SectionNotice> : null}
+      {feedback.message ? <SectionNotice variant={feedback.type || "success"}>{feedback.message}</SectionNotice> : null}
 
       <div className={styles.grid}>
         <Card eyebrow="PENDENTES" title="Solicitacoes em aberto" wide className={requestsCardClassName}>
@@ -271,6 +308,7 @@ export function AccessPermissionsContent({ sessionUser, onNotificationsRefresh }
               {users.map((item) => {
                 const draftRole = getRoleDraft(item);
                 const pendingChange = hasPendingRoleChange(item);
+                const canDeleteUser = !item.roleLocked && item.email !== sessionUser?.email;
 
                 return (
                   <article key={item.id} className={styles.systemUserRow}>
@@ -327,6 +365,15 @@ export function AccessPermissionsContent({ sessionUser, onNotificationsRefresh }
                             {busyUserId === item.id ? "Salvando..." : "Salvar"}
                           </button>
                         </>
+                      ) : canDeleteUser ? (
+                        <button
+                          type="button"
+                          className={styles.dangerActionButton}
+                          onClick={() => handleUserDelete(item)}
+                          disabled={busyUserId === item.id}
+                        >
+                          {busyUserId === item.id ? "Excluindo..." : "Excluir"}
+                        </button>
                       ) : null}
                     </div>
                   </article>

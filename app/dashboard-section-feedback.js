@@ -39,12 +39,8 @@ export function SectionLoadingState({
   description = "Aguarde enquanto trazemos os dados mais recentes.",
 }) {
   return (
-    <div className={styles.sectionLoadingPanel} role="status" aria-live="polite">
-      <span className={styles.sectionLoadingSpinner} aria-hidden="true" />
-      <div>
-        <strong>{title}</strong>
-        <p>{description}</p>
-      </div>
-    </div>
+    <span className={styles.srOnly} role="status" aria-live="polite">
+      {`${title}. ${description}`.trim()}
+    </span>
   );
 }

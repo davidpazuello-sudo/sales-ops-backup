@@ -14,9 +14,11 @@ import {
 import styles from "../page.module.css";
 import { findDealByRouteId, sellerToSlug } from "lib/dashboard-shell-helpers";
 import {
+  getDefaultPipelineId,
   formatCurrencyFromLabel,
   getBoardColumns,
   getOwnerOptions,
+  getPipelineOptions,
   getVisibleDeals,
   moveDealToStage,
 } from "lib/services/dashboard-deals";
@@ -25,6 +27,7 @@ export function DealsContent({ dashboardData }) {
   const router = useRouter();
   const [boardDeals, setBoardDeals] = useState(dashboardData.deals);
   const [draggedDealId, setDraggedDealId] = useState("");
+  const [pipelineFilter, setPipelineFilter] = useState("");
   const [ownerFilter, setOwnerFilter] = useState("todos");
   const [activityWeeksFilter, setActivityWeeksFilter] = useState("1");
   const [collapsedStages, setCollapsedStages] = useState({});
@@ -38,11 +41,27 @@ export function DealsContent({ dashboardData }) {
     setBoardDeals(dashboardData.deals);
   }, [dashboardData.deals]);
 
+  useEffect(() => {
+    const nextDefaultPipelineId = getDefaultPipelineId(dashboardData.pipeline);
+    setPipelineFilter((current) => {
+      const hasCurrentPipeline = Array.isArray(dashboardData.pipeline?.items)
+        && dashboardData.pipeline.items.some((item) => item.id === current);
+      return hasCurrentPipeline ? current : nextDefaultPipelineId;
+    });
+  }, [dashboardData.pipeline]);
+
   const ownerOptions = getOwnerOptions(boardDeals);
+  const pipelineOptions = getPipelineOptions(dashboardData.pipeline);
   const loadingState = dashboardData.states?.loading || "ready";
   const stateErrors = dashboardData.states?.errors || [];
-  const visibleDeals = getVisibleDeals(boardDeals, ownerFilter, activityWeeksFilter);
-  const boardColumns = getBoardColumns(visibleDeals, pipelineStages);
+  const visibleDeals = getVisibleDeals(boardDeals, ownerFilter, activityWeeksFilter, pipelineFilter);
+  const boardColumns = getBoardColumns(visibleDeals, dashboardData.pipeline, pipelineFilter);
+  const selectedPipeline = Array.isArray(dashboardData.pipeline?.items)
+    ? dashboardData.pipeline.items.find((item) => item.id === pipelineFilter)
+    : null;
+  const stageOptions = Array.isArray(selectedPipeline?.stages) && selectedPipeline.stages.length
+    ? selectedPipeline.stages
+    : pipelineStages;
 
   async function handleStageUpdate(dealId, stageId, stageLabel) {
     if (!dealId || !stageId) {
@@ -115,6 +134,19 @@ export function DealsContent({ dashboardData }) {
       ) : null}
 
       <div className={styles.dealsFilters}>
+        <label className={styles.dealsFilterField}>
+          <span>Pipeline</span>
+          <select
+            className={styles.dealsFilterSelect}
+            value={pipelineFilter}
+            onChange={(event) => setPipelineFilter(event.target.value)}
+          >
+            {pipelineOptions.map((pipeline) => (
+              <option key={pipeline.id} value={pipeline.id}>{pipeline.label}</option>
+            ))}
+          </select>
+        </label>
+
         <label className={styles.dealsFilterField}>
           <span>Por proprietario</span>
           <select
@@ -193,9 +225,9 @@ export function DealsContent({ dashboardData }) {
                   key={deal.id}
                   className={styles.pipelineDealCard}
                   draggable={busyDealId !== deal.id}
+                  onClick={() => router.push(`/negocios/${sellerToSlug(deal.name)}-${deal.id}`)}
                   onDragStart={() => setDraggedDealId(deal.id)}
                   onDragEnd={() => setDraggedDealId("")}
-                  onDoubleClick={() => router.push(`/negocios/${sellerToSlug(deal.name)}-${deal.id}`)}
                 >
                   {collapsedStages[column.stage] ? null : (
                     <>
@@ -214,13 +246,14 @@ export function DealsContent({ dashboardData }) {
                           <select
                             className={styles.pipelineStageSelect}
                             value={stageDrafts[deal.id] || deal.stageId || column.stageId}
+                            onClick={(event) => event.stopPropagation()}
                             onChange={(event) => setStageDrafts((current) => ({
                               ...current,
                               [deal.id]: event.target.value,
                             }))}
-                            disabled={busyDealId === deal.id}
+                            disabled={busyDealId === deal.id || !stageOptions.length}
                           >
-                            {pipelineStages.map((stage) => (
+                            {stageOptions.map((stage) => (
                               <option key={stage.id} value={stage.id}>{stage.label}</option>
                             ))}
                           </select>
@@ -228,9 +261,10 @@ export function DealsContent({ dashboardData }) {
                         <button
                           type="button"
                           className={styles.secondaryActionButton}
-                          onClick={() => {
+                          onClick={(event) => {
+                            event.stopPropagation();
                             const targetStageId = stageDrafts[deal.id] || deal.stageId || column.stageId;
-                            const targetStage = pipelineStages.find((stage) => stage.id === targetStageId);
+                            const targetStage = stageOptions.find((stage) => stage.id === targetStageId);
                             if (!targetStage) {
                               return;
                             }

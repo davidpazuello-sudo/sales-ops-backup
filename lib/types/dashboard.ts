@@ -46,11 +46,27 @@ export type DashboardDeal = {
   name: string;
   owner: string;
   stage: string;
+  pipelineId?: string;
+  pipelineLabel?: string;
   amountLabel: string;
   staleLabel: string;
   stageId?: string;
   amount?: number;
   lastTouchDays?: number | null;
+};
+
+export type DashboardPipelineDefinitionStage = {
+  id: string;
+  label: string;
+  displayOrder?: number;
+  isClosed?: boolean;
+};
+
+export type DashboardPipelineDefinition = {
+  id: string;
+  label: string;
+  displayOrder?: number;
+  stages: DashboardPipelineDefinitionStage[];
 };
 
 export type DashboardTask = {
@@ -175,12 +191,15 @@ export type PipelineStage = {
   totalAmount: number;
   totalLabel: string;
   isClosed: boolean;
+  displayOrder?: number;
 };
 
 export type DashboardPipeline = {
   stages: PipelineStage[];
   totalOpenDeals: number;
   totalClosedDeals: number;
+  items?: DashboardPipelineDefinition[];
+  defaultPipelineId?: string;
 };
 
 export type DashboardStates = {
