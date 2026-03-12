@@ -129,4 +129,17 @@ describe("supabase middleware authorization", () => {
     expect(response.status).toBe(401);
     expect(await response.json()).toEqual({ error: "Nao autenticado." });
   });
+
+  it("allows public operational APIs without authentication", async () => {
+    const middleware = await loadMiddleware({
+      user: null,
+      role: "",
+    });
+
+    const healthResponse = await middleware.updateSession(createRequest("/api/health"));
+    const webhookResponse = await middleware.updateSession(createRequest("/api/hubspot/webhooks"));
+
+    expect(healthResponse.status).toBe(200);
+    expect(webhookResponse.status).toBe(200);
+  });
 });
