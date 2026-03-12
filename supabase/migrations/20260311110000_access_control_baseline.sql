@@ -123,7 +123,7 @@ stable
 security definer
 set search_path = public
 as $$
-  with current_role as (
+  with current_role_cte as (
     select public.current_app_role() as role_name
   ),
   role_rank as (
@@ -142,7 +142,7 @@ as $$
         when 'Vendedor' then 1
         else 0
       end as required_rank
-    from current_role
+    from current_role_cte
   )
   select current_rank >= required_rank
   from role_rank;
