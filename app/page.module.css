@@ -516,6 +516,25 @@
   line-height: 1.1;
 }
 
+.pageTitleRow {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.pageTitleStatus {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+
+.pageTitleSpinner {
+  width: 16px;
+  height: 16px;
+}
+
 .settingsHeader p {
   max-width: 760px;
   margin: 10px 0 0;
@@ -1316,6 +1335,27 @@
   gap: 10px;
   align-items: flex-end;
   margin: 12px 0 18px;
+}
+
+.filterActionGroup {
+  display: flex;
+  align-items: flex-end;
+}
+
+.filterApplyButton {
+  min-width: 112px;
+  justify-content: center;
+}
+
+.filterApplyButton:disabled {
+  cursor: default;
+  opacity: 0.55;
+  transform: none;
+  box-shadow: none;
+}
+
+.filterApplyButton:disabled:hover {
+  transform: none;
 }
 
 .dealsFilterField {

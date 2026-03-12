@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Card, Metric } from "../dashboard-ui";
+import { Card, Metric, PageTitle } from "../dashboard-ui";
 import PageAgentPanel, { PageAgentToggleButton } from "../page-agent-panel";
 import {
   SectionEmptyState,
@@ -91,6 +91,8 @@ export function TasksContent({ dashboardData, sessionUser = {} }) {
   const [agentOpen, setAgentOpen] = useState(false);
   const [ownerFilter, setOwnerFilter] = useState("todos");
   const [typeFilter, setTypeFilter] = useState("todos");
+  const [ownerDraft, setOwnerDraft] = useState("todos");
+  const [typeDraft, setTypeDraft] = useState("todos");
 
   const allTasks = dashboardData.tasks || [];
   const teamAccess = canViewTeamTasks(sessionUser);
@@ -108,12 +110,21 @@ export function TasksContent({ dashboardData, sessionUser = {} }) {
       ? "Voce pode acompanhar as proximas tarefas da HubSpot e filtrar por vendedor."
       : `Mostrando as proximas tarefas do vendedor ${ownerFilter}.`)
     : "Mostrando apenas tarefas futuras ligadas ao seu usuario na HubSpot.";
+  const filtersDirty = ownerDraft !== ownerFilter || typeDraft !== typeFilter;
+
+  function handleApplyFilters(event) {
+    event.preventDefault();
+    setOwnerFilter(ownerDraft);
+    setTypeFilter(typeDraft);
+  }
 
   return (
     <section className={styles.dashboardSection}>
       <header className={styles.sectionHeaderBar}>
         <div className={styles.settingsHeader}>
-          <h1>Tarefas</h1>
+          <PageTitle loading={loadingState === "loading"} loadingLabel="Carregando tarefas da HubSpot">
+            Tarefas
+          </PageTitle>
           <p>Reunioes, chamadas e tarefas comerciais futuras sincronizadas com a HubSpot e respeitando o cargo do usuario.</p>
         </div>
         <PageAgentToggleButton agentId="tasks" open={agentOpen} onToggle={() => setAgentOpen((value) => !value)} />
@@ -134,14 +145,14 @@ export function TasksContent({ dashboardData, sessionUser = {} }) {
         </div>
       ) : null}
 
-      <div className={styles.dealsFilters}>
+      <form className={styles.dealsFilters} onSubmit={handleApplyFilters}>
         {teamAccess ? (
           <label className={styles.dealsFilterField}>
             <span>Vendedor</span>
             <select
               className={styles.dealsFilterSelect}
-              value={ownerFilter}
-              onChange={(event) => setOwnerFilter(event.target.value)}
+              value={ownerDraft}
+              onChange={(event) => setOwnerDraft(event.target.value)}
             >
               <option value="todos">Todos</option>
               {ownerOptions.map((owner) => (
@@ -155,8 +166,8 @@ export function TasksContent({ dashboardData, sessionUser = {} }) {
           <span>Tipo</span>
           <select
             className={styles.dealsFilterSelect}
-            value={typeFilter}
-            onChange={(event) => setTypeFilter(event.target.value)}
+            value={typeDraft}
+            onChange={(event) => setTypeDraft(event.target.value)}
           >
             <option value="todos">Todos</option>
             <option value="meeting">Reunioes</option>
@@ -164,7 +175,12 @@ export function TasksContent({ dashboardData, sessionUser = {} }) {
             <option value="task">Outras tarefas</option>
           </select>
         </label>
-      </div>
+        <div className={styles.filterActionGroup}>
+          <button type="submit" className={`${styles.primaryActionButton} ${styles.filterApplyButton}`.trim()} disabled={!filtersDirty}>
+            Filtrar
+          </button>
+        </div>
+      </form>
 
       <div className={styles.taskScopeHint}>{scopeMessage}</div>
 

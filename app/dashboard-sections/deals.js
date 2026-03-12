@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   Card,
+  PageTitle,
   Row,
 } from "../dashboard-ui";
 import PageAgentPanel, { PageAgentToggleButton } from "../page-agent-panel";
@@ -31,9 +32,9 @@ export function DealsContent({
   const router = useRouter();
   const [boardDeals, setBoardDeals] = useState(dashboardData.deals);
   const [draggedDealId, setDraggedDealId] = useState("");
-  const [pipelineFilter, setPipelineFilter] = useState("");
-  const [ownerFilter, setOwnerFilter] = useState(initialOwnerFilter || "todos");
-  const [activityWeeksFilter, setActivityWeeksFilter] = useState(initialActivityWeeksFilter || "1");
+  const [pipelineDraft, setPipelineDraft] = useState("");
+  const [ownerDraft, setOwnerDraft] = useState(initialOwnerFilter || "todos");
+  const [activityWeeksDraft, setActivityWeeksDraft] = useState(initialActivityWeeksFilter || "1");
   const [collapsedStages, setCollapsedStages] = useState({});
   const [stageDrafts, setStageDrafts] = useState({});
   const [agentOpen, setAgentOpen] = useState(false);
@@ -47,39 +48,41 @@ export function DealsContent({
 
   useEffect(() => {
     const nextDefaultPipelineId = getDefaultPipelineId(dashboardData.pipeline);
-    setPipelineFilter((current) => {
-      const hasCurrentPipeline = Array.isArray(dashboardData.pipeline?.items)
-        && dashboardData.pipeline.items.some((item) => item.id === current);
-      return hasCurrentPipeline ? current : nextDefaultPipelineId;
-    });
+    setPipelineDraft(nextDefaultPipelineId);
   }, [dashboardData.pipeline]);
 
   useEffect(() => {
-    setOwnerFilter(String(initialOwnerFilter || "todos"));
+    setOwnerDraft(String(initialOwnerFilter || "todos"));
   }, [initialOwnerFilter]);
 
   useEffect(() => {
-    setActivityWeeksFilter(String(initialActivityWeeksFilter || "1"));
+    setActivityWeeksDraft(String(initialActivityWeeksFilter || "1"));
   }, [initialActivityWeeksFilter]);
 
+  const currentPipelineId = getDefaultPipelineId(dashboardData.pipeline);
+  const currentOwnerFilter = String(initialOwnerFilter || "todos");
+  const currentActivityWeeksFilter = String(initialActivityWeeksFilter || "1");
   const ownerOptions = getOwnerOptions(boardDeals);
   const pipelineOptions = getPipelineOptions(dashboardData.pipeline);
   const loadingState = dashboardData.states?.loading || "ready";
   const stateErrors = dashboardData.states?.errors || [];
-  const visibleDeals = getVisibleDeals(boardDeals, ownerFilter, activityWeeksFilter, pipelineFilter);
-  const boardColumns = getBoardColumns(visibleDeals, dashboardData.pipeline, pipelineFilter);
+  const visibleDeals = getVisibleDeals(boardDeals, currentOwnerFilter, currentActivityWeeksFilter, currentPipelineId);
+  const boardColumns = getBoardColumns(visibleDeals, dashboardData.pipeline, currentPipelineId);
   const selectedPipeline = Array.isArray(dashboardData.pipeline?.items)
-    ? dashboardData.pipeline.items.find((item) => item.id === pipelineFilter)
+    ? dashboardData.pipeline.items.find((item) => item.id === currentPipelineId)
     : null;
   const stageOptions = Array.isArray(selectedPipeline?.stages) && selectedPipeline.stages.length
     ? selectedPipeline.stages
     : pipelineStages;
+  const filtersDirty = pipelineDraft !== currentPipelineId
+    || ownerDraft !== currentOwnerFilter
+    || activityWeeksDraft !== currentActivityWeeksFilter;
 
   function updateDealsRoute(nextFilters = {}) {
-    const fallbackPipelineId = pipelineFilter || getDefaultPipelineId(dashboardData.pipeline);
+    const fallbackPipelineId = currentPipelineId || getDefaultPipelineId(dashboardData.pipeline);
     const targetPipelineId = String((nextFilters.pipelineId ?? fallbackPipelineId) || "").trim();
-    const targetOwnerFilter = String((nextFilters.ownerFilter ?? ownerFilter) || "todos").trim() || "todos";
-    const targetActivityWeeksFilter = String((nextFilters.activityWeeksFilter ?? activityWeeksFilter) || "1").trim() || "1";
+    const targetOwnerFilter = String((nextFilters.ownerFilter ?? currentOwnerFilter) || "todos").trim() || "todos";
+    const targetActivityWeeksFilter = String((nextFilters.activityWeeksFilter ?? currentActivityWeeksFilter) || "1").trim() || "1";
     const searchParams = new URLSearchParams();
 
     if (targetPipelineId) {
@@ -99,16 +102,16 @@ export function DealsContent({
     router.replace(nextRoute, { scroll: false });
   }
 
-  function handlePipelineFilterChange(nextPipelineId) {
-    updateDealsRoute({ pipelineId: nextPipelineId });
-  }
-
-  function handleOwnerFilterChange(nextOwnerFilter) {
-    updateDealsRoute({ ownerFilter: nextOwnerFilter });
-  }
-
-  function handleActivityWeeksFilterChange(nextActivityWeeksFilter) {
-    updateDealsRoute({ activityWeeksFilter: nextActivityWeeksFilter });
+  function handleFiltersApply(event) {
+    event.preventDefault();
+    if (!filtersDirty) {
+      return;
+    }
+    updateDealsRoute({
+      pipelineId: pipelineDraft,
+      ownerFilter: ownerDraft,
+      activityWeeksFilter: activityWeeksDraft,
+    });
   }
 
   async function handleStageUpdate(dealId, stageId, stageLabel) {
@@ -164,7 +167,9 @@ export function DealsContent({
     <section className={`${styles.dashboardSection} ${styles.dealsSection}`.trim()}>
       <header className={styles.sectionHeaderBar}>
         <div className={styles.settingsHeader}>
-          <h1>Negocios</h1>
+          <PageTitle loading={loadingState === "loading"} loadingLabel="Carregando pipeline da HubSpot">
+            Negocios
+          </PageTitle>
         </div>
         <PageAgentToggleButton agentId="deals" open={agentOpen} onToggle={() => setAgentOpen((value) => !value)} />
       </header>
@@ -181,13 +186,13 @@ export function DealsContent({
         </SectionNotice>
       ) : null}
 
-      <div className={styles.dealsFilters}>
+      <form className={styles.dealsFilters} onSubmit={handleFiltersApply}>
         <label className={styles.dealsFilterField}>
           <span>Pipeline</span>
           <select
             className={styles.dealsFilterSelect}
-            value={pipelineFilter}
-            onChange={(event) => handlePipelineFilterChange(event.target.value)}
+            value={pipelineDraft}
+            onChange={(event) => setPipelineDraft(event.target.value)}
           >
             {pipelineOptions.map((pipeline) => (
               <option key={pipeline.id} value={pipeline.id}>{pipeline.label}</option>
@@ -199,8 +204,8 @@ export function DealsContent({
           <span>Por proprietario</span>
           <select
             className={styles.dealsFilterSelect}
-            value={ownerFilter}
-            onChange={(event) => handleOwnerFilterChange(event.target.value)}
+            value={ownerDraft}
+            onChange={(event) => setOwnerDraft(event.target.value)}
           >
             <option value="todos">Todos</option>
             {ownerOptions.map((owner) => (
@@ -213,8 +218,8 @@ export function DealsContent({
           <span>Tempo da ultima atividade</span>
           <select
             className={styles.dealsFilterSelect}
-            value={activityWeeksFilter}
-            onChange={(event) => handleActivityWeeksFilterChange(event.target.value)}
+            value={activityWeeksDraft}
+            onChange={(event) => setActivityWeeksDraft(event.target.value)}
           >
             <option value="1">1 semana</option>
             <option value="2">2 semanas</option>
@@ -222,7 +227,12 @@ export function DealsContent({
             <option value="4">4 semanas</option>
           </select>
         </label>
-      </div>
+        <div className={styles.filterActionGroup}>
+          <button type="submit" className={`${styles.primaryActionButton} ${styles.filterApplyButton}`.trim()} disabled={!filtersDirty}>
+            Filtrar
+          </button>
+        </div>
+      </form>
 
       {stateErrors.length ? (
         <SectionNotice variant="error">{stateErrors[0] || "A pipeline ainda nao conseguiu carregar dados reais."}</SectionNotice>
@@ -363,6 +373,7 @@ export function DealsContent({
 
 export function DealProfileContent({ dashboardData, dealId }) {
   const router = useRouter();
+  const loadingState = dashboardData.states?.loading || "ready";
   const deal = findDealByRouteId(dashboardData.deals, dealId);
   const relatedTasks = (dashboardData.tasks || [])
     .filter((task) => Array.isArray(task.dealIds) && task.dealIds.includes(deal?.id));
@@ -374,7 +385,9 @@ export function DealProfileContent({ dashboardData, dealId }) {
     return (
       <section className={styles.dashboardSection}>
         <header className={styles.settingsHeader}>
-          <h1>Negocio nao encontrado</h1>
+          <PageTitle loading={loadingState === "loading"} loadingLabel="Carregando negocio da HubSpot">
+            Negocio nao encontrado
+          </PageTitle>
           <p>Nao localizamos esse negocio no pipeline atual.</p>
         </header>
         <button type="button" className={styles.secondaryActionButton} onClick={() => router.push("/negocios")}>
@@ -387,7 +400,9 @@ export function DealProfileContent({ dashboardData, dealId }) {
   return (
     <section className={styles.dashboardSection}>
       <header className={styles.settingsHeader}>
-        <h1>{deal.name}</h1>
+        <PageTitle loading={loadingState === "loading"} loadingLabel="Carregando negocio da HubSpot">
+          {deal.name}
+        </PageTitle>
         <p>Perfil operacional do negocio, com atividades e proximos passos puxados do fluxo real.</p>
       </header>
 

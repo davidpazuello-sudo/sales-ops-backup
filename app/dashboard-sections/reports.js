@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Card, Metric, Table } from "../dashboard-ui";
+import { Card, Metric, PageTitle, Table } from "../dashboard-ui";
 import PageAgentPanel, { PageAgentToggleButton } from "../page-agent-panel";
 import {
   SectionEmptyState,
@@ -18,7 +18,9 @@ export function ReportsContent({ dashboardData }) {
     <section className={styles.dashboardSection}>
       <header className={styles.sectionHeaderBar}>
         <div className={styles.settingsHeader}>
-          <h1>Relatorios</h1>
+          <PageTitle loading={loadingState === "loading"} loadingLabel="Carregando relatorios da HubSpot">
+            Relatorios
+          </PageTitle>
           <p>Resumo executivo puxado da HubSpot, com visao por vendedor e pipeline aberto.</p>
         </div>
         <PageAgentToggleButton agentId="reports" open={agentOpen} onToggle={() => setAgentOpen((value) => !value)} />

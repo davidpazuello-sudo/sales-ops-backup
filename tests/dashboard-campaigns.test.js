@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   aggregateCampaignSummary,
   buildCampaignSummaries,
+  PRIMARY_CAMPAIGN_CONTACT_VALUE,
   PRIMARY_CAMPAIGN_NAME,
 } from "../lib/services/dashboard-campaigns";
 
@@ -87,6 +88,30 @@ describe("dashboard campaigns service", () => {
     expect(campaigns[0].sales.closedWonCount).toBe(1);
     expect(campaigns[0].meetingCount).toBe(1);
     expect(campaigns[0].smartGoals).toHaveLength(4);
+  });
+
+  it("accepts the HubSpot contact property value for the primary campaign", () => {
+    const campaigns = buildCampaignSummaries({
+      contacts: [
+        {
+          id: "contact-2026-1",
+          campaignName: PRIMARY_CAMPAIGN_CONTACT_VALUE,
+          lifecycleStage: "marketingqualifiedlead",
+          leadStatus: "",
+        },
+        {
+          id: "contact-2026-2",
+          campaignName: PRIMARY_CAMPAIGN_CONTACT_VALUE,
+          lifecycleStage: "salesqualifiedlead",
+          leadStatus: "SQL",
+        },
+      ],
+    });
+
+    expect(campaigns).toHaveLength(1);
+    expect(campaigns[0].name).toBe(PRIMARY_CAMPAIGN_CONTACT_VALUE);
+    expect(campaigns[0].qualification.mqlCount).toBe(1);
+    expect(campaigns[0].qualification.sqlCount).toBe(1);
   });
 
   it("aggregates multiple campaigns into a portfolio-level summary", () => {

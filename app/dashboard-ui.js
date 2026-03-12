@@ -193,6 +193,24 @@ export function PhotoOption({ profilePhoto, onPhotoChange }) {
   );
 }
 
+export function PageTitle({
+  children,
+  loading = false,
+  loadingLabel = "Carregando integracao",
+}) {
+  return (
+    <div className={styles.pageTitleRow}>
+      <h1>{children}</h1>
+      {loading ? (
+        <span className={styles.pageTitleStatus} role="status" aria-live="polite" aria-label={loadingLabel}>
+          <span className={`${styles.sectionLoadingSpinner} ${styles.pageTitleSpinner}`.trim()} aria-hidden="true" />
+          <span className={styles.srOnly}>{loadingLabel}</span>
+        </span>
+      ) : null}
+    </div>
+  );
+}
+
 export function Card({ eyebrow, title, children, wide = false, className = "" }) {
   return (
     <section className={`${styles.card} ${wide ? styles.cardWide : ""} ${className}`.trim()}>

@@ -7,6 +7,7 @@ import {
   getNavIcon,
   LogoutIcon,
   MenuIcon,
+  PageTitle,
   PanelsIcon,
   SearchIcon,
   SimpleArrow,
@@ -239,7 +240,9 @@ export default function DashboardShell({
             <div className={`${styles.settingsContent} ${profileViewOpen ? styles.settingsContentFull : ""}`.trim()}>
               <header className={styles.sectionHeaderBar}>
                 <div className={styles.settingsHeader}>
-                  <h1>{resolvedCurrentSection?.label}</h1>
+                  <PageTitle loading={dashboardData.states?.loading === "loading"} loadingLabel="Carregando integracao">
+                    {resolvedCurrentSection?.label}
+                  </PageTitle>
                   <p>{resolvedCurrentSection?.description}</p>
                 </div>
                 <PageAgentToggleButton
@@ -269,7 +272,9 @@ export default function DashboardShell({
             <div className={`${styles.settingsContent} ${styles.settingsContentFull}`.trim()}>
               <header className={styles.sectionHeaderBar}>
                 <div className={styles.settingsHeader}>
-                  <h1>{currentSection?.label}</h1>
+                  <PageTitle loading={dashboardData.states?.loading === "loading"} loadingLabel="Carregando integracao">
+                    {currentSection?.label}
+                  </PageTitle>
                   <p>{currentSection?.description}</p>
                 </div>
                 <PageAgentToggleButton

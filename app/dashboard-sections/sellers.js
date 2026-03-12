@@ -6,6 +6,7 @@ import {
   Card,
   MeetingIcon,
   Metric,
+  PageTitle,
   Row,
 } from "../dashboard-ui";
 import PageAgentPanel, { PageAgentToggleButton } from "../page-agent-panel";
@@ -40,7 +41,9 @@ export function SellerMeetingsContent({ dashboardData, sellerSlug }) {
       <section className={styles.dashboardSection}>
         <header className={styles.sellerDetailHeader}>
           <div className={styles.settingsHeader}>
-            <h1>Reunioes</h1>
+            <PageTitle loading={loadingState === "loading"} loadingLabel="Carregando reunioes da HubSpot">
+              Reunioes
+            </PageTitle>
             <p>Nao encontramos um vendedor sincronizado para esta tela.</p>
           </div>
         </header>
@@ -56,7 +59,9 @@ export function SellerMeetingsContent({ dashboardData, sellerSlug }) {
     <section className={styles.dashboardSection}>
       <header className={styles.sellerDetailHeader}>
         <div className={styles.settingsHeader}>
-          <h1>Reunioes internas</h1>
+          <PageTitle loading={loadingState === "loading"} loadingLabel="Carregando reunioes da HubSpot">
+            Reunioes internas
+          </PageTitle>
           <p>{seller.name} · Lista consolidada de alinhamentos internos e rituais de acompanhamento.</p>
         </div>
         <div className={styles.sellerMeetingActions}>
@@ -112,9 +117,25 @@ export function SellerMeetingDetailContent({ dashboardData, sellerSlug, meetingI
   const [formError, setFormError] = useState("");
   const [formMessage, setFormMessage] = useState("");
   const [saving, setSaving] = useState(false);
+  const loadingState = dashboardData.states?.loading || "ready";
+  const stateErrors = dashboardData.states?.errors || [];
   const seller = dashboardData.sellers.find((item) => sellerToSlug(item.name) === sellerSlug) || dashboardData.sellers[0];
   const meetings = getMeetingsForSeller(dashboardData, seller);
-  const meeting = meetings.find((item) => (item.slug || meetingToSlug(item)) === meetingId) || meetings[0];
+  const selectedMeeting = meetings.find((item) => (item.slug || meetingToSlug(item)) === meetingId) || meetings[0];
+  const meeting = selectedMeeting
+    ? {
+        ...selectedMeeting,
+        title: selectedMeeting.title || "Reuniao interna",
+        date: selectedMeeting.dateLabel || selectedMeeting.date || "Sem data",
+        time: selectedMeeting.timeLabel || selectedMeeting.time || "Sem horario",
+        type: selectedMeeting.type || "Reuniao",
+      }
+    : {
+        title: "Reuniao interna",
+        date: "Sem data",
+        time: "Sem horario",
+        type: "Reuniao",
+      };
   const isNewMeeting = meetingId === "nova";
 
   useEffect(() => {
@@ -131,6 +152,28 @@ export function SellerMeetingDetailContent({ dashboardData, sellerSlug, meetingI
       time: current.time || timePart,
     }));
   }, [isNewMeeting]);
+
+  if (!seller) {
+    return (
+      <section className={styles.dashboardSection}>
+        <header className={styles.settingsHeader}>
+          <PageTitle loading={loadingState === "loading"} loadingLabel="Carregando reuniao da HubSpot">
+            {isNewMeeting ? "Registrar nova reuniao" : "Reuniao interna"}
+          </PageTitle>
+          <p>Preparando os dados do vendedor para esta tela.</p>
+        </header>
+        {stateErrors.length ? (
+          <SectionNotice variant="error">{stateErrors[0] || "Nao foi possivel carregar o vendedor agora."}</SectionNotice>
+        ) : null}
+        <SectionEmptyState
+          title={loadingState === "loading" ? "Carregando vendedor" : "Vendedor nao encontrado"}
+          description={loadingState === "loading"
+            ? "Aguarde alguns instantes enquanto sincronizamos os dados da HubSpot."
+            : "Volte para a lista de vendedores e tente abrir novamente."}
+        />
+      </section>
+    );
+  }
 
   async function handleMeetingSave() {
     const title = formData.title.trim();
@@ -176,7 +219,9 @@ export function SellerMeetingDetailContent({ dashboardData, sellerSlug, meetingI
     <section className={styles.dashboardSection}>
       <header className={styles.sellerDetailHeader}>
         <div className={styles.settingsHeader}>
-          <h1>{isNewMeeting ? "Registrar nova reuniao" : meeting.title}</h1>
+          <PageTitle loading={loadingState === "loading"} loadingLabel="Carregando reuniao da HubSpot">
+            {isNewMeeting ? "Registrar nova reuniao" : meeting.title}
+          </PageTitle>
           <p>{isNewMeeting ? `Novo registro interno para ${seller.name}, preparado para posterior sincronizacao com a HubSpot.` : `${meeting.date} · ${meeting.time} · ${meeting.type}`}</p>
         </div>
       </header>
@@ -281,18 +326,27 @@ export function SellerMeetingDetailContent({ dashboardData, sellerSlug, meetingI
 export function SellersContent({ dashboardData }) {
   const router = useRouter();
   const [sellerFilter, setSellerFilter] = useState("");
+  const [sellerDraft, setSellerDraft] = useState("");
   const [agentOpen, setAgentOpen] = useState(false);
   const loadingState = dashboardData.states?.loading || "ready";
   const stateErrors = dashboardData.states?.errors || [];
   const filteredSellers = dashboardData.sellers.filter((seller) =>
     seller.name.toLowerCase().includes(sellerFilter.trim().toLowerCase()),
   );
+  const filtersDirty = sellerDraft.trim() !== sellerFilter;
+
+  function handleApplyFilters(event) {
+    event.preventDefault();
+    setSellerFilter(sellerDraft.trim());
+  }
 
   return (
     <section className={styles.dashboardSection}>
       <header className={styles.sectionHeaderBar}>
         <div className={styles.settingsHeader}>
-          <h1>Vendedores</h1>
+          <PageTitle loading={loadingState === "loading"} loadingLabel="Carregando usuarios da HubSpot">
+            Vendedores
+          </PageTitle>
         </div>
         <PageAgentToggleButton agentId="sellers" open={agentOpen} onToggle={() => setAgentOpen((value) => !value)} />
       </header>
@@ -303,12 +357,17 @@ export function SellersContent({ dashboardData }) {
         </div>
       ) : null}
 
-      <div className={styles.dealsFilters}>
+      <form className={styles.dealsFilters} onSubmit={handleApplyFilters}>
         <label className={styles.dealsFilterField}>
           <span>Filtrar por nome</span>
-          <input type="text" className={styles.dealsFilterInput} value={sellerFilter} onChange={(event) => setSellerFilter(event.target.value)} placeholder="Buscar vendedor" />
+          <input type="text" className={styles.dealsFilterInput} value={sellerDraft} onChange={(event) => setSellerDraft(event.target.value)} placeholder="Buscar vendedor" />
         </label>
-      </div>
+        <div className={styles.filterActionGroup}>
+          <button type="submit" className={`${styles.primaryActionButton} ${styles.filterApplyButton}`.trim()} disabled={!filtersDirty}>
+            Filtrar
+          </button>
+        </div>
+      </form>
 
       {stateErrors.length ? (
         <SectionNotice variant="error">{stateErrors[0] || "A lista de vendedores ainda nao conseguiu carregar dados reais."}</SectionNotice>
@@ -377,13 +436,16 @@ export function SellersContent({ dashboardData }) {
 export function SellerProfileContent({ dashboardData, sellerSlug }) {
   const router = useRouter();
   const [selectedStage, setSelectedStage] = useState("");
+  const loadingState = dashboardData.states?.loading || "ready";
   const seller = dashboardData.sellers.find((item) => sellerToSlug(item.name) === sellerSlug) || dashboardData.sellers[0];
 
   if (!seller) {
     return (
       <section className={styles.dashboardSection}>
         <header className={styles.settingsHeader}>
-          <h1>Vendedores</h1>
+          <PageTitle loading={loadingState === "loading"} loadingLabel="Carregando vendedor da HubSpot">
+            Vendedores
+          </PageTitle>
           <p>Nao encontramos um vendedor sincronizado para este perfil ainda.</p>
         </header>
         <div className={styles.sectionEmptyPanel}>
@@ -412,7 +474,9 @@ export function SellerProfileContent({ dashboardData, sellerSlug }) {
         <div className={styles.sellerDetailIdentity}>
           <div className={styles.sellerDetailAvatar}>{seller.initials}</div>
           <div className={`${styles.settingsHeader} ${styles.sellerDetailHeaderBlock}`.trim()}>
-            <h1>{seller.name}</h1>
+            <PageTitle loading={loadingState === "loading"} loadingLabel="Carregando vendedor da HubSpot">
+              {seller.name}
+            </PageTitle>
             <p>{seller.team}</p>
           </div>
           <div className={`${styles.sellerMeetingActions} ${styles.sellerProfileMeetingActions}`.trim()}>
