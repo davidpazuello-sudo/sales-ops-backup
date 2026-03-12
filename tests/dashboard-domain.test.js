@@ -14,6 +14,7 @@ describe("dashboard domain", () => {
       "meetings",
       "tasks",
       "audit_logs",
+      "system_events",
     ]);
   });
 

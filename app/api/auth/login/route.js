@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { writeAuditLog } from "lib/audit-log-store";
 import { createClient } from "lib/supabase/server";
 import { mapSupabaseUser } from "lib/supabase/shared";
 import { readMfaState } from "lib/supabase/mfa";
@@ -7,6 +8,10 @@ import { consumeRateLimit, getRequestClientKey } from "lib/auth-rate-limit";
 import { logAuthRouteError, logRateLimitEvent, logSecurityEvent } from "lib/auth-logging";
 import { normalizeEmail } from "lib/auth-flows";
 import { isCorporateEmail } from "lib/supabase/shared";
+
+function isSensitiveLoginRole(role) {
+  return ["Admin", "Gerente", "Supervisor"].includes(String(role || ""));
+}
 
 export async function POST(request) {
   const body = await request.json().catch(() => null);
@@ -81,7 +86,34 @@ export async function POST(request) {
       email,
       userId: data.user.id,
       role,
+      clientKey,
     });
+  }
+
+  logSecurityEvent("info", "auth.login_succeeded", {
+    route: "api/auth/login",
+    email,
+    userId: data.user.id,
+    role,
+    clientKey,
+    requiresTwoFactor: mfa.requiresTwoFactor,
+  });
+
+  if (isSensitiveLoginRole(role) || mfa.requiresTwoFactor) {
+    await writeAuditLog({
+      actorUserId: data.user.id,
+      actorEmail: email,
+      actorRole: role,
+      action: "auth.login_sensitive",
+      entityType: "auth_user",
+      entityId: data.user.id,
+      route: "api/auth/login",
+      details: {
+        requiresTwoFactor: mfa.requiresTwoFactor,
+        twoFactorEnabled: mfa.hasTotpFactor,
+        clientKey,
+      },
+    }).catch(() => null);
   }
 
   return NextResponse.json({

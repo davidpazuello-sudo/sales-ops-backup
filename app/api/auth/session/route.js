@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { consumeRateLimit, getRequestClientKey } from "lib/auth-rate-limit";
-import { logAuthRouteError, logRateLimitEvent } from "lib/auth-logging";
+import { logAuthRouteError, logRateLimitEvent, logSecurityEvent } from "lib/auth-logging";
 import { readE2EUserFromCookies } from "lib/e2e-auth";
 import { createClient } from "lib/supabase/server";
 import { mapSupabaseUser } from "lib/supabase/shared";
@@ -58,6 +58,25 @@ export async function GET(request) {
   const role = await resolveAuthorizedRole(supabase, user);
   const mfa = await readMfaState(supabase);
   const authorizedAccess = Boolean(role);
+
+  if (!authorizedAccess) {
+    logSecurityEvent("warn", "auth.session_role_denied", {
+      route: "api/auth/session",
+      clientKey,
+      email: user.email || "",
+      userId: user.id,
+    });
+  }
+
+  if (mfa.requiresTwoFactor) {
+    logSecurityEvent("info", "auth.session_mfa_pending", {
+      route: "api/auth/session",
+      clientKey,
+      email: user.email || "",
+      userId: user.id,
+      role,
+    });
+  }
 
   return NextResponse.json({
     authenticated: true,

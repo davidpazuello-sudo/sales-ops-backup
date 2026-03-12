@@ -93,6 +93,7 @@ export async function POST(request) {
   if (decision === "rejected") {
     const resolved = await rejectAccessRequest({
       requestId,
+      actorUserId: auth.user.id,
       actorEmail: auth.user.email,
       actorName: auth.user.name,
     });
@@ -113,6 +114,7 @@ export async function POST(request) {
 
   const result = await approveAccessRequest({
     requestId,
+    actorUserId: auth.user.id,
     actorEmail: auth.user.email,
     actorName: auth.user.name,
     request,

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { requireSuperAdmin } from "lib/admin-access";
+import { writeAuditLog, writeSystemEvent } from "lib/audit-log-store";
 import { consumeRateLimit, getRequestClientKey } from "lib/auth-rate-limit";
 import { logAuthRouteError, logRateLimitEvent } from "lib/auth-logging";
 import {
@@ -110,6 +111,34 @@ export async function POST(request) {
       email,
       role,
     });
+    await writeAuditLog({
+      actorUserId: auth.user.id,
+      actorEmail: auth.user.email,
+      actorRole: auth.user.role,
+      action: "system_user.role_updated",
+      entityType: "user_role",
+      entityId: userId,
+      route: "api/admin/system-users",
+      details: {
+        targetEmail: email,
+        role,
+      },
+    }).catch(() => null);
+
+    await writeSystemEvent({
+      event: "system_user.role_updated",
+      level: "info",
+      route: "api/admin/system-users",
+      actorUserId: auth.user.id,
+      actorEmail: auth.user.email,
+      actorRole: auth.user.role,
+      message: `Cargo de ${email} atualizado para ${role}.`,
+      meta: {
+        targetUserId: userId,
+        targetEmail: email,
+        role,
+      },
+    }).catch(() => null);
 
     return NextResponse.json({
       ok: true,
