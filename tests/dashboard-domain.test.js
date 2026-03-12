@@ -141,6 +141,77 @@ describe("dashboard domain", () => {
     expect(payload.states.empty.deals).toBe(false);
   });
 
+  it("infers Aluno a Bordo campaign from deal names and contact markers", () => {
+    const payload = buildDashboardDomainPayload(
+      [
+        {
+          id: "7",
+          firstName: "Ana",
+          lastName: "Souza",
+          email: "ana@empresa.com",
+          teams: [{ name: "Enterprise", primary: true }],
+        },
+      ],
+      [
+        {
+          id: "deal-aluno-1",
+          associations: {
+            contacts: {
+              results: [{ id: "contact-aluno-1" }],
+            },
+          },
+          properties: {
+            dealname: "SEMED - MAO - Aluno a Bordo e Pais Conectados",
+            amount: "15000",
+            dealstage: "discovery",
+            pipeline: "pipeline-brasil-publico",
+            hubspot_owner_id: "7",
+            hs_lastmodifieddate: new Date().toISOString(),
+          },
+        },
+      ],
+      {
+        contacts: [
+          {
+            id: "contact-aluno-1",
+            properties: {
+              email: "alunoabordo@empresa.com",
+              alunos_a_bordo_contatos: "true",
+              lifecyclestage: "salesqualifiedlead",
+              hs_lead_status: "SQL",
+              hubspot_owner_id: "7",
+            },
+          },
+        ],
+        tasks: [],
+        calls: [],
+        meetings: [],
+      },
+      [
+        {
+          id: "pipeline-brasil-publico",
+          label: "Brasil Publico",
+          displayOrder: 0,
+          stages: [
+            {
+              id: "discovery",
+              label: "Discovery",
+              displayOrder: 0,
+              metadata: {
+                isClosed: false,
+              },
+            },
+          ],
+        },
+      ],
+    );
+
+    expect(payload.campaigns).toHaveLength(1);
+    expect(payload.campaigns[0].name).toBe("Aluno a Bordo 2026");
+    expect(payload.campaigns[0].qualifiedOpportunityCount).toBe(1);
+    expect(payload.campaigns[0].qualification.sqlCount).toBe(1);
+  });
+
   it("groups deal totals by stage", () => {
     const stages = buildPipelineStages([
       { stageId: "discovery", stageLabel: "Discovery", amount: 100, isClosed: false },

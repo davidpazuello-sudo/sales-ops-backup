@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   aggregateCampaignSummary,
   buildCampaignSummaries,
+  inferPrimaryCampaignLabel,
   PRIMARY_CAMPAIGN_CONTACT_VALUE,
   PRIMARY_CAMPAIGN_NAME,
 } from "../lib/services/dashboard-campaigns";
@@ -81,7 +82,7 @@ describe("dashboard campaigns service", () => {
     });
 
     expect(campaigns).toHaveLength(1);
-    expect(campaigns[0].name).toBe(PRIMARY_CAMPAIGN_NAME);
+    expect(campaigns[0].name).toBe(PRIMARY_CAMPAIGN_CONTACT_VALUE);
     expect(campaigns[0].qualification.mqlCount).toBe(1);
     expect(campaigns[0].qualification.sqlCount).toBe(1);
     expect(campaigns[0].sales.proposalCount).toBe(1);
@@ -112,6 +113,33 @@ describe("dashboard campaigns service", () => {
     expect(campaigns[0].name).toBe(PRIMARY_CAMPAIGN_CONTACT_VALUE);
     expect(campaigns[0].qualification.mqlCount).toBe(1);
     expect(campaigns[0].qualification.sqlCount).toBe(1);
+  });
+
+  it("canonicalizes primary campaign variants and HubSpot boolean markers", () => {
+    const campaigns = buildCampaignSummaries({
+      deals: [
+        {
+          id: "deal-aluno-1",
+          campaignName: inferPrimaryCampaignLabel("SEMED - MAO - Aluno a Bordo e Pais Conectados"),
+          stageLabel: "Discovery",
+          isWon: false,
+          isClosed: false,
+        },
+      ],
+      contacts: [
+        {
+          id: "contact-aluno-1",
+          campaignName: inferPrimaryCampaignLabel("true"),
+          lifecycleStage: "salesqualifiedlead",
+          leadStatus: "SQL",
+        },
+      ],
+    });
+
+    expect(campaigns).toHaveLength(1);
+    expect(campaigns[0].name).toBe(PRIMARY_CAMPAIGN_CONTACT_VALUE);
+    expect(campaigns[0].qualification.sqlCount).toBe(1);
+    expect(campaigns[0].qualifiedOpportunityCount).toBe(1);
   });
 
   it("aggregates multiple campaigns into a portfolio-level summary", () => {
