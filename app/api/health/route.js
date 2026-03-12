@@ -1,5 +1,11 @@
 import { jsonWithApiObservation, startApiObservation } from "lib/api-observability.js";
-import { getAppEnvironment, getHubSpotTokenSource, hasHubSpotTokenConfigured } from "lib/hubspot-runtime";
+import {
+  getAppEnvironment,
+  getHubSpotClientSecretSource,
+  getHubSpotTokenSource,
+  hasHubSpotClientSecretConfigured,
+  hasHubSpotTokenConfigured,
+} from "lib/hubspot-runtime";
 import { getPublicSupabaseConfig } from "lib/supabase/shared";
 
 export async function GET(request) {
@@ -20,6 +26,8 @@ export async function GET(request) {
       checks: {
         hubspotConfigured: hasHubSpotTokenConfigured(),
         hubspotTokenSource: getHubSpotTokenSource(),
+        hubspotWebhookSecretConfigured: hasHubSpotClientSecretConfigured(),
+        hubspotWebhookSecretSource: getHubSpotClientSecretSource(),
         supabaseConfigured: Boolean(supabase?.url && supabase?.publishableKey),
       },
     },

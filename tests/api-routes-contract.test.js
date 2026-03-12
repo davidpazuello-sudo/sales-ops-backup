@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 function createRequest({
   method = "GET",
   body = undefined,
+  rawBody = undefined,
   headers = {},
   url = "http://localhost/api/test",
 } = {}) {
@@ -19,6 +20,7 @@ function createRequest({
       },
     },
     json: vi.fn().mockResolvedValue(body),
+    text: vi.fn().mockResolvedValue(rawBody ?? JSON.stringify(body ?? {})),
   };
 }
 
@@ -88,7 +90,9 @@ describe("API route contracts", () => {
     const route = await loadModule("../app/api/health/route.js", {
       "lib/hubspot-runtime": () => ({
         getAppEnvironment: vi.fn(() => "staging"),
+        getHubSpotClientSecretSource: vi.fn(() => "HUBSPOT_CLIENT_SECRET_STAGING"),
         getHubSpotTokenSource: vi.fn(() => "HUBSPOT_ACCESS_TOKEN_STAGING"),
+        hasHubSpotClientSecretConfigured: vi.fn(() => true),
         hasHubSpotTokenConfigured: vi.fn(() => true),
       }),
       "lib/supabase/shared": () => ({
@@ -116,6 +120,8 @@ describe("API route contracts", () => {
       checks: {
         hubspotConfigured: true,
         hubspotTokenSource: "HUBSPOT_ACCESS_TOKEN_STAGING",
+        hubspotWebhookSecretConfigured: true,
+        hubspotWebhookSecretSource: "HUBSPOT_CLIENT_SECRET_STAGING",
         supabaseConfigured: true,
       },
     });
@@ -796,6 +802,98 @@ describe("API route contracts", () => {
       auditLogs: [],
       syncLogs: [],
       notifications: [],
+    });
+  });
+
+  it("returns the HubSpot webhook contract when the signature is valid", async () => {
+    const route = await loadModule("../app/api/hubspot/webhooks/route.js", {
+      "lib/hubspot-runtime": () => ({
+        getAppEnvironment: vi.fn(() => "production"),
+        getHubSpotClientSecret: vi.fn(() => "client-secret"),
+        getHubSpotClientSecretSource: vi.fn(() => "HUBSPOT_CLIENT_SECRET_PRODUCTION"),
+      }),
+      "lib/hubspot-webhooks": () => ({
+        getHubSpotWebhookEventKey: vi.fn(() => "event:event-1"),
+        parseHubSpotWebhookEvents: vi.fn(() => ([{
+          eventId: "event-1",
+          subscriptionType: "deal.propertyChange",
+          objectId: 123,
+          objectType: "deal",
+          portalId: 999,
+        }])),
+        validateHubSpotWebhookSignature: vi.fn(() => ({ ok: true })),
+      }),
+      "lib/idempotency-store": () => ({
+        reserveIdempotencyKey: vi.fn(async () => ({ ok: true, record: null })),
+        finalizeIdempotencyKey: vi.fn(async () => null),
+      }),
+      "lib/audit-log-store": () => ({
+        writeSystemEvent: vi.fn(async () => null),
+      }),
+      "lib/auth-logging": () => ({
+        logSecurityEvent: vi.fn(),
+      }),
+    });
+
+    const response = await route.POST(createRequest({
+      method: "POST",
+      url: "https://opssales.com.br/api/hubspot/webhooks",
+      rawBody: JSON.stringify([{ eventId: "event-1" }]),
+      headers: {
+        "x-hubspot-signature-v3": "signature",
+        "x-hubspot-request-timestamp": String(Date.now()),
+      },
+    }));
+    const payload = await readJsonResponse(response);
+
+    expect(payload.status).toBe(200);
+    expect(payload.body).toEqual({
+      ok: true,
+      accepted: 1,
+      duplicates: 0,
+      received: 1,
+    });
+  });
+
+  it("rejects the HubSpot webhook contract when the signature is invalid", async () => {
+    const route = await loadModule("../app/api/hubspot/webhooks/route.js", {
+      "lib/hubspot-runtime": () => ({
+        getAppEnvironment: vi.fn(() => "production"),
+        getHubSpotClientSecret: vi.fn(() => "client-secret"),
+        getHubSpotClientSecretSource: vi.fn(() => "HUBSPOT_CLIENT_SECRET_PRODUCTION"),
+      }),
+      "lib/hubspot-webhooks": () => ({
+        getHubSpotWebhookEventKey: vi.fn(),
+        parseHubSpotWebhookEvents: vi.fn(),
+        validateHubSpotWebhookSignature: vi.fn(() => ({ ok: false, reason: "signature_mismatch" })),
+      }),
+      "lib/idempotency-store": () => ({
+        reserveIdempotencyKey: vi.fn(),
+        finalizeIdempotencyKey: vi.fn(),
+      }),
+      "lib/audit-log-store": () => ({
+        writeSystemEvent: vi.fn(async () => null),
+      }),
+      "lib/auth-logging": () => ({
+        logSecurityEvent: vi.fn(),
+      }),
+    });
+
+    const response = await route.POST(createRequest({
+      method: "POST",
+      url: "https://opssales.com.br/api/hubspot/webhooks",
+      rawBody: "[]",
+      headers: {
+        "x-hubspot-signature-v3": "invalid-signature",
+        "x-hubspot-request-timestamp": String(Date.now()),
+      },
+    }));
+    const payload = await readJsonResponse(response);
+
+    expect(payload.status).toBe(401);
+    expect(payload.body).toEqual({
+      ok: false,
+      error: "Assinatura do webhook da HubSpot invalida.",
     });
   });
 });

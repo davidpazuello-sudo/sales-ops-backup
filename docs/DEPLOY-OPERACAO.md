@@ -53,6 +53,7 @@ Monitorar pelo menos:
 - status de `/api/health`
 - falhas em `/api/auth/*`
 - falhas em `/api/hubspot/dashboard`
+- falhas e rejeicoes em `/api/hubspot/webhooks`
 - falhas em `/api/deals/stage`
 - falhas em `/api/meetings`
 

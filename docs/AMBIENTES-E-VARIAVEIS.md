@@ -17,6 +17,8 @@ Obrigatorias em `staging` e `production`:
 - `NEXT_PUBLIC_APP_URL`
 - `HUBSPOT_ACCESS_TOKEN_STAGING` em `staging`
 - `HUBSPOT_ACCESS_TOKEN_PRODUCTION` em `production`
+- `HUBSPOT_CLIENT_SECRET_STAGING` em `staging` quando webhook estiver habilitado
+- `HUBSPOT_CLIENT_SECRET_PRODUCTION` em `production` quando webhook estiver habilitado
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
 - `SUPABASE_SERVICE_ROLE_KEY`
@@ -27,6 +29,8 @@ Compativeis com projetos antigos:
 
 - `HUBSPOT_ACCESS_TOKEN`
 - `HUBSPOT_ACCESS_TOKEN_DEVELOPMENT`
+- `HUBSPOT_CLIENT_SECRET`
+- `HUBSPOT_CLIENT_SECRET_DEVELOPMENT`
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 
 ## Variaveis do GitHub Actions
@@ -70,5 +74,10 @@ vercel pull --yes --environment=production
 - `staging`: usar `HUBSPOT_ACCESS_TOKEN_STAGING`
 - `production`: usar `HUBSPOT_ACCESS_TOKEN_PRODUCTION`
 - `HUBSPOT_ACCESS_TOKEN` fica apenas como fallback legada
+- `development`: preferir `HUBSPOT_CLIENT_SECRET_DEVELOPMENT` para webhooks
+- `staging`: usar `HUBSPOT_CLIENT_SECRET_STAGING` para webhooks
+- `production`: usar `HUBSPOT_CLIENT_SECRET_PRODUCTION` para webhooks
+- `HUBSPOT_CLIENT_SECRET` fica apenas como fallback legado
 
 Nao reutilize o token de producao em staging.
+Nao reutilize o client secret de producao em staging.
