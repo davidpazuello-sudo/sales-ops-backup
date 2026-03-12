@@ -3,6 +3,11 @@
 import { useState } from "react";
 import { Card, Metric, Table } from "../dashboard-ui";
 import PageAgentPanel, { PageAgentToggleButton } from "../page-agent-panel";
+import {
+  SectionEmptyState,
+  SectionLoadingState,
+  SectionNotice,
+} from "../dashboard-section-feedback";
 import styles from "../page.module.css";
 
 export function ReportsContent({ dashboardData }) {
@@ -26,19 +31,22 @@ export function ReportsContent({ dashboardData }) {
         </div>
       ) : null}
 
-      {loadingState !== "ready" || stateErrors.length ? (
-        <div className={`${styles.sectionNotice} ${stateErrors.length ? styles.sectionNoticeError : ""}`.trim()}>
-          {loadingState === "loading"
-            ? "Carregando resumo executivo real da HubSpot..."
-            : stateErrors[0] || "Os relatorios ainda nao conseguiram carregar dados reais."}
-        </div>
+      {loadingState === "loading" ? (
+        <SectionLoadingState
+          title="Carregando relatorios"
+          description="Buscando o resumo executivo e os KPIs comerciais mais recentes."
+        />
+      ) : null}
+
+      {stateErrors.length ? (
+        <SectionNotice variant="error">{stateErrors[0] || "Os relatorios ainda nao conseguiram carregar dados reais."}</SectionNotice>
       ) : null}
 
       {!dashboardData.reports.length ? (
-        <div className={styles.sectionEmptyPanel}>
-          <strong>Sem relatorios consolidados</strong>
-          <p>Assim que o dashboard receber dados reais da HubSpot, os resumos por vendedor aparecerao aqui.</p>
-        </div>
+        <SectionEmptyState
+          title="Sem relatorios consolidados"
+          description="Assim que o dashboard receber dados reais da HubSpot, os resumos por vendedor aparecerao aqui."
+        />
       ) : null}
 
       <div className={styles.grid}>

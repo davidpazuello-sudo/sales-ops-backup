@@ -77,6 +77,57 @@ export type DashboardTask = {
   source: string;
 };
 
+export type DashboardMeeting = {
+  id: string;
+  externalId: string;
+  slug: string;
+  title: string;
+  summary: string;
+  meetingAt: string | null;
+  dateLabel: string;
+  timeLabel: string;
+  type: string;
+  owner: string;
+  ownerEmail: string;
+  hubspotOwnerId: string;
+  statusLabel: string;
+  notes: string;
+  audioUrl: string;
+  audioLabel: string;
+  source: string;
+  createdAt: string | null;
+};
+
+export type DashboardAuditLog = {
+  id: string;
+  actor: string;
+  action: string;
+  when: string;
+  route: string;
+  level: string;
+  source: string;
+};
+
+export type DashboardSyncLog = {
+  id: string;
+  when: string;
+  message: string;
+  severity: string;
+  route: string;
+  source: string;
+};
+
+export type DashboardNotification = {
+  id: string;
+  title: string;
+  body: string;
+  tag: string;
+  createdAt: string | null;
+  read: boolean;
+  trash: boolean;
+  requestId: string;
+};
+
 export type CampaignGoalStatus = {
   id: string;
   label: string;
@@ -153,6 +204,10 @@ export type DashboardData = {
   alerts: string[][];
   deals: DashboardDeal[];
   tasks?: DashboardTask[];
+  meetings?: DashboardMeeting[];
+  auditLogs?: DashboardAuditLog[];
+  syncLogs?: DashboardSyncLog[];
+  notifications?: DashboardNotification[];
   campaigns?: CampaignSummary[];
   reports: string[][];
   error?: string;

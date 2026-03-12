@@ -5,6 +5,7 @@ import { getHubSpotDashboardData } from "lib/hubspot";
 import { logAuthRouteError, logRateLimitEvent } from "lib/auth-logging";
 import { assertDashboardData } from "lib/dashboard-contracts";
 import { createDashboardFallbackData } from "lib/dashboard-fallback";
+import { enrichDashboardWithOperationalData } from "lib/operational-data";
 
 export async function GET(request) {
   const auth = await requireAuthenticatedUser({
@@ -41,7 +42,8 @@ export async function GET(request) {
   }
 
   try {
-    const data = assertDashboardData(await getHubSpotDashboardData());
+    const baseData = assertDashboardData(await getHubSpotDashboardData());
+    const data = assertDashboardData(await enrichDashboardWithOperationalData(baseData, auth.user));
     return NextResponse.json(data);
   } catch (error) {
     logAuthRouteError("api/hubspot/dashboard", "load-dashboard", error, {

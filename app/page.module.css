@@ -1387,10 +1387,29 @@
   line-height: 1.5;
 }
 
+.sectionNoticeTitle {
+  display: block;
+  margin-bottom: 4px;
+  font-size: calc(12px * var(--font-scale));
+  font-weight: 800;
+}
+
+.sectionNoticeInfo {
+  border-color: rgba(22, 61, 115, 0.12);
+  background: rgba(22, 61, 115, 0.05);
+  color: #24476f;
+}
+
 .sectionNoticeError {
   border-color: rgba(180, 72, 55, 0.18);
   background: rgba(180, 72, 55, 0.08);
   color: #7d3021;
+}
+
+.sectionNoticeSuccess {
+  border-color: rgba(22, 101, 52, 0.2);
+  background: rgba(22, 163, 74, 0.09);
+  color: #166534;
 }
 
 .sectionEmptyPanel {
@@ -1412,6 +1431,52 @@
   margin: 0;
   color: #5c7698;
   font-size: calc(12px * var(--font-scale));
+}
+
+.sectionLoadingPanel {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 0 14px;
+  padding: 14px 16px;
+  border: 1px solid color-mix(in srgb, var(--border) 88%, transparent);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--panel-soft) 72%, var(--panel));
+}
+
+.sectionLoadingPanel strong {
+  display: block;
+  color: var(--heading);
+  font-size: calc(13px * var(--font-scale));
+}
+
+.sectionLoadingPanel p {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: calc(12px * var(--font-scale));
+  line-height: 1.45;
+}
+
+.sectionLoadingSpinner {
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  border: 2px solid color-mix(in srgb, var(--accent) 24%, var(--border));
+  border-top-color: var(--accent);
+  animation: sectionSpinner 0.8s linear infinite;
+  flex: 0 0 auto;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 .campaignSummaryMeta {
@@ -2064,6 +2129,34 @@
   color: var(--muted);
   font-size: calc(11px * var(--font-scale));
   line-height: 1.5;
+}
+
+.pipelineDealActions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.pipelineStageField {
+  display: block;
+  min-width: 0;
+}
+
+.pipelineStageSelect {
+  width: 100%;
+  height: 36px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--panel-soft);
+  color: var(--text);
+  font: inherit;
+}
+
+.pipelineStageSelect:disabled {
+  opacity: 0.65;
+  cursor: wait;
 }
 
 .pipelineColumnCollapsed .pipelineColumnHeader {
@@ -2783,6 +2876,12 @@
   height: min(72vh, 760px);
   border: 0;
   background: #fff;
+}
+
+@keyframes sectionSpinner {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .dealListItem {
@@ -3891,6 +3990,11 @@
   .accessRequestCard {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .pipelineDealActions {
+    grid-template-columns: 1fr;
+    width: 100%;
   }
 
   .accessRequestCard {

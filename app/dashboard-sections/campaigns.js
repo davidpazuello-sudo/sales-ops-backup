@@ -3,6 +3,11 @@
 import { useState } from "react";
 import { Card, Metric, Table } from "../dashboard-ui";
 import PageAgentPanel, { PageAgentToggleButton } from "../page-agent-panel";
+import {
+  SectionEmptyState,
+  SectionLoadingState,
+  SectionNotice,
+} from "../dashboard-section-feedback";
 import styles from "../page.module.css";
 import {
   aggregateCampaignSummary,
@@ -102,19 +107,22 @@ export function CampaignsContent({ dashboardData }) {
           : `Mostrando o acompanhamento da campanha ${selectedCampaign?.name || "selecionada"}.`}
       </div>
 
-      {loadingState !== "ready" || stateErrors.length ? (
-        <div className={`${styles.sectionNotice} ${stateErrors.length ? styles.sectionNoticeError : ""}`.trim()}>
-          {loadingState === "loading"
-            ? "Carregando campanhas reais da HubSpot..."
-            : stateErrors[0] || "As campanhas ainda nao conseguiram carregar dados reais."}
-        </div>
+      {loadingState === "loading" ? (
+        <SectionLoadingState
+          title="Carregando campanhas"
+          description="Buscando campanhas, atividades SDR e resultados mais recentes."
+        />
+      ) : null}
+
+      {stateErrors.length ? (
+        <SectionNotice variant="error">{stateErrors[0] || "As campanhas ainda nao conseguiram carregar dados reais."}</SectionNotice>
       ) : null}
 
       {!campaigns.length && loadingState === "ready" && !stateErrors.length ? (
-        <div className={styles.sectionEmptyPanel}>
-          <strong>Sem campanhas consolidadas</strong>
-          <p>Assim que a HubSpot trouxer campanhas, contatos e atividades associadas, o acompanhamento vai aparecer aqui.</p>
-        </div>
+        <SectionEmptyState
+          title="Sem campanhas consolidadas"
+          description="Assim que a HubSpot trouxer campanhas, contatos e atividades associadas, o acompanhamento vai aparecer aqui."
+        />
       ) : null}
 
       <div className={styles.grid}>

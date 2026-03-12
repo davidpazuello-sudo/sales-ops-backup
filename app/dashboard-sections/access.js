@@ -3,6 +3,11 @@
 import { useEffect, useState } from "react";
 import { Card, Table } from "../dashboard-ui";
 import PageAgentPanel, { PageAgentToggleButton } from "../page-agent-panel";
+import {
+  SectionEmptyState,
+  SectionLoadingState,
+  SectionNotice,
+} from "../dashboard-section-feedback";
 import { permissionRows } from "../dashboard-shell-config";
 import styles from "../page.module.css";
 
@@ -167,10 +172,10 @@ export function AccessPermissionsContent({ sessionUser, onNotificationsRefresh }
           <h1>Permissoes e Acessos</h1>
           <p>Esta area e restrita aos super admins do sistema.</p>
         </header>
-        <div className={styles.sectionEmptyPanel}>
-          <strong>Acesso restrito</strong>
-          <p>Entre com uma conta de super admin para revisar solicitacoes pendentes.</p>
-        </div>
+        <SectionEmptyState
+          title="Acesso restrito"
+          description="Entre com uma conta de super admin para revisar solicitacoes pendentes."
+        />
       </section>
     );
   }
@@ -195,16 +200,16 @@ export function AccessPermissionsContent({ sessionUser, onNotificationsRefresh }
         </div>
       ) : null}
 
-      {message ? <div className={styles.sectionNotice}>{message}</div> : null}
+      {message ? <SectionNotice variant="success">{message}</SectionNotice> : null}
 
       <div className={styles.grid}>
         <Card eyebrow="PENDENTES" title="Solicitacoes em aberto" wide>
-          {requestsError ? <div className={`${styles.sectionNotice} ${styles.sectionNoticeError}`.trim()}>{requestsError}</div> : null}
+          {requestsError ? <SectionNotice variant="error">{requestsError}</SectionNotice> : null}
           {loading ? (
-            <div className={styles.sectionEmptyPanel}>
-              <strong>Carregando solicitacoes</strong>
-              <p>Buscando pedidos abertos para aprovacao.</p>
-            </div>
+            <SectionLoadingState
+              title="Carregando solicitacoes"
+              description="Buscando pedidos abertos para aprovacao."
+            />
           ) : requests.length ? (
             <div className={styles.accessRequestList}>
               {requests.map((item) => (
@@ -236,20 +241,20 @@ export function AccessPermissionsContent({ sessionUser, onNotificationsRefresh }
               ))}
             </div>
           ) : (
-            <div className={styles.sectionEmptyPanel}>
-              <strong>Nenhuma solicitacao pendente</strong>
-              <p>Quando um usuario solicitar acesso ou primeiro acesso, ele aparecera aqui.</p>
-            </div>
+            <SectionEmptyState
+              title="Nenhuma solicitacao pendente"
+              description="Quando um usuario solicitar acesso ou primeiro acesso, ele aparecera aqui."
+            />
           )}
         </Card>
 
         <Card eyebrow="USUARIOS" title="Usuarios do sistema" wide>
-          {usersError ? <div className={`${styles.sectionNotice} ${styles.sectionNoticeError}`.trim()}>{usersError}</div> : null}
+          {usersError ? <SectionNotice variant="error">{usersError}</SectionNotice> : null}
           {usersLoading ? (
-            <div className={styles.sectionEmptyPanel}>
-              <strong>Carregando usuarios</strong>
-              <p>Buscando usuarios cadastrados para revisar cargo e ultimo acesso.</p>
-            </div>
+            <SectionLoadingState
+              title="Carregando usuarios"
+              description="Buscando usuarios cadastrados para revisar cargo e ultimo acesso."
+            />
           ) : users.length ? (
             <div className={styles.systemUsersList}>
               <div className={styles.systemUsersHead}>
@@ -326,10 +331,10 @@ export function AccessPermissionsContent({ sessionUser, onNotificationsRefresh }
               })}
             </div>
           ) : (
-            <div className={styles.sectionEmptyPanel}>
-              <strong>Nenhum usuario encontrado</strong>
-              <p>Quando houver usuarios cadastrados no sistema, eles aparecerao aqui para gestao de cargo.</p>
-            </div>
+            <SectionEmptyState
+              title="Nenhum usuario encontrado"
+              description="Quando houver usuarios cadastrados no sistema, eles aparecerao aqui para gestao de cargo."
+            />
           )}
         </Card>
 

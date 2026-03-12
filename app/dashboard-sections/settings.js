@@ -11,14 +11,15 @@ import {
 } from "../dashboard-ui";
 import PageAgentPanel from "../page-agent-panel";
 import {
-  auditRows,
+  SectionEmptyState,
+  SectionNotice,
+} from "../dashboard-section-feedback";
+import {
   densityOptions,
-  errorRows,
   fontOptions,
   fontSizeOptions,
   mappingRows,
   maskingRows,
-  metricRows,
   queueRows,
   reportRows,
   themeOptions,
@@ -58,6 +59,21 @@ export function SettingsContent({
       context={{ section, sessionUser }}
     />
   );
+  const syncLogs = Array.isArray(dashboardData.syncLogs) ? dashboardData.syncLogs : [];
+  const auditLogs = Array.isArray(dashboardData.auditLogs) ? dashboardData.auditLogs : [];
+  const notifications = Array.isArray(dashboardData.notifications) ? dashboardData.notifications : [];
+  const unreadNotifications = notifications.filter((item) => !item.read && !item.trash);
+  const hubspotLogRows = syncLogs.length
+    ? syncLogs.slice(0, 6).map((item) => [item.when, item.message, item.severity])
+    : (dashboardData.configured ? [["Agora", "Sincronizacao via API operando", "info"]] : [["Sem registro", "Nenhum log operacional ainda.", "info"]]);
+  const auditLogRows = auditLogs.length
+    ? auditLogs.slice(0, 8).map((item) => [item.actor, item.action, item.when])
+    : [["Sistema", "Sem eventos recentes para este perfil", "Agora"]];
+  const notificationMetrics = [
+    ["Nao lidas", `${unreadNotifications.length}`, "Pendencias reais na central"],
+    ["Total", `${notifications.length}`, "Itens disponiveis para o usuario"],
+    ["Origem", sessionUser?.isSuperAdmin ? "Admin" : "Workspace", "Escopo atual de alertas"],
+  ];
 
   if (section === "account") {
     return (
@@ -101,7 +117,7 @@ export function SettingsContent({
           <Table head={["SalesOps", "HubSpot", "Status"]} rows={mappingRows} />
         </Card>
         <Card eyebrow="LOG" title="Erros recentes">
-          <Table head={["Hora", "Erro", "Gravidade"]} rows={dashboardData.configured ? [["Agora", "Sincronizacao via API operando", "Baixo"]] : errorRows} />
+          <Table head={["Hora", "Erro", "Gravidade"]} rows={hubspotLogRows} />
         </Card>
       </div>
     );
@@ -113,14 +129,31 @@ export function SettingsContent({
         {showAgentPanel ? sectionAgentPanel : null}
 
         <Card eyebrow="CANAIS" title="Notificacoes & Alertas">
-          <Row label="Email" value="Ativo" helper="comercial@salesops.ai" />
-          <Row label="Push" value="Ativo" helper="Chrome + mobile" />
-          <Row label="Resumo automatico" value="Diario" />
+          <Row label="Email do usuario" value={sessionUser?.email || "Nao identificado"} helper="Base autenticada do workspace" />
+          <Row label="Centro de notificacoes" value={notifications.length ? "Ativo" : "Sem itens"} helper={`${unreadNotifications.length} nao lidas neste momento`} />
+          <Row label="Escopo" value={sessionUser?.isSuperAdmin ? "Admin" : "Operacional"} helper={sessionUser?.isSuperAdmin ? "Inclui fila de aprovacoes" : "Mostra alertas ligados ao perfil"} />
         </Card>
         <Card eyebrow="THRESHOLDS" title="Metas e thresholds" wide>
           <div className={styles.metrics}>
-            {metricRows.map((item) => <Metric key={item[0]} title={item[0]} value={item[1]} note={item[2]} />)}
+            {notificationMetrics.map((item) => <Metric key={item[0]} title={item[0]} value={item[1]} note={item[2]} />)}
           </div>
+        </Card>
+        <Card eyebrow="ATUAL" title="Ultimos alertas" wide>
+          {notifications.length ? (
+            <Table
+              head={["Titulo", "Tag", "Quando"]}
+              rows={notifications.slice(0, 6).map((item) => [
+                item.title,
+                item.tag || "Sem tag",
+                item.createdAt ? new Date(item.createdAt).toLocaleString("pt-BR") : "Agora",
+              ])}
+            />
+          ) : (
+            <SectionEmptyState
+              title="Sem alertas reais neste momento"
+              description="Assim que algo operacional exigir sua atencao, a central de notificacoes vai refletir aqui."
+            />
+          )}
         </Card>
       </div>
     );
@@ -237,7 +270,7 @@ export function SettingsContent({
       {showAgentPanel ? sectionAgentPanel : null}
 
       <Card eyebrow="AUDITORIA" title="Eventos recentes" wide>
-        <Table head={["Quem", "O que", "Quando"]} rows={auditRows} />
+        <Table head={["Quem", "O que", "Quando"]} rows={auditLogRows} />
       </Card>
       <Card eyebrow="MASKING" title="Matriz visual por campo e cargo">
         <Table head={["Campo", "Admin", "Gestor", "Vendedor"]} rows={maskingRows} matrix />
@@ -246,6 +279,7 @@ export function SettingsContent({
         <Row label="Consentimento" value="Registrado por contato" />
         <Row label="Esquecimento" value="Fluxo habilitado" helper="remocao em ate 7 dias" />
         <Row label="Relatorio" value="Atualizado hoje" />
+        {!auditLogs.length ? <SectionNotice variant="info">Os eventos de auditoria aparecerao aqui assim que o workspace registrar novas acoes administrativas.</SectionNotice> : null}
       </Card>
     </div>
   );

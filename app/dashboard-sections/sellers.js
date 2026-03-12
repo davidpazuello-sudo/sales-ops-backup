@@ -1,17 +1,21 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   Card,
   MeetingIcon,
   Metric,
   Row,
-  SparkIcon,
 } from "../dashboard-ui";
 import PageAgentPanel, { PageAgentToggleButton } from "../page-agent-panel";
+import {
+  SectionEmptyState,
+  SectionLoadingState,
+  SectionNotice,
+} from "../dashboard-section-feedback";
 import styles from "../page.module.css";
-import { getInternalMeetingsForSeller, meetingToSlug, sellerToSlug } from "lib/dashboard-shell-helpers";
+import { getMeetingsForSeller, meetingToSlug, sellerToSlug } from "lib/dashboard-shell-helpers";
 import {
   getMaxKanbanCount,
   getMotivationStatus,
@@ -28,7 +32,26 @@ import { formatCurrency } from "lib/services/dashboard-deals";
 export function SellerMeetingsContent({ dashboardData, sellerSlug }) {
   const router = useRouter();
   const seller = dashboardData.sellers.find((item) => sellerToSlug(item.name) === sellerSlug) || dashboardData.sellers[0];
-  const meetings = getInternalMeetingsForSeller(seller);
+  const meetings = getMeetingsForSeller(dashboardData, seller);
+  const loadingState = dashboardData.states?.loading || "ready";
+  const stateErrors = dashboardData.states?.errors || [];
+
+  if (!seller) {
+    return (
+      <section className={styles.dashboardSection}>
+        <header className={styles.sellerDetailHeader}>
+          <div className={styles.settingsHeader}>
+            <h1>Reunioes</h1>
+            <p>Nao encontramos um vendedor sincronizado para esta tela.</p>
+          </div>
+        </header>
+        <SectionEmptyState
+          title="Perfil do vendedor indisponivel"
+          description="Volte para a lista de vendedores quando a sincronizacao terminar."
+        />
+      </section>
+    );
+  }
 
   return (
     <section className={styles.dashboardSection}>
@@ -45,55 +68,117 @@ export function SellerMeetingsContent({ dashboardData, sellerSlug }) {
         </div>
       </header>
 
-      <section className={styles.meetingsList}>
-        {meetings.map((meeting) => (
-          <button key={meeting.id} type="button" className={styles.meetingRow} onClick={() => router.push(`/vendedores/${sellerSlug}/reunioes/${meetingToSlug(meeting.id)}`)}>
-            <div className={styles.meetingPrimary}>
-              <strong>{meeting.title}</strong>
-              <span>{meeting.summary}</span>
-            </div>
-            <div className={styles.meetingMeta}>
-              <strong>{meeting.date}</strong>
-              <span>{meeting.time}</span>
-            </div>
-            <div className={styles.meetingMeta}>
-              <strong>{meeting.type}</strong>
-              <span>{meeting.owner}</span>
-            </div>
-          </button>
-        ))}
-      </section>
+      {loadingState === "loading" ? (
+        <SectionLoadingState
+          title="Carregando reunioes"
+          description="Buscando reunioes da HubSpot e do workspace operacional."
+        />
+      ) : null}
+
+      {stateErrors.length ? (
+        <SectionNotice variant="error">{stateErrors[0] || "Nao foi possivel carregar as reunioes agora."}</SectionNotice>
+      ) : null}
+
+      {!meetings.length && loadingState === "ready" && !stateErrors.length ? (
+        <SectionEmptyState
+          title="Sem reunioes neste vendedor"
+          description="Quando houver reunioes reais da HubSpot ou registros internos, elas aparecerao aqui."
+        />
+      ) : (
+        <section className={styles.meetingsList}>
+          {meetings.map((meeting) => (
+            <button key={meeting.id} type="button" className={styles.meetingRow} onClick={() => router.push(`/vendedores/${sellerSlug}/reunioes/${meeting.slug || meetingToSlug(meeting)}`)}>
+              <div className={styles.meetingPrimary}>
+                <strong>{meeting.title}</strong>
+                <span>{meeting.summary}</span>
+              </div>
+              <div className={styles.meetingMeta}>
+                <strong>{meeting.dateLabel}</strong>
+                <span>{meeting.timeLabel}</span>
+              </div>
+              <div className={styles.meetingMeta}>
+                <strong>{meeting.type}</strong>
+                <span>{meeting.owner}</span>
+              </div>
+            </button>
+          ))}
+        </section>
+      )}
     </section>
   );
 }
 
 export function SellerMeetingDetailContent({ dashboardData, sellerSlug, meetingId }) {
   const router = useRouter();
-  const [meetingAttachments, setMeetingAttachments] = useState([]);
-  const [showAiAnalysis, setShowAiAnalysis] = useState(false);
+  const [formData, setFormData] = useState({
+    title: "",
+    date: "",
+    time: "",
+    type: "Reuniao interna",
+    summary: "",
+  });
+  const [formError, setFormError] = useState("");
+  const [formMessage, setFormMessage] = useState("");
+  const [saving, setSaving] = useState(false);
   const seller = dashboardData.sellers.find((item) => sellerToSlug(item.name) === sellerSlug) || dashboardData.sellers[0];
-  const meetings = getInternalMeetingsForSeller(seller);
-  const meeting = meetings.find((item) => meetingToSlug(item.id) === meetingId) || meetings[0];
+  const meetings = getMeetingsForSeller(dashboardData, seller);
+  const meeting = meetings.find((item) => (item.slug || meetingToSlug(item)) === meetingId) || meetings[0];
   const isNewMeeting = meetingId === "nova";
 
-  const handleMeetingAttachments = (event) => {
-    const files = Array.from(event.target.files || []);
-    if (!files.length) {
+  useEffect(() => {
+    if (!isNewMeeting) {
       return;
     }
 
-    setMeetingAttachments((current) => [
+    const nextDate = new Date();
+    const datePart = nextDate.toISOString().slice(0, 10);
+    const timePart = nextDate.toTimeString().slice(0, 5);
+    setFormData((current) => ({
       ...current,
-      ...files.map((file) => ({
-        id: `${file.name}-${file.size}-${file.lastModified}`,
-        name: file.name,
-        type: file.type || "application/octet-stream",
-        sizeLabel: `${Math.max(1, Math.round(file.size / 1024))} KB`,
-      })),
-    ]);
+      date: current.date || datePart,
+      time: current.time || timePart,
+    }));
+  }, [isNewMeeting]);
 
-    event.target.value = "";
-  };
+  async function handleMeetingSave() {
+    const title = formData.title.trim();
+    const summary = formData.summary.trim();
+    const meetingAt = formData.date && formData.time ? `${formData.date}T${formData.time}:00` : "";
+
+    if (!title || !meetingAt) {
+      setFormError("Preencha titulo, data e horario para registrar a reuniao.");
+      return;
+    }
+
+    setSaving(true);
+    setFormError("");
+    setFormMessage("");
+
+    const response = await fetch("/api/meetings", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        title,
+        summary,
+        meetingAt: new Date(meetingAt).toISOString(),
+        type: formData.type,
+        ownerName: seller?.name || "",
+        ownerEmail: seller?.email || "",
+        hubspotOwnerId: seller?.id || "",
+      }),
+    }).catch(() => null);
+
+    const payload = await response?.json().catch(() => null);
+    setSaving(false);
+
+    if (!response?.ok) {
+      setFormError(payload?.error || "Nao foi possivel registrar a reuniao agora.");
+      return;
+    }
+
+    setFormMessage(payload?.message || "Reuniao registrada com sucesso.");
+    router.push(`/vendedores/${sellerSlug}/reunioes`);
+  }
 
   return (
     <section className={styles.dashboardSection}>
@@ -108,71 +193,73 @@ export function SellerMeetingDetailContent({ dashboardData, sellerSlug, meetingI
         <Card eyebrow="REUNIAO" title={isNewMeeting ? "Novo registro" : "Resumo da reuniao"} wide>
           {isNewMeeting ? (
             <div className={styles.meetingComposer}>
+              {formError ? <SectionNotice variant="error">{formError}</SectionNotice> : null}
+              {formMessage ? <SectionNotice variant="success">{formMessage}</SectionNotice> : null}
               <label className={styles.meetingField}>
                 <span>Titulo</span>
-                <input type="text" placeholder="Ex.: Alinhamento semanal do pipeline" />
+                <input
+                  type="text"
+                  value={formData.title}
+                  onChange={(event) => setFormData((current) => ({ ...current, title: event.target.value }))}
+                  placeholder="Ex.: Alinhamento semanal do pipeline"
+                />
               </label>
               <div className={styles.meetingFieldRow}>
                 <label className={styles.meetingField}>
                   <span>Data</span>
-                  <input type="text" placeholder="dd/mm/aaaa" />
+                  <input
+                    type="date"
+                    value={formData.date}
+                    onChange={(event) => setFormData((current) => ({ ...current, date: event.target.value }))}
+                  />
                 </label>
                 <label className={styles.meetingField}>
                   <span>Horario</span>
-                  <input type="text" placeholder="09:00" />
+                  <input
+                    type="time"
+                    value={formData.time}
+                    onChange={(event) => setFormData((current) => ({ ...current, time: event.target.value }))}
+                  />
                 </label>
               </div>
               <label className={styles.meetingField}>
-                <span>Resumo</span>
-                <textarea rows="5" placeholder="Descreva objetivo, contexto e decisoes da reuniao." />
+                <span>Tipo</span>
+                <input
+                  type="text"
+                  value={formData.type}
+                  onChange={(event) => setFormData((current) => ({ ...current, type: event.target.value }))}
+                  placeholder="Ex.: Coaching, Operacao, Ritual semanal"
+                />
               </label>
-              <div className={styles.meetingAttachmentsBlock}>
-                <div className={styles.meetingAttachmentsHeader}>
-                  <span>Anexos</span>
-                  <label className={styles.meetingAttachmentButton}>
-                    <input type="file" accept=".pdf,.doc,.docx,.txt,.rtf,.md,.mp3,.wav,.m4a,.ogg,.aac,.webm,audio/*" multiple className={styles.hiddenFileInput} onChange={handleMeetingAttachments} />
-                    Anexar documento ou audio
-                  </label>
-                </div>
-                {meetingAttachments.length ? (
-                  <div className={styles.meetingAttachmentList}>
-                    {meetingAttachments.map((attachment) => (
-                      <div key={attachment.id} className={styles.meetingAttachmentItem}>
-                        <div className={styles.meetingAttachmentMeta}>
-                          <strong>{attachment.name}</strong>
-                          <span>{attachment.sizeLabel}</span>
-                        </div>
-                        <button type="button" className={styles.meetingAttachmentRemove} onClick={() => setMeetingAttachments((current) => current.filter((item) => item.id !== attachment.id))}>
-                          Remover
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className={styles.meetingAttachmentHint}>Aceita PDF, DOC, TXT, MD e arquivos de audio como MP3, WAV e M4A.</p>
-                )}
-              </div>
+              <label className={styles.meetingField}>
+                <span>Resumo</span>
+                <textarea
+                  rows="5"
+                  value={formData.summary}
+                  onChange={(event) => setFormData((current) => ({ ...current, summary: event.target.value }))}
+                  placeholder="Descreva objetivo, contexto e decisoes da reuniao."
+                />
+              </label>
               <div className={styles.meetingFormActions}>
-                <button type="button" className={styles.primaryActionButton} onClick={() => router.push(`/vendedores/${sellerSlug}/reunioes`)}>
-                  Salvar reuniao
+                <button type="button" className={styles.secondaryActionButton} onClick={() => router.push(`/vendedores/${sellerSlug}/reunioes`)}>
+                  Cancelar
+                </button>
+                <button type="button" className={styles.primaryActionButton} onClick={handleMeetingSave} disabled={saving}>
+                  {saving ? "Salvando..." : "Salvar reuniao"}
                 </button>
               </div>
             </div>
-          ) : (
+          ) : meeting ? (
             <div className={styles.meetingDetailStack}>
-              <div className={styles.meetingDetailActions}>
-                <button type="button" className={styles.primaryActionButton} onClick={() => setShowAiAnalysis((value) => !value)}>
-                  <SparkIcon />
-                  <span>{showAiAnalysis ? "Ocultar analise da IA" : "Analisar com IA"}</span>
-                </button>
-              </div>
               <Row label="Responsavel" value={meeting.owner} />
               <Row label="Tipo" value={meeting.type} />
+              <Row label="Status" value={meeting.statusLabel || "Registrada"} />
+              <Row label="Origem" value={meeting.source === "hubspot" ? "HubSpot" : "Workspace operacional"} />
               <Row label="Resumo" value={meeting.summary} />
-              {showAiAnalysis ? (
+              {meeting.notes ? (
                 <div className={styles.meetingAiPanel}>
-                  <strong>Analise da IA</strong>
-                  <p>A reuniao indica foco em previsibilidade de receita e em proximos passos por conta. Recomendacao: registrar todos os follow-ups no HubSpot em ate 24h e revisar negocios parados antes do proximo ritual.</p>
+                  <strong>Notas operacionais</strong>
+                  <p>{meeting.notes}</p>
                 </div>
               ) : null}
               <div className={styles.meetingAudioPanel}>
@@ -187,6 +274,11 @@ export function SellerMeetingDetailContent({ dashboardData, sellerSlug, meetingI
                 )}
               </div>
             </div>
+          ) : (
+            <SectionEmptyState
+              title="Reuniao nao encontrada"
+              description="Volte para a lista e abra uma reuniao sincronizada ou registre uma nova."
+            />
           )}
         </Card>
       </div>
@@ -226,17 +318,19 @@ export function SellersContent({ dashboardData }) {
         </label>
       </div>
 
-      {loadingState !== "ready" || stateErrors.length ? (
-        <div className={`${styles.sectionNotice} ${stateErrors.length ? styles.sectionNoticeError : ""}`.trim()}>
-          {loadingState === "loading" ? "Carregando vendedores sincronizados da HubSpot..." : stateErrors[0] || "A lista de vendedores ainda nao conseguiu carregar dados reais."}
-        </div>
+      {loadingState === "loading" ? (
+        <SectionLoadingState title="Carregando vendedores" description="Buscando owners e carteiras sincronizadas da HubSpot." />
+      ) : null}
+
+      {stateErrors.length ? (
+        <SectionNotice variant="error">{stateErrors[0] || "A lista de vendedores ainda nao conseguiu carregar dados reais."}</SectionNotice>
       ) : null}
 
       {!filteredSellers.length ? (
-        <div className={styles.sectionEmptyPanel}>
-          <strong>{sellerFilter.trim() ? "Nenhum vendedor encontrado" : "Nenhum vendedor sincronizado"}</strong>
-          <p>{sellerFilter.trim() ? "Tente ajustar o nome pesquisado ou limpar o filtro." : "Quando a HubSpot retornar owners reais, eles aparecerao nesta lista."}</p>
-        </div>
+        <SectionEmptyState
+          title={sellerFilter.trim() ? "Nenhum vendedor encontrado" : "Nenhum vendedor sincronizado"}
+          description={sellerFilter.trim() ? "Tente ajustar o nome pesquisado ou limpar o filtro." : "Quando a HubSpot retornar owners reais, eles aparecerao nesta lista."}
+        />
       ) : null}
 
       <div className={styles.sellerProfilesGrid}>
@@ -321,6 +415,8 @@ export function SellerProfileContent({ dashboardData, sellerSlug }) {
   const kanbanColumns = getSellerKanbanColumns(sellerDeals);
   const maxKanbanCount = getMaxKanbanCount(kanbanColumns);
   const stageDeals = getStageDeals(sellerDeals, selectedStage);
+  const sellerMeetings = getMeetingsForSeller(dashboardData, seller);
+  const nextMeeting = sellerMeetings[0] || null;
 
   return (
     <section className={styles.dashboardSection}>
@@ -381,31 +477,31 @@ export function SellerProfileContent({ dashboardData, sellerSlug }) {
           <div className={styles.dealList}>
             <article className={styles.dealListItem}>
               <div className={styles.dealIdentity}>
-                <strong>Repositorio de inteligencia</strong>
-                <span>Gravacoes, audios e documentos documentados</span>
+                <strong>Cadencia operacional</strong>
+                <span>Reunioes, tarefas e acompanhamentos reais deste vendedor</span>
               </div>
               <div className={styles.dealMeta}>
-                <strong>12 itens</strong>
-                <span>Semana atual</span>
+                <strong>{sellerMeetings.length}</strong>
+                <span>Reunioes registradas</span>
               </div>
               <div className={styles.dealMeta}>
-                <strong>Atualizado</strong>
-                <span>Sincronizado com HubSpot</span>
+                <strong>{pendingTasks}</strong>
+                <span>Tarefas em aberto</span>
               </div>
             </article>
           </div>
           <div className={styles.kpiRow}>
             <div className={styles.kpiCard}>
-              <span>Resiliencia</span>
-              <strong>8.7</strong>
+              <span>Proxima reuniao</span>
+              <strong>{nextMeeting ? `${nextMeeting.dateLabel} ${nextMeeting.timeLabel}` : "Sem agenda"}</strong>
             </div>
             <div className={styles.kpiCard}>
-              <span>Escuta ativa</span>
-              <strong>8.4</strong>
+              <span>Origem mais recente</span>
+              <strong>{nextMeeting ? (nextMeeting.source === "hubspot" ? "HubSpot" : "Workspace") : "Sem registros"}</strong>
             </div>
             <div className={styles.kpiCard}>
-              <span>Feedback da supervisao</span>
-              <strong>Bom momento de evolucao</strong>
+              <span>Resumo operacional</span>
+              <strong>{seller.note}</strong>
             </div>
           </div>
         </Card>

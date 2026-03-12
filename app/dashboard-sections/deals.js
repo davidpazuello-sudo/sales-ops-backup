@@ -3,14 +3,15 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
-  AttachmentIcon,
   Card,
-  MicIcon,
   Row,
-  SendIcon,
-  SparkIcon,
 } from "../dashboard-ui";
 import PageAgentPanel, { PageAgentToggleButton } from "../page-agent-panel";
+import {
+  SectionEmptyState,
+  SectionLoadingState,
+  SectionNotice,
+} from "../dashboard-section-feedback";
 import styles from "../page.module.css";
 import { findDealByRouteId, sellerToSlug } from "lib/dashboard-shell-helpers";
 import {
@@ -28,8 +29,11 @@ export function DealsContent({ dashboardData }) {
   const [ownerFilter, setOwnerFilter] = useState("todos");
   const [activityWeeksFilter, setActivityWeeksFilter] = useState("1");
   const [collapsedStages, setCollapsedStages] = useState({});
+  const [stageDrafts, setStageDrafts] = useState({});
   const [agentOpen, setAgentOpen] = useState(false);
-  const stageOrder = dashboardData.pipeline?.stages?.map((stage) => stage.label) || [];
+  const [feedback, setFeedback] = useState({ type: "", message: "" });
+  const [busyDealId, setBusyDealId] = useState("");
+  const pipelineStages = dashboardData.pipeline?.stages || [];
 
   useEffect(() => {
     setBoardDeals(dashboardData.deals);
@@ -39,14 +43,50 @@ export function DealsContent({ dashboardData }) {
   const loadingState = dashboardData.states?.loading || "ready";
   const stateErrors = dashboardData.states?.errors || [];
   const visibleDeals = getVisibleDeals(boardDeals, ownerFilter, activityWeeksFilter);
-  const boardColumns = getBoardColumns(visibleDeals, stageOrder);
+  const boardColumns = getBoardColumns(visibleDeals, pipelineStages);
 
-  const handleDropStage = (targetStage) => {
+  async function handleStageUpdate(dealId, stageId, stageLabel) {
+    if (!dealId || !stageId) {
+      return;
+    }
+
+    setBusyDealId(dealId);
+    setFeedback({ type: "", message: "" });
+
+    const response = await fetch("/api/deals/stage", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ dealId, stageId, stageLabel }),
+    }).catch(() => null);
+    const payload = await response?.json().catch(() => null);
+
+    setBusyDealId("");
+
+    if (!response?.ok) {
+      setFeedback({
+        type: "error",
+        message: payload?.error || "Nao foi possivel atualizar a etapa do negocio.",
+      });
+      return;
+    }
+
+    setBoardDeals((currentDeals) => moveDealToStage(currentDeals, dealId, { stageId, stageLabel }));
+    setStageDrafts((current) => ({
+      ...current,
+      [dealId]: stageId,
+    }));
+    setFeedback({
+      type: "success",
+      message: payload?.message || `Etapa atualizada para ${stageLabel}.`,
+    });
+  }
+
+  const handleDropStage = async (targetStage) => {
     if (!draggedDealId) {
       return;
     }
 
-    setBoardDeals((currentDeals) => moveDealToStage(currentDeals, draggedDealId, targetStage));
+    await handleStageUpdate(draggedDealId, targetStage.stageId, targetStage.stage);
     setDraggedDealId("");
   };
 
@@ -67,6 +107,12 @@ export function DealsContent({ dashboardData }) {
         <div className={styles.grid}>
           <PageAgentPanel agentId="deals" dashboardData={dashboardData} />
         </div>
+      ) : null}
+
+      {feedback.message ? (
+        <SectionNotice variant={feedback.type === "error" ? "error" : "success"}>
+          {feedback.message}
+        </SectionNotice>
       ) : null}
 
       <div className={styles.dealsFilters}>
@@ -99,22 +145,25 @@ export function DealsContent({ dashboardData }) {
         </label>
       </div>
 
-      {loadingState !== "ready" || stateErrors.length ? (
-        <div className={`${styles.sectionNotice} ${stateErrors.length ? styles.sectionNoticeError : ""}`.trim()}>
-          {loadingState === "loading"
-            ? "Carregando pipeline real da HubSpot..."
-            : stateErrors[0] || "A pipeline ainda nao conseguiu carregar dados reais."}
-        </div>
+      {loadingState === "loading" ? (
+        <SectionLoadingState
+          title="Carregando pipeline"
+          description="Buscando negocios e etapas reais da HubSpot."
+        />
+      ) : null}
+
+      {stateErrors.length ? (
+        <SectionNotice variant="error">{stateErrors[0] || "A pipeline ainda nao conseguiu carregar dados reais."}</SectionNotice>
       ) : null}
 
       {!boardColumns.length ? (
-        <div className={styles.sectionEmptyPanel}>
-          <strong>Pipeline sem negocios sincronizados</strong>
-          <p>Assim que a HubSpot retornar etapas e negocios reais, elas aparecerao aqui.</p>
-        </div>
+        <SectionEmptyState
+          title="Pipeline sem negocios sincronizados"
+          description="Assim que a HubSpot retornar etapas e negocios reais, elas aparecerao aqui."
+        />
       ) : null}
 
-      <section className={styles.pipelineBoard}>
+      <section className={styles.pipelineBoard} aria-busy={busyDealId ? "true" : "false"}>
         {boardColumns.map((column) => (
           <article
             key={column.stage}
@@ -151,7 +200,7 @@ export function DealsContent({ dashboardData }) {
                 <article
                   key={deal.id}
                   className={styles.pipelineDealCard}
-                  draggable
+                  draggable={busyDealId !== deal.id}
                   onDragStart={() => setDraggedDealId(deal.id)}
                   onDragEnd={() => setDraggedDealId("")}
                   onDoubleClick={() => router.push(`/negocios/${sellerToSlug(deal.name)}-${deal.id}`)}
@@ -166,7 +215,40 @@ export function DealsContent({ dashboardData }) {
                         <span>{deal.owner}</span>
                         <span>{deal.staleLabel}</span>
                       </div>
-                      <small>Sincronizado com HubSpot. Arraste para atualizar o estagio.</small>
+                      <small>Sincronizado com HubSpot. Arraste o card ou use o seletor abaixo para atualizar a etapa.</small>
+                      <div className={styles.pipelineDealActions}>
+                        <label className={styles.pipelineStageField}>
+                          <span className={styles.srOnly}>Selecionar etapa para {deal.name}</span>
+                          <select
+                            className={styles.pipelineStageSelect}
+                            value={stageDrafts[deal.id] || deal.stageId || column.stageId}
+                            onChange={(event) => setStageDrafts((current) => ({
+                              ...current,
+                              [deal.id]: event.target.value,
+                            }))}
+                            disabled={busyDealId === deal.id}
+                          >
+                            {pipelineStages.map((stage) => (
+                              <option key={stage.id} value={stage.id}>{stage.label}</option>
+                            ))}
+                          </select>
+                        </label>
+                        <button
+                          type="button"
+                          className={styles.secondaryActionButton}
+                          onClick={() => {
+                            const targetStageId = stageDrafts[deal.id] || deal.stageId || column.stageId;
+                            const targetStage = pipelineStages.find((stage) => stage.id === targetStageId);
+                            if (!targetStage) {
+                              return;
+                            }
+                            handleStageUpdate(deal.id, targetStage.id, targetStage.label);
+                          }}
+                          disabled={busyDealId === deal.id}
+                        >
+                          {busyDealId === deal.id ? "Salvando..." : "Mover etapa"}
+                        </button>
+                      </div>
                     </>
                   )}
                 </article>
@@ -189,47 +271,12 @@ export function DealsContent({ dashboardData }) {
 
 export function DealProfileContent({ dashboardData, dealId }) {
   const router = useRouter();
-  const [showAiSummary, setShowAiSummary] = useState(false);
-  const [dealAiMessage, setDealAiMessage] = useState("");
-  const [dealAiAttachments, setDealAiAttachments] = useState([]);
-  const [activeAttachment, setActiveAttachment] = useState(null);
   const deal = findDealByRouteId(dashboardData.deals, dealId);
-
-  const completedTasks = [
-    { id: "sync", title: "Sincronizacao com HubSpot concluida", when: "Hoje, 09:12" },
-    { id: "touch", title: "Atualizacao de etapa registrada", when: "Hoje, 10:40" },
-    { id: "contact", title: "Contato com decisor principal validado", when: "Ontem, 16:25" },
-  ];
-
-  const completedAttachments = [
-    { id: "a1", name: "gravacao-reuniao.mp3", note: "Gravacao da ultima call", url: "/anexos-negocio/gravacao-reuniao.html" },
-    { id: "a2", name: "resumo-comercial.pdf", note: "Resumo enviado para aprovacao", url: "/anexos-negocio/resumo-comercial.html" },
-    { id: "a3", name: "proposta-v3.docx", note: "Versao final da proposta", url: "/anexos-negocio/proposta-v3.html" },
-  ];
-
-  const upcomingTasks = [
-    { id: "n1", title: "Enviar follow-up com proximos passos", due: "Hoje, 18:00" },
-    { id: "n2", title: "Revisar objecoes comerciais com gestor", due: "Amanha, 10:00" },
-    { id: "n3", title: "Agendar reuniao de validacao final", due: "Quinta, 14:30" },
-  ];
-
-  const handleDealAiAttachments = (event) => {
-    const files = Array.from(event.target.files || []);
-    if (!files.length) {
-      return;
-    }
-
-    setDealAiAttachments((current) => [
-      ...current,
-      ...files.map((file) => ({
-        id: `${file.name}-${file.size}-${file.lastModified}`,
-        name: file.name,
-        sizeLabel: `${Math.max(1, Math.round(file.size / 1024))} KB`,
-      })),
-    ]);
-
-    event.target.value = "";
-  };
+  const relatedTasks = (dashboardData.tasks || [])
+    .filter((task) => Array.isArray(task.dealIds) && task.dealIds.includes(deal?.id));
+  const openTasks = relatedTasks.filter((task) => !task.isCompleted);
+  const completedTasks = relatedTasks.filter((task) => task.isCompleted);
+  const relatedMeetings = relatedTasks.filter((task) => task.kind === "meeting");
 
   if (!deal) {
     return (
@@ -249,57 +296,10 @@ export function DealProfileContent({ dashboardData, dealId }) {
     <section className={styles.dashboardSection}>
       <header className={styles.settingsHeader}>
         <h1>{deal.name}</h1>
-        <p>Perfil completo do negocio e status atual no pipeline.</p>
+        <p>Perfil operacional do negocio, com atividades e proximos passos puxados do fluxo real.</p>
       </header>
 
       <div className={styles.grid}>
-        <div className={styles.dealProfileActions}>
-          <button type="button" className={styles.primaryActionButton} onClick={() => setShowAiSummary(true)}>
-            <SparkIcon />
-            <span>Resumo com IA</span>
-          </button>
-        </div>
-
-        {showAiSummary ? (
-          <Card eyebrow="IA" title="Resumo com IA" wide>
-            <div className={styles.dealAiSummaryBox}>
-              <strong>Resumo pela IA</strong>
-              <p>Negocio em andamento com boa aderencia de escopo e evolucao de etapa. Recomendacao: reforcar proximo compromisso com decisor e registrar objecoes finais para acelerar fechamento.</p>
-            </div>
-
-            <div className={styles.dealAiComposer}>
-              <label className={styles.dealAiComposerButton}>
-                <AttachmentIcon />
-                <input type="file" multiple className={styles.hiddenFileInput} onChange={handleDealAiAttachments} />
-              </label>
-              <button type="button" className={styles.dealAiComposerButton} aria-label="Gravar audio para IA">
-                <MicIcon />
-              </button>
-              <input className={styles.dealAiInput} value={dealAiMessage} onChange={(event) => setDealAiMessage(event.target.value)} placeholder="Pergunte para IA sobre riscos, proximas acoes e prioridades deste negocio..." />
-              <button type="button" className={styles.dealAiSendButton} aria-label="Enviar mensagem para IA">
-                <SendIcon />
-                <span>Enviar</span>
-              </button>
-            </div>
-
-            {dealAiAttachments.length ? (
-              <div className={styles.dealAttachmentList}>
-                {dealAiAttachments.map((attachment) => (
-                  <div key={attachment.id} className={styles.dealAttachmentItem}>
-                    <div className={styles.dealAttachmentMeta}>
-                      <strong>{attachment.name}</strong>
-                      <span>{attachment.sizeLabel}</span>
-                    </div>
-                    <button type="button" className={styles.meetingAttachmentRemove} onClick={() => setDealAiAttachments((current) => current.filter((item) => item.id !== attachment.id))}>
-                      Remover
-                    </button>
-                  </div>
-                ))}
-              </div>
-            ) : null}
-          </Card>
-        ) : null}
-
         <Card eyebrow="NEGOCIO" title="Resumo do Negocio">
           <Row label="Nome" value={deal.name} />
           <Row label="Responsavel" value={deal.owner} />
@@ -310,70 +310,76 @@ export function DealProfileContent({ dashboardData, dealId }) {
 
         <Card eyebrow="ACOES" title="Proximos Passos">
           <Row label="Sincronizacao" value="HubSpot ativa" helper="Negocio vinculado ao pipeline principal" />
-          <Row label="Movimentacao" value="Arraste no quadro de Negocios" helper="Pressione e arraste o card para mudar de etapa" />
-          <Row label="Navegacao" value="Voltar ao pipeline" helper="Clique abaixo para retornar" />
+          <Row label="Movimentacao" value="Atualize pela etapa do pipeline" helper="Use o seletor no quadro de Negocios para persistir a nova etapa" />
+          <Row label="Atividades em aberto" value={`${openTasks.length}`} helper="Tasks reais vinculadas a este negocio" />
           <button type="button" className={styles.secondaryActionButton} onClick={() => router.push("/negocios")}>
             Voltar para Negocios
           </button>
         </Card>
 
-        <Card eyebrow="CONCLUIDO" title="Ultimas entregas" wide>
-          <div className={styles.dealChecklist}>
-            {completedTasks.map((task) => (
-              <article key={task.id} className={styles.dealChecklistItem}>
-                <div>
-                  <strong>{task.title}</strong>
-                  <span>{task.when}</span>
-                </div>
-                <span className={styles.dealTaskDone}>Concluido</span>
-              </article>
-            ))}
-          </div>
+        <Card eyebrow="EM ABERTO" title="Atividades pendentes" wide>
+          {openTasks.length ? (
+            <div className={styles.dealChecklist}>
+              {openTasks.map((task) => (
+                <article key={task.id} className={styles.dealChecklistItem}>
+                  <div>
+                    <strong>{task.title}</strong>
+                    <span>{task.dueLabel || task.statusLabel}</span>
+                  </div>
+                  <span className={styles.dealTaskNext}>{task.statusLabel || "Pendente"}</span>
+                </article>
+              ))}
+            </div>
+          ) : (
+            <SectionEmptyState
+              title="Nenhuma atividade pendente"
+              description="Quando houver follow-ups, chamadas ou reunioes em aberto ligadas a este negocio, elas aparecerao aqui."
+            />
+          )}
         </Card>
 
-        <Card eyebrow="PENDENTE" title="Itens em aberto" wide>
-          <div className={styles.dealChecklist}>
-            {upcomingTasks.map((task) => (
-              <article key={task.id} className={styles.dealChecklistItem}>
-                <div>
-                  <strong>{task.title}</strong>
-                  <span>{task.due}</span>
-                </div>
-                <span className={styles.dealTaskNext}>Pendente</span>
-              </article>
-            ))}
-          </div>
+        <Card eyebrow="CONCLUIDO" title="Atividades concluidas" wide>
+          {completedTasks.length ? (
+            <div className={styles.dealChecklist}>
+              {completedTasks.map((task) => (
+                <article key={task.id} className={styles.dealChecklistItem}>
+                  <div>
+                    <strong>{task.title}</strong>
+                    <span>{task.dueLabel || task.statusLabel}</span>
+                  </div>
+                  <span className={styles.dealTaskDone}>Concluida</span>
+                </article>
+              ))}
+            </div>
+          ) : (
+            <SectionEmptyState
+              title="Sem atividades concluidas"
+              description="As entregas finalizadas deste negocio vao aparecer aqui assim que a HubSpot devolver o historico completo."
+            />
+          )}
         </Card>
 
-        <Card eyebrow="ANEXOS" title="Documentos e materiais" wide>
-          <div className={styles.dealAttachmentGrid}>
-            {completedAttachments.map((attachment) => (
-              <button key={attachment.id} type="button" className={styles.dealAttachmentCard} onClick={() => setActiveAttachment(attachment)}>
-                <strong>{attachment.name}</strong>
-                <span>{attachment.note}</span>
-              </button>
-            ))}
-          </div>
+        <Card eyebrow="REUNIOES" title="Reunioes relacionadas" wide>
+          {relatedMeetings.length ? (
+            <div className={styles.dealChecklist}>
+              {relatedMeetings.map((meeting) => (
+                <article key={meeting.id} className={styles.dealChecklistItem}>
+                  <div>
+                    <strong>{meeting.title}</strong>
+                    <span>{meeting.dueLabel || meeting.statusLabel}</span>
+                  </div>
+                  <span className={styles.dealTaskNext}>{meeting.statusLabel || "Agendada"}</span>
+                </article>
+              ))}
+            </div>
+          ) : (
+            <SectionEmptyState
+              title="Sem reunioes relacionadas"
+              description="As reunioes deste negocio vao aparecer aqui quando forem associadas na HubSpot."
+            />
+          )}
         </Card>
       </div>
-
-      {activeAttachment ? (
-        <div className={styles.attachmentPopupBackdrop} role="presentation" onClick={() => setActiveAttachment(null)}>
-          <div className={styles.attachmentPopup} role="dialog" aria-modal="true" aria-label={`Anexo ${activeAttachment.name}`} onClick={(event) => event.stopPropagation()}>
-            <header className={styles.attachmentPopupHeader}>
-              <div>
-                <span>ANEXO</span>
-                <h3>{activeAttachment.name}</h3>
-                <p>{activeAttachment.note}</p>
-              </div>
-              <button type="button" className={styles.secondaryActionButton} onClick={() => setActiveAttachment(null)}>
-                Fechar
-              </button>
-            </header>
-            <iframe src={activeAttachment.url} title={activeAttachment.name} className={styles.attachmentPopupFrame} />
-          </div>
-        </div>
-      ) : null}
     </section>
   );
 }

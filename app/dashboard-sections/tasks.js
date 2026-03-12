@@ -3,6 +3,11 @@
 import { useState } from "react";
 import { Card, Metric } from "../dashboard-ui";
 import PageAgentPanel, { PageAgentToggleButton } from "../page-agent-panel";
+import {
+  SectionEmptyState,
+  SectionLoadingState,
+  SectionNotice,
+} from "../dashboard-section-feedback";
 import styles from "../page.module.css";
 import {
   buildTaskSummary,
@@ -181,19 +186,22 @@ export function TasksContent({ dashboardData, sessionUser = {} }) {
 
       <div className={styles.taskScopeHint}>{scopeMessage}</div>
 
-      {loadingState !== "ready" || stateErrors.length ? (
-        <div className={`${styles.sectionNotice} ${stateErrors.length ? styles.sectionNoticeError : ""}`.trim()}>
-          {loadingState === "loading"
-            ? "Carregando tarefas reais da HubSpot..."
-            : stateErrors[0] || "As tarefas ainda nao conseguiram carregar dados reais."}
-        </div>
+      {loadingState === "loading" ? (
+        <SectionLoadingState
+          title="Carregando tarefas"
+          description="Buscando reunioes, chamadas e tarefas reais sincronizadas."
+        />
+      ) : null}
+
+      {stateErrors.length ? (
+        <SectionNotice variant="error">{stateErrors[0] || "As tarefas ainda nao conseguiram carregar dados reais."}</SectionNotice>
       ) : null}
 
       {!allTasks.length && loadingState === "ready" && !stateErrors.length ? (
-        <div className={styles.sectionEmptyPanel}>
-          <strong>Sem tarefas sincronizadas</strong>
-          <p>Quando a HubSpot retornar reunioes, chamadas e outras tarefas, elas aparecerao aqui.</p>
-        </div>
+        <SectionEmptyState
+          title="Sem tarefas sincronizadas"
+          description="Quando a HubSpot retornar reunioes, chamadas e outras tarefas, elas aparecerao aqui."
+        />
       ) : null}
 
       <div className={styles.grid}>

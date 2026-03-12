@@ -574,6 +574,104 @@ describe("API route contracts", () => {
     });
   });
 
+  it("returns the deal stage update contract", async () => {
+    const route = await loadModule("../app/api/deals/stage/route.js", {
+      "lib/admin-access": () => ({
+        requireAuthenticatedUser: vi.fn(async () => ({
+          ok: true,
+          user: { id: "seller-1", email: "seller@sasi.com.br", role: "Vendedor" },
+        })),
+      }),
+      "lib/auth-rate-limit": () => ({
+        consumeRateLimit: vi.fn(async () => ({ ok: true, remaining: 18, retryAfter: 0 })),
+        getRequestClientKey: vi.fn(() => "client-deal-stage"),
+      }),
+      "lib/auth-logging": () => ({
+        logAuthRouteError: vi.fn(),
+        logRateLimitEvent: vi.fn(),
+      }),
+      "lib/hubspot": () => ({
+        updateHubSpotDealStage: vi.fn(async () => ({ id: "deal-1" })),
+      }),
+      "lib/audit-log-store": () => ({
+        writeAuditLog: vi.fn().mockResolvedValue(null),
+        writeSystemEvent: vi.fn().mockResolvedValue(null),
+      }),
+    });
+
+    const response = await route.POST(createRequest({
+      method: "POST",
+      body: { dealId: "deal-1", stageId: "proposal", stageLabel: "Proposta Enviada" },
+    }));
+    const payload = await readJsonResponse(response);
+
+    expect(payload.status).toBe(200);
+    expect(payload.body).toEqual({
+      ok: true,
+      message: "Etapa atualizada para Proposta Enviada.",
+      deal: {
+        id: "deal-1",
+        stageId: "proposal",
+        stageLabel: "Proposta Enviada",
+      },
+    });
+  });
+
+  it("returns the meetings creation contract", async () => {
+    const route = await loadModule("../app/api/meetings/route.js", {
+      "lib/admin-access": () => ({
+        requireAuthenticatedUser: vi.fn(async () => ({
+          ok: true,
+          user: { id: "seller-1", email: "seller@sasi.com.br", role: "Vendedor" },
+        })),
+      }),
+      "lib/auth-rate-limit": () => ({
+        consumeRateLimit: vi.fn(async () => ({ ok: true, remaining: 11, retryAfter: 0 })),
+        getRequestClientKey: vi.fn(() => "client-meetings"),
+      }),
+      "lib/auth-logging": () => ({
+        logAuthRouteError: vi.fn(),
+        logRateLimitEvent: vi.fn(),
+      }),
+      "lib/operational-data": () => ({
+        createOperationalMeeting: vi.fn(async () => ({
+          id: "meeting-1",
+          title: "Ritual semanal",
+          owner: "Ana Souza",
+          ownerEmail: "ana@sasi.com.br",
+        })),
+        listPersistedMeetingsForUser: vi.fn(async () => []),
+      }),
+      "lib/audit-log-store": () => ({
+        writeAuditLog: vi.fn().mockResolvedValue(null),
+        writeSystemEvent: vi.fn().mockResolvedValue(null),
+      }),
+    });
+
+    const response = await route.POST(createRequest({
+      method: "POST",
+      body: {
+        title: "Ritual semanal",
+        summary: "Resumo",
+        meetingAt: new Date().toISOString(),
+        ownerName: "Ana Souza",
+        ownerEmail: "ana@sasi.com.br",
+      },
+    }));
+    const payload = await readJsonResponse(response);
+
+    expect(payload.status).toBe(200);
+    expect(payload.body).toMatchObject({
+      ok: true,
+      message: "Reuniao registrada com sucesso.",
+      meeting: {
+        id: "meeting-1",
+        title: "Ritual semanal",
+        owner: "Ana Souza",
+      },
+    });
+  });
+
   it("returns the dashboard contract for the HubSpot endpoint", async () => {
     const dashboard = {
       configured: true,
@@ -610,6 +708,15 @@ describe("API route contracts", () => {
       "lib/hubspot": () => ({
         getHubSpotDashboardData: vi.fn(async () => dashboard),
       }),
+      "lib/operational-data": () => ({
+        enrichDashboardWithOperationalData: vi.fn(async (value) => ({
+          ...value,
+          meetings: [],
+          auditLogs: [],
+          syncLogs: [],
+          notifications: [],
+        })),
+      }),
       "lib/auth-logging": () => ({
         logAuthRouteError: vi.fn(),
         logRateLimitEvent: vi.fn(),
@@ -626,6 +733,12 @@ describe("API route contracts", () => {
     const payload = await readJsonResponse(response);
 
     expect(payload.status).toBe(200);
-    expect(payload.body).toEqual(dashboard);
+    expect(payload.body).toEqual({
+      ...dashboard,
+      meetings: [],
+      auditLogs: [],
+      syncLogs: [],
+      notifications: [],
+    });
   });
 });

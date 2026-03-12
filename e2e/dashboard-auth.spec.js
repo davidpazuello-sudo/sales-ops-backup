@@ -301,6 +301,48 @@ async function mockDashboardApis(page, sessionUser = adminSessionUser) {
   await page.route("**/api/admin/system-users", async (route) => {
     await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(systemUsersPayload) });
   });
+
+  await page.route("**/api/deals/stage", async (route) => {
+    const payload = route.request().postDataJSON();
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        ok: true,
+        message: `Etapa atualizada para ${payload.stageLabel}.`,
+        deal: {
+          id: payload.dealId,
+          stageId: payload.stageId,
+          stageLabel: payload.stageLabel,
+        },
+      }),
+    });
+  });
+
+  await page.route("**/api/meetings", async (route) => {
+    if (route.request().method() === "POST") {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          ok: true,
+          message: "Reuniao registrada com sucesso.",
+          meeting: {
+            id: "meeting-new",
+            title: "Ritual semanal",
+            owner: "Ana Souza",
+          },
+        }),
+      });
+      return;
+    }
+
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ ok: true, meetings: [] }),
+    });
+  });
 }
 
 test("login redireciona para relatorios com auth valida", async ({ context, page }) => {
@@ -367,17 +409,28 @@ test("admin aprova uma solicitacao pendente pela tela de acessos", async ({ cont
   await expect(page.getByText("Solicitacao aprovada. O email de primeiro acesso foi enviado.")).toBeVisible();
 });
 
+test("pipeline persiste atualizacao de etapa com feedback operacional", async ({ context, page }) => {
+  await context.addCookies(buildRoleCookies("admin"));
+  await mockDashboardApis(page);
+
+  await page.goto("/negocios");
+  await page.locator("article").filter({ hasText: "Piloto Atlas" }).getByRole("combobox").selectOption("proposal");
+  await page.locator("article").filter({ hasText: "Piloto Atlas" }).getByRole("button", { name: /Mover etapa/i }).click();
+
+  await expect(page.getByText("Etapa atualizada para Proposta Enviada.")).toBeVisible();
+});
+
 test("main navigation smoke covers relatorios, negocios, campanhas, tarefas e vendedores", async ({ context, page }) => {
   await context.addCookies(buildRoleCookies("admin"));
   await mockDashboardApis(page);
 
   await page.goto("/relatorios");
-  await expect(page.getByText("KPIs comerciais")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "KPIs comerciais" })).toBeVisible();
 
   await page.getByRole("button", { name: /Neg/i }).click();
   await expect(page).toHaveURL(/\/negocios$/);
-  await expect(page.getByText("Piloto Atlas")).toBeVisible();
-  await expect(page.getByText("Proposta Enviada")).toBeVisible();
+  await expect(page.getByText("Piloto Atlas", { exact: true })).toBeVisible();
+  await expect(page.locator('[draggable="true"]').filter({ hasText: "Expansao Solaris" })).toContainText("Proposta Enviada");
 
   await page.getByRole("button", { name: /Campanhas/i }).click();
   await expect(page).toHaveURL(/\/campanhas$/);
