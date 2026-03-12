@@ -106,6 +106,7 @@ export default function DashboardShell({
   const resolvedCurrentSection = activeNav === "settings" && !profileViewOpen
     ? resolvedConfigSection
     : currentSection;
+  const contentClassName = `${styles.content} ${activeNav === "deals" && !dealId ? styles.contentNoScroll : ""}`.trim();
 
   useEffect(() => {
     setPageAgentOpen(false);
@@ -219,7 +220,7 @@ export default function DashboardShell({
         </div>
       </aside>
 
-      <section className={styles.content}>
+      <section className={contentClassName}>
         {activeNav === "settings" ? (
           <section className={styles.settingsLayout}>
             {!profileViewOpen ? (

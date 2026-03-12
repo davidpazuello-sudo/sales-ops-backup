@@ -2,37 +2,51 @@ import { describe, expect, it } from "vitest";
 import {
   aggregateCampaignSummary,
   buildCampaignSummaries,
+  PRIMARY_CAMPAIGN_NAME,
 } from "../lib/services/dashboard-campaigns";
 
 describe("dashboard campaigns service", () => {
-  it("builds campaign summaries from hubspot-flavored deals, contacts and activities", () => {
+  it("builds only the Aluno a Bordo campaign summary from hubspot-flavored data", () => {
     const campaigns = buildCampaignSummaries({
       deals: [
         {
           id: "deal-1",
-          campaignName: "Educacao 2026",
+          campaignName: PRIMARY_CAMPAIGN_NAME,
           stageLabel: "Proposta enviada",
           isWon: false,
           isClosed: false,
         },
         {
           id: "deal-2",
-          campaignName: "Educacao 2026",
+          campaignName: PRIMARY_CAMPAIGN_NAME,
           stageLabel: "Closed Won",
           isWon: true,
           isClosed: true,
+        },
+        {
+          id: "deal-3",
+          campaignName: "Outra campanha",
+          stageLabel: "Proposta enviada",
+          isWon: false,
+          isClosed: false,
         },
       ],
       contacts: [
         {
           id: "contact-1",
-          campaignName: "Educacao 2026",
+          campaignName: PRIMARY_CAMPAIGN_NAME,
           lifecycleStage: "marketingqualifiedlead",
           leadStatus: "",
         },
         {
           id: "contact-2",
-          campaignName: "Educacao 2026",
+          campaignName: PRIMARY_CAMPAIGN_NAME,
+          lifecycleStage: "salesqualifiedlead",
+          leadStatus: "SQL",
+        },
+        {
+          id: "contact-3",
+          campaignName: "Outra campanha",
           lifecycleStage: "salesqualifiedlead",
           leadStatus: "SQL",
         },
@@ -40,19 +54,25 @@ describe("dashboard campaigns service", () => {
       activities: [
         {
           id: "call-1",
-          campaignName: "Educacao 2026",
+          campaignName: PRIMARY_CAMPAIGN_NAME,
           kind: "call",
           updatedAt: new Date().toISOString(),
         },
         {
           id: "meeting-1",
-          campaignName: "Educacao 2026",
+          campaignName: PRIMARY_CAMPAIGN_NAME,
           kind: "meeting",
           updatedAt: new Date().toISOString(),
         },
         {
           id: "task-1",
-          campaignName: "Educacao 2026",
+          campaignName: PRIMARY_CAMPAIGN_NAME,
+          kind: "task",
+          updatedAt: new Date().toISOString(),
+        },
+        {
+          id: "task-2",
+          campaignName: "Outra campanha",
           kind: "task",
           updatedAt: new Date().toISOString(),
         },
@@ -60,7 +80,7 @@ describe("dashboard campaigns service", () => {
     });
 
     expect(campaigns).toHaveLength(1);
-    expect(campaigns[0].name).toBe("Educacao 2026");
+    expect(campaigns[0].name).toBe(PRIMARY_CAMPAIGN_NAME);
     expect(campaigns[0].qualification.mqlCount).toBe(1);
     expect(campaigns[0].qualification.sqlCount).toBe(1);
     expect(campaigns[0].sales.proposalCount).toBe(1);

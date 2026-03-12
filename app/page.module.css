@@ -412,15 +412,25 @@
   overflow-y: auto;
 }
 
+.contentNoScroll {
+  overflow: hidden;
+}
+
 .dashboardSection {
   min-width: 0;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
   padding: calc(34px * var(--density-scale)) calc(38px * var(--density-scale)) calc(42px * var(--density-scale));
 }
 
 .dealsSection {
   display: flex;
   flex-direction: column;
+  flex: 1 1 auto;
   height: 100%;
+  width: 100%;
+  max-width: 100%;
   min-height: 0;
   box-sizing: border-box;
   overflow: hidden;

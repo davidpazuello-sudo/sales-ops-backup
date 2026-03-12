@@ -47,6 +47,13 @@ describe("dashboard domain", () => {
           email: "ana@empresa.com",
           teams: [{ name: "Enterprise", primary: true }],
         },
+        {
+          id: "8",
+          firstName: "Bruno",
+          lastName: "Lima",
+          email: "bruno@empresa.com",
+          teams: [{ name: "Mid Market", primary: true }],
+        },
       ],
       [
         {
@@ -126,6 +133,8 @@ describe("dashboard domain", () => {
     expect(payload.pipeline.stages[0].label).toBe("Proposta Enviada");
     expect(payload.deals[0].pipelineLabel).toBe("Brasil Publico");
     expect(payload.deals[0].ownerEmail).toBe("ana@empresa.com");
+    expect(payload.sellers).toHaveLength(2);
+    expect(payload.sellers.map((seller) => seller.name)).toEqual(["Ana Souza", "Bruno Lima"]);
     expect(payload.tasks).toHaveLength(3);
     expect(payload.tasks.every((task) => task.ownerEmail === "ana@empresa.com")).toBe(true);
     expect(payload.tasks.map((task) => task.kind).sort()).toEqual(["call", "meeting", "task"]);
