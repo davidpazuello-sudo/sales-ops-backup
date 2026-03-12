@@ -54,7 +54,7 @@ export async function GET(request) {
 
   try {
     const baseData = assertDashboardData(await getHubSpotDashboardData({ scope }));
-    const data = assertDashboardData(await enrichDashboardWithOperationalData(baseData, auth.user));
+    const data = assertDashboardData(await enrichDashboardWithOperationalData(baseData, auth.user, { scope }));
     return jsonWithApiObservation(
       observation,
       data,

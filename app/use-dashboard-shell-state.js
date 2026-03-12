@@ -24,6 +24,8 @@ import {
 
 const SESSION_USER_STORAGE_KEY = "salesops:session-user";
 const BROWSER_NOTIFICATION_IDS_KEY = "salesops:browser-notification-ids";
+const DASHBOARD_SCOPE_CACHE_PREFIX = "salesops:dashboard-scope:";
+const DASHBOARD_SCOPE_CACHE_TTL_MS = 60 * 1000;
 
 const defaultDashboardData = createDashboardFallbackData({
   loading: "loading",
@@ -89,6 +91,45 @@ function writeShownBrowserNotificationIds(ids) {
   }
 
   window.localStorage.setItem(BROWSER_NOTIFICATION_IDS_KEY, JSON.stringify(ids));
+}
+
+function readDashboardScopeCache(scope) {
+  if (typeof window === "undefined" || !scope || scope === "none") {
+    return null;
+  }
+
+  try {
+    const storedValue = window.sessionStorage.getItem(`${DASHBOARD_SCOPE_CACHE_PREFIX}${scope}`);
+    if (!storedValue) {
+      return null;
+    }
+
+    const parsedValue = JSON.parse(storedValue);
+    const cachedAt = Number(parsedValue?.cachedAt || 0);
+    if (!cachedAt || (Date.now() - cachedAt) > DASHBOARD_SCOPE_CACHE_TTL_MS) {
+      window.sessionStorage.removeItem(`${DASHBOARD_SCOPE_CACHE_PREFIX}${scope}`);
+      return null;
+    }
+
+    return parsedValue?.payload || null;
+  } catch {
+    window.sessionStorage.removeItem(`${DASHBOARD_SCOPE_CACHE_PREFIX}${scope}`);
+    return null;
+  }
+}
+
+function writeDashboardScopeCache(scope, payload) {
+  if (typeof window === "undefined" || !scope || scope === "none" || !payload) {
+    return;
+  }
+
+  window.sessionStorage.setItem(
+    `${DASHBOARD_SCOPE_CACHE_PREFIX}${scope}`,
+    JSON.stringify({
+      cachedAt: Date.now(),
+      payload,
+    }),
+  );
 }
 
 function getDashboardHubSpotScope({ initialNav, initialProfileView }) {
@@ -202,8 +243,15 @@ export function useDashboardShellState({
         return;
       }
 
+      const cachedPayload = readDashboardScopeCache(hubspotScope);
+      if (cachedPayload) {
+        setDashboardData(cachedPayload);
+        setHubspotMessage("Dados recentes da HubSpot carregados.");
+        return;
+      }
+
       try {
-        const response = await fetch(`/api/hubspot/dashboard?scope=${encodeURIComponent(hubspotScope)}`, { cache: "no-store" });
+        const response = await fetch(`/api/hubspot/dashboard?scope=${encodeURIComponent(hubspotScope)}`);
         const payload = await response.json();
         if (cancelled) {
           return;
@@ -223,6 +271,7 @@ export function useDashboardShellState({
         }
 
         setDashboardData(payload);
+        writeDashboardScopeCache(hubspotScope, payload);
         setHubspotMessage("Dados da HubSpot sincronizados.");
       } catch {
         if (cancelled) {
