@@ -135,8 +135,8 @@ describe("dashboard campaigns service", () => {
           campaignName: PRIMARY_CAMPAIGN_CONTACT_VALUE,
           name: "Lead C",
           phone: "3333-3333",
-          leadStatus: "UNQUALIFIED",
-          lifecycleStage: "Desqualificado",
+          leadStatus: "Wrong number",
+          lifecycleStage: "Telefone incorreto",
           ownerName: "Carla",
         },
         {
@@ -157,6 +157,24 @@ describe("dashboard campaigns service", () => {
           lifecycleStage: "3 tentativa",
           ownerName: "Elisa",
         },
+        {
+          id: "contact-f",
+          campaignName: PRIMARY_CAMPAIGN_CONTACT_VALUE,
+          name: "Lead F",
+          phone: "6666-6666",
+          leadStatus: "Telefone atualizado",
+          lifecycleStage: "Telefone atualizado",
+          ownerName: "Fabio",
+        },
+        {
+          id: "contact-g",
+          campaignName: PRIMARY_CAMPAIGN_CONTACT_VALUE,
+          name: "Lead G",
+          phone: "7777-7777",
+          leadStatus: "UNQUALIFIED",
+          lifecycleStage: "Desqualificado",
+          ownerName: "Giovana",
+        },
       ],
     });
 
@@ -165,15 +183,27 @@ describe("dashboard campaigns service", () => {
     expect(campaigns[0].prospecting.secondAttemptCount).toBe(1);
     expect(campaigns[0].prospecting.thirdAttemptCount).toBe(1);
     expect(campaigns[0].prospecting.fourthAttemptCount).toBe(1);
+    expect(campaigns[0].prospecting.wrongNumbersCount).toBe(1);
+    expect(campaigns[0].prospecting.updatedPhoneCount).toBe(1);
     expect(campaigns[0].prospecting.disqualifiedNumbersCount).toBe(1);
     expect(campaigns[0].prospecting.firstAttemptItems[0]).toMatchObject({
       leadName: "Lead A",
       detailLabel: "1111-1111",
       statusLabel: "1a tentativa",
     });
-    expect(campaigns[0].prospecting.disqualifiedNumberItems[0]).toMatchObject({
+    expect(campaigns[0].prospecting.wrongNumberItems[0]).toMatchObject({
       leadName: "Lead C",
       detailLabel: "3333-3333",
+      statusLabel: "Wrong number",
+    });
+    expect(campaigns[0].prospecting.updatedPhoneItems[0]).toMatchObject({
+      leadName: "Lead F",
+      detailLabel: "6666-6666",
+      statusLabel: "Telefone atualizado",
+    });
+    expect(campaigns[0].prospecting.disqualifiedNumberItems[0]).toMatchObject({
+      leadName: "Lead G",
+      detailLabel: "7777-7777",
       statusLabel: "UNQUALIFIED",
     });
   });
@@ -194,8 +224,8 @@ describe("dashboard campaigns service", () => {
           campaignName: PRIMARY_CAMPAIGN_CONTACT_VALUE,
           name: "Lead Invalido",
           phone: "1111-9999",
-          leadStatus: "Attempted to contact",
-          lifecycleStage: "Telefone incorreto",
+          leadStatus: "UNQUALIFIED",
+          lifecycleStage: "Desqualificado",
         },
       ],
     });

@@ -72,6 +72,20 @@ const OVERVIEW_DETAIL_CONFIG = {
     columns: ["Proprietario", "Lead", "Detalhe", "Status"],
     columnTemplate: "minmax(180px, 1.1fr) minmax(360px, 2.65fr) minmax(260px, 1.7fr) minmax(210px, 1.1fr)",
   },
+  wrongNumbers: {
+    eyebrow: "SDR",
+    title: "Numeros errados",
+    description: "Contatos marcados com numero errado",
+    columns: ["Proprietario", "Lead", "Detalhe", "Status"],
+    columnTemplate: "minmax(180px, 1.1fr) minmax(360px, 2.65fr) minmax(260px, 1.7fr) minmax(210px, 1.1fr)",
+  },
+  updatedPhones: {
+    eyebrow: "SDR",
+    title: "Telefone atualizado",
+    description: "Contatos com telefone atualizado",
+    columns: ["Proprietario", "Lead", "Detalhe", "Status"],
+    columnTemplate: "minmax(180px, 1.1fr) minmax(360px, 2.65fr) minmax(260px, 1.7fr) minmax(210px, 1.1fr)",
+  },
   disqualifiedNumbers: {
     eyebrow: "SDR",
     title: "Numeros desqualificados",
@@ -279,6 +293,14 @@ function renderCampaignDetailRows(detailKey, summary) {
 
   if (detailKey === "fourthAttemptContacts") {
     return summary.prospecting.fourthAttemptItems || [];
+  }
+
+  if (detailKey === "wrongNumbers") {
+    return summary.prospecting.wrongNumberItems || [];
+  }
+
+  if (detailKey === "updatedPhones") {
+    return summary.prospecting.updatedPhoneItems || [];
   }
 
   if (detailKey === "disqualifiedNumbers") {
@@ -678,6 +700,18 @@ export function CampaignsContent({ dashboardData }) {
                 value={`${summary.prospecting.fourthAttemptCount || 0}`}
                 onClick={() => handleOpenDetail("fourthAttemptContacts")}
                 expanded={activeDetail === "fourthAttemptContacts"}
+              />
+              <CampaignMetricButton
+                title="Numeros errados"
+                value={`${summary.prospecting.wrongNumbersCount || 0}`}
+                onClick={() => handleOpenDetail("wrongNumbers")}
+                expanded={activeDetail === "wrongNumbers"}
+              />
+              <CampaignMetricButton
+                title="Telefone atualizado"
+                value={`${summary.prospecting.updatedPhoneCount || 0}`}
+                onClick={() => handleOpenDetail("updatedPhones")}
+                expanded={activeDetail === "updatedPhones"}
               />
               <CampaignMetricButton
                 title="Numeros desqualificados"
