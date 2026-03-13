@@ -195,6 +195,11 @@ export type CampaignSummary = {
   lastActivityAt: string | null;
 };
 
+export type DashboardCampaignOption = {
+  id: string;
+  label: string;
+};
+
 export type PipelineStage = {
   id: string;
   label: string;
@@ -240,6 +245,7 @@ export type DashboardData = {
   syncLogs?: DashboardSyncLog[];
   notifications?: DashboardNotification[];
   campaigns?: CampaignSummary[];
+  campaignOptions?: DashboardCampaignOption[];
   reports: string[][];
   error?: string;
 };

@@ -48,6 +48,7 @@ export function createDashboardFallbackData({
     syncLogs: [],
     notifications: [],
     campaigns: [],
+    campaignOptions: [],
     reports: [],
     error,
   };

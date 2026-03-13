@@ -43,6 +43,7 @@ export default function DashboardShell({
   initialPipelineId = "",
   initialOwnerFilter = "todos",
   initialActivityWeeksFilter = "1",
+  initialCampaignName = "",
   initialSellerPage = "1",
   initialSellerSearch = "",
   sellerSlug = "",
@@ -100,6 +101,7 @@ export default function DashboardShell({
     initialPipelineId,
     initialOwnerFilter,
     initialActivityWeeksFilter,
+    initialCampaignName,
     initialSellerPage,
     initialSellerSearch,
   });

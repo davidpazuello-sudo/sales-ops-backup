@@ -1538,6 +1538,49 @@
   color: color-mix(in srgb, var(--muted) 88%, white);
 }
 
+.campaignFilterBar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 14px;
+  margin: 0 0 18px;
+}
+
+.campaignFilterField {
+  width: min(420px, 100%);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.campaignFilterField span {
+  color: var(--muted);
+  font-size: calc(12px * var(--font-scale));
+  font-weight: 700;
+}
+
+.campaignFilterInput {
+  width: 100%;
+  height: 42px;
+  padding: 0 14px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--panel);
+  color: var(--text);
+  font: inherit;
+  font-size: calc(13px * var(--font-scale));
+  outline: none;
+}
+
+.campaignFilterInput:focus {
+  border-color: rgba(222, 131, 0, 0.58);
+  box-shadow: 0 0 0 4px rgba(222, 131, 0, 0.08);
+}
+
+.campaignFilterInput::placeholder {
+  color: color-mix(in srgb, var(--muted) 88%, white);
+}
+
 .taskScopeHint {
   margin: -2px 0 18px;
   color: var(--muted);
@@ -1714,17 +1757,93 @@
   outline-offset: 2px;
 }
 
-.campaignMeetingsModal {
-  width: min(1220px, calc(100vw - 32px));
-  max-height: min(90vh, 860px);
+.campaignReportModal {
+  width: min(1710px, calc(100vw - 32px));
+  max-height: min(92vh, 980px);
+  gap: 0;
+  padding: 0;
+  background: #f4f7fb;
+  border: 1px solid #d9e3ef;
+  border-radius: 8px;
+  box-shadow: 0 28px 64px rgba(15, 23, 42, 0.24);
 }
 
-.campaignMeetingsList {
+.campaignReportHeader {
+  min-height: 82px;
+  padding: 0 24px 0 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  background: linear-gradient(90deg, #12a6d1 0%, #17c2a4 100%);
+  color: #ffffff;
+}
+
+.campaignReportHeader h3 {
+  margin: 0;
+  font-size: calc(22px * var(--font-scale));
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.campaignReportClose {
+  width: 44px;
+  height: 44px;
+  border: 0;
+  background: transparent;
+  color: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font: inherit;
+  font-size: 42px;
+  font-weight: 300;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.campaignReportBody {
   display: grid;
-  grid-template-rows: auto 1fr auto;
-  gap: 8px;
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  gap: 18px;
+  padding: 28px 32px 20px;
   overflow: hidden;
-  padding-right: 0;
+  background: #f4f7fb;
+}
+
+.campaignReportBreadcrumb {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #6783a6;
+  font-size: calc(12px * var(--font-scale));
+  font-weight: 600;
+}
+
+.campaignReportMetaBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.campaignReportMetaPrimary {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 12px;
+  color: #0891b2;
+}
+
+.campaignReportMetaPrimary strong {
+  color: #415a77;
+  font-size: calc(16px * var(--font-scale));
+  font-weight: 700;
+}
+
+.campaignReportMetaPrimary span {
+  color: #0891b2;
+  font-size: calc(15px * var(--font-scale));
+  font-weight: 800;
 }
 
 .campaignDetailLoadingState {
@@ -1743,10 +1862,10 @@
 
 .campaignMeetingItem {
   display: grid;
-  grid-template-columns: minmax(0, 1.15fr) minmax(0, 2.4fr) minmax(0, 1.4fr) minmax(0, 1fr);
+  grid-template-columns: minmax(160px, 1.05fr) minmax(260px, 2.4fr) minmax(220px, 1.6fr) minmax(180px, 1fr);
   align-items: center;
   justify-items: start;
-  column-gap: 16px;
+  column-gap: 20px;
   width: 100%;
   text-align: left;
 }
@@ -1774,15 +1893,18 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   text-align: left;
+  color: #304969;
+  font-size: calc(13px * var(--font-scale));
+  font-weight: 600;
 }
 
 .popupPagination {
-  width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 14px;
+  gap: 10px;
   flex-wrap: wrap;
+  color: #0b8fb0;
 }
 
 .popupPaginationPages {
@@ -1796,7 +1918,7 @@
 .popupPaginationPage {
   border: 0;
   background: transparent;
-  color: var(--accent);
+  color: #0b8fb0;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1818,21 +1940,76 @@
 }
 
 .popupPaginationPage {
-  min-width: 34px;
-  height: 34px;
-  border-radius: 10px;
+  min-width: 36px;
+  height: 36px;
+  border-radius: 4px;
   padding: 0 8px;
 }
 
 .popupPaginationPageActive {
-  border: 1px solid color-mix(in srgb, var(--accent) 55%, transparent);
-  background: color-mix(in srgb, var(--accent) 14%, var(--panel));
+  border: 1px solid #8ed3df;
+  background: #e8f7fb;
 }
 
 .popupPaginationNav:disabled,
 .popupPaginationPage:disabled {
   opacity: 0.42;
   cursor: default;
+}
+
+.campaignReportTableFrame {
+  min-height: 0;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  overflow: hidden;
+  border: 1px solid #cfd9e6;
+  background: #ffffff;
+}
+
+.campaignReportTableHead {
+  min-height: 54px;
+  padding: 0 18px;
+  background: #eef2f6;
+  border-bottom: 1px solid #cfd9e6;
+  color: #2c4b70;
+  font-size: calc(11px * var(--font-scale));
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.campaignReportTableHead span {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 54px;
+  text-align: left;
+}
+
+.campaignReportTableRow {
+  min-height: 58px;
+  padding: 0 18px;
+  background: #ffffff;
+  border-bottom: 1px solid #d7e0ea;
+}
+
+.campaignReportTableRow:nth-child(even) {
+  background: #fbfcfe;
+}
+
+.campaignReportFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-top: 2px;
+}
+
+.campaignReportPageSize {
+  color: #0b8fb0;
+  font-size: calc(13px * var(--font-scale));
+  font-weight: 800;
+  white-space: nowrap;
 }
 
 .campaignGoalList {
@@ -2048,6 +2225,7 @@
 
 :global(html[data-theme="dark"]) .dealsFilterField select,
 :global(html[data-theme="dark"]) .dealsFilterInput,
+:global(html[data-theme="dark"]) .campaignFilterInput,
 :global(html[data-theme="dark"]) .sellerFilterBox input,
 :global(html[data-theme="dark"]) .meetingField input,
 :global(html[data-theme="dark"]) .meetingField textarea,
@@ -2097,6 +2275,7 @@
 :global(html[data-theme="dark"]) .aiAssistantBox input::placeholder,
 :global(html[data-theme="dark"]) .meetingField input::placeholder,
 :global(html[data-theme="dark"]) .meetingField textarea::placeholder,
+:global(html[data-theme="dark"]) .campaignFilterInput::placeholder,
 :global(html[data-theme="dark"]) .sellerFilterBox input::placeholder,
 :global(html[data-theme="dark"]) .twoFactorField input::placeholder {
   color: #8fa4c2;
@@ -2663,8 +2842,8 @@
   z-index: 110;
   display: grid;
   place-items: center;
-  background: rgba(15, 24, 39, 0.38);
-  backdrop-filter: blur(2px);
+  background: rgba(33, 52, 77, 0.34);
+  backdrop-filter: blur(8px);
   padding: 24px;
 }
 

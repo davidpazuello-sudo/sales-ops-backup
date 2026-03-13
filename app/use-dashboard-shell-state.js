@@ -101,9 +101,10 @@ function buildDashboardScopeCacheKey(scope, options = {}) {
   const pipelineId = String(options.pipelineId || "").trim();
   const ownerFilter = String(options.ownerFilter || "").trim();
   const activityWeeksFilter = String(options.activityWeeksFilter || "").trim();
+  const campaignName = String(options.campaignName || "").trim();
   const sellerPage = String(options.sellerPage || "").trim();
   const sellerSearch = String(options.sellerSearch || "").trim();
-  const suffixParts = [pipelineId, ownerFilter, activityWeeksFilter, sellerPage, sellerSearch].filter(Boolean);
+  const suffixParts = [pipelineId, ownerFilter, activityWeeksFilter, campaignName, sellerPage, sellerSearch].filter(Boolean);
   return suffixParts.length ? `${scope}:${suffixParts.join(":")}` : scope;
 }
 
@@ -168,6 +169,7 @@ export function useDashboardShellState({
   initialPipelineId = "",
   initialOwnerFilter = "todos",
   initialActivityWeeksFilter = "1",
+  initialCampaignName = "",
   initialSellerPage = "1",
   initialSellerSearch = "",
 }) {
@@ -282,6 +284,7 @@ export function useDashboardShellState({
     const pipelineId = hubspotScope === "deals" ? String(initialPipelineId || "").trim() : "";
     const ownerFilter = hubspotScope === "deals" ? String(initialOwnerFilter || "todos").trim() : "";
     const activityWeeksFilter = hubspotScope === "deals" ? String(initialActivityWeeksFilter || "1").trim() : "";
+    const campaignName = hubspotScope === "campaigns" ? String(initialCampaignName || "").trim() : "";
     const sellerPage = hubspotScope === "sellers" ? String(initialSellerPage || "1").trim() : "";
     const sellerSearch = hubspotScope === "sellers" ? String(initialSellerSearch || "").trim() : "";
 
@@ -296,6 +299,7 @@ export function useDashboardShellState({
           pipelineId,
           ownerFilter,
           activityWeeksFilter,
+          campaignName,
           sellerPage,
           sellerSearch,
         });
@@ -315,6 +319,9 @@ export function useDashboardShellState({
         }
         if (activityWeeksFilter) {
           searchParams.set("activityWeeks", activityWeeksFilter);
+        }
+        if (campaignName) {
+          searchParams.set("campaign", campaignName);
         }
         if (sellerPage) {
           searchParams.set("sellerPage", sellerPage);
@@ -347,6 +354,7 @@ export function useDashboardShellState({
           pipelineId,
           ownerFilter,
           activityWeeksFilter,
+          campaignName,
           sellerPage,
           sellerSearch,
         });
@@ -389,7 +397,7 @@ export function useDashboardShellState({
         }
       }
     };
-  }, [initialActivityWeeksFilter, initialNav, initialOwnerFilter, initialPipelineId, initialProfileView, initialSellerPage, initialSellerSearch]);
+  }, [initialActivityWeeksFilter, initialCampaignName, initialNav, initialOwnerFilter, initialPipelineId, initialProfileView, initialSellerPage, initialSellerSearch]);
 
   useEffect(() => {
     let cancelled = false;

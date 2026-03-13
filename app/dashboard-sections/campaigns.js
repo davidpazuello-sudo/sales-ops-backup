@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { Card, Metric, PageTitle, SimpleArrow } from "../dashboard-ui";
 import PageAgentPanel, { PageAgentToggleButton } from "../page-agent-panel";
 import {
@@ -9,12 +10,36 @@ import {
 } from "../dashboard-section-feedback";
 import styles from "../page.module.css";
 import {
-  PRIMARY_CAMPAIGN_NAME,
-  getPrimaryCampaign,
+  normalizeCampaignLabel,
 } from "lib/services/dashboard-campaigns";
 
 const EMPTY_CAMPAIGNS = [];
+const EMPTY_CAMPAIGN_OPTIONS = [];
 const OVERVIEW_DETAIL_CONFIG = {
+  callsDaily: {
+    eyebrow: "SDR",
+    title: "Ligacoes hoje",
+    description: "Ligacoes do dia na campanha",
+    columns: ["Proprietario", "Lead", "Data", "Status"],
+  },
+  callsWeekly: {
+    eyebrow: "SDR",
+    title: "Ligacoes na semana",
+    description: "Ligacoes da semana na campanha",
+    columns: ["Proprietario", "Lead", "Data", "Status"],
+  },
+  connectionsDaily: {
+    eyebrow: "SDR",
+    title: "Conexoes hoje",
+    description: "Conexoes do dia na campanha",
+    columns: ["Proprietario", "Lead", "Data", "Status"],
+  },
+  connectionsWeekly: {
+    eyebrow: "SDR",
+    title: "Conexoes na semana",
+    description: "Conexoes da semana na campanha",
+    columns: ["Proprietario", "Lead", "Data", "Status"],
+  },
   totalLeads: {
     eyebrow: "LEADS",
     title: "Total de leads",
@@ -27,16 +52,40 @@ const OVERVIEW_DETAIL_CONFIG = {
     description: "Leads qualificados por vendas",
     columns: ["Proprietario", "Lead", "Detalhe", "Status"],
   },
+  mqls: {
+    eyebrow: "QUALIFICACAO",
+    title: "MQLs",
+    description: "Leads de marketing da campanha",
+    columns: ["Proprietario", "Lead", "Detalhe", "Status"],
+  },
+  qualificationConversion: {
+    eyebrow: "QUALIFICACAO",
+    title: "Taxa MQL > SQL",
+    description: "Base de conversao de MQL para SQL",
+    columns: ["Proprietario", "Lead", "Detalhe", "Status"],
+  },
   meetings: {
     eyebrow: "REUNIOES",
     title: "Reunioes da campanha",
     description: "Reunioes sincronizadas da HubSpot",
     columns: ["Proprietario", "Lead", "Data", "Status"],
   },
+  proposals: {
+    eyebrow: "VENDAS",
+    title: "Propostas",
+    description: "Negocios em etapa de proposta",
+    columns: ["Proprietario", "Negocio", "Valor", "Status"],
+  },
   closedWon: {
     eyebrow: "FECHADOS",
     title: "Negocios fechados",
     description: "Contratos fechados na campanha",
+    columns: ["Proprietario", "Negocio", "Valor", "Status"],
+  },
+  salesConversion: {
+    eyebrow: "VENDAS",
+    title: "Taxa proposta > fechamento",
+    description: "Base de conversao de propostas em fechamentos",
     columns: ["Proprietario", "Negocio", "Valor", "Status"],
   },
   qualifiedOpportunities: {
@@ -87,13 +136,57 @@ function GoalList({ goals }) {
   );
 }
 
+function formatDateBucket(value, mode = "day") {
+  if (!value) {
+    return "";
+  }
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return "";
+  }
+
+  if (mode === "week") {
+    const weekStart = new Date(date);
+    weekStart.setHours(0, 0, 0, 0);
+    weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+    return weekStart.toISOString().slice(0, 10);
+  }
+
+  return date.toISOString().slice(0, 10);
+}
+
 function renderCampaignDetailRows(detailKey, summary) {
   if (!summary) {
     return [];
   }
 
+  if (detailKey === "callsDaily") {
+    const today = formatDateBucket(new Date().toISOString(), "day");
+    return (summary.prospecting.callItems || []).filter((item) => formatDateBucket(item.dateValue, "day") === today);
+  }
+
+  if (detailKey === "callsWeekly") {
+    const currentWeek = formatDateBucket(new Date().toISOString(), "week");
+    return (summary.prospecting.callItems || []).filter((item) => formatDateBucket(item.dateValue, "week") === currentWeek);
+  }
+
+  if (detailKey === "connectionsDaily") {
+    const today = formatDateBucket(new Date().toISOString(), "day");
+    return (summary.prospecting.connectionItems || []).filter((item) => formatDateBucket(item.dateValue, "day") === today);
+  }
+
+  if (detailKey === "connectionsWeekly") {
+    const currentWeek = formatDateBucket(new Date().toISOString(), "week");
+    return (summary.prospecting.connectionItems || []).filter((item) => formatDateBucket(item.dateValue, "week") === currentWeek);
+  }
+
   if (detailKey === "totalLeads") {
     return summary.qualification.totalLeadItems || [];
+  }
+
+  if (detailKey === "mqls" || detailKey === "qualificationConversion") {
+    return summary.qualification.mqlLeadItems || [];
   }
 
   if (detailKey === "sqls") {
@@ -106,6 +199,10 @@ function renderCampaignDetailRows(detailKey, summary) {
 
   if (detailKey === "closedWon") {
     return summary.sales.closedWonItems || [];
+  }
+
+  if (detailKey === "proposals" || detailKey === "salesConversion") {
+    return summary.sales.proposalItems || [];
   }
 
   if (detailKey === "qualifiedOpportunities") {
@@ -140,17 +237,42 @@ function getDetailCellValues(item) {
   ];
 }
 
+function normalizeCampaignSearchValue(value) {
+  return String(value || "")
+    .trim()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+}
+
+function resolveCampaignOptionLabel(options = [], value = "") {
+  const normalizedValue = normalizeCampaignSearchValue(value);
+  if (!normalizedValue) {
+    return "";
+  }
+
+  const exactOption = options.find((option) => normalizeCampaignSearchValue(option?.label) === normalizedValue);
+  return exactOption?.label || String(value || "").trim();
+}
+
 export function CampaignsContent({ dashboardData }) {
+  const router = useRouter();
   const [agentOpen, setAgentOpen] = useState(false);
   const [activeDetail, setActiveDetail] = useState("");
   const [detailPageByKey, setDetailPageByKey] = useState({});
   const [detailRowsByKey, setDetailRowsByKey] = useState({});
   const [detailLoadingKey, setDetailLoadingKey] = useState("");
   const [detailError, setDetailError] = useState("");
+  const [campaignOptions, setCampaignOptions] = useState(EMPTY_CAMPAIGN_OPTIONS);
+  const [campaignOptionsLoading, setCampaignOptionsLoading] = useState(false);
+  const [campaignOptionsError, setCampaignOptionsError] = useState("");
+  const [selectedCampaignDraft, setSelectedCampaignDraft] = useState("");
+  const [isFilterPending, startFilterTransition] = useTransition();
   const campaigns = Array.isArray(dashboardData.campaigns) ? dashboardData.campaigns : EMPTY_CAMPAIGNS;
-  const summary = getPrimaryCampaign(campaigns);
+  const summary = campaigns[0] || null;
   const loadingState = dashboardData.states?.loading || "ready";
   const stateErrors = dashboardData.states?.errors || [];
+  const normalizedSummaryName = useMemo(() => normalizeCampaignLabel(summary?.name), [summary?.name]);
   const activeDetailConfig = OVERVIEW_DETAIL_CONFIG[activeDetail] || null;
   const activeDetailRows = detailRowsByKey[activeDetail] || [];
   const activeDetailPage = detailPageByKey[activeDetail] || 1;
@@ -160,6 +282,55 @@ export function CampaignsContent({ dashboardData }) {
     (activeDetailPage - 1) * detailPageSize,
     activeDetailPage * detailPageSize,
   );
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadCampaignOptions() {
+      setCampaignOptionsLoading(true);
+      setCampaignOptionsError("");
+
+      try {
+        const response = await fetch("/api/hubspot/dashboard?scope=campaigns&campaignOptions=1", {
+          cache: "no-store",
+        });
+        const payload = await response.json().catch(() => null);
+
+        if (cancelled) {
+          return;
+        }
+
+        if (!response.ok) {
+          setCampaignOptions([]);
+          setCampaignOptionsError(payload?.error || "Nao foi possivel carregar as campanhas da HubSpot.");
+          return;
+        }
+
+        setCampaignOptions(Array.isArray(payload?.campaignOptions) ? payload.campaignOptions : []);
+      } catch {
+        if (!cancelled) {
+          setCampaignOptions([]);
+          setCampaignOptionsError("Nao foi possivel carregar as campanhas da HubSpot.");
+        }
+      } finally {
+        if (!cancelled) {
+          setCampaignOptionsLoading(false);
+        }
+      }
+    }
+
+    loadCampaignOptions();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (normalizedSummaryName) {
+      setSelectedCampaignDraft(normalizedSummaryName);
+    }
+  }, [normalizedSummaryName]);
 
   async function handleOpenDetail(detailKey) {
     setActiveDetail(detailKey);
@@ -176,7 +347,16 @@ export function CampaignsContent({ dashboardData }) {
     setDetailLoadingKey(detailKey);
 
     try {
-      const response = await fetch(`/api/hubspot/dashboard?scope=campaigns&campaignDetail=${encodeURIComponent(detailKey)}`, {
+      const searchParams = new URLSearchParams({
+        scope: "campaigns",
+        campaignDetail: detailKey,
+      });
+
+      if (summary?.name) {
+        searchParams.set("campaign", summary.name);
+      }
+
+      const response = await fetch(`/api/hubspot/dashboard?${searchParams.toString()}`, {
         cache: "no-store",
       });
       const payload = await response.json().catch(() => null);
@@ -186,7 +366,7 @@ export function CampaignsContent({ dashboardData }) {
         return;
       }
 
-      const detailSummary = getPrimaryCampaign(Array.isArray(payload?.campaigns) ? payload.campaigns : []);
+      const detailSummary = Array.isArray(payload?.campaigns) ? payload.campaigns[0] || null : null;
       setDetailRowsByKey((current) => ({
         ...current,
         [detailKey]: renderCampaignDetailRows(detailKey, detailSummary),
@@ -198,6 +378,17 @@ export function CampaignsContent({ dashboardData }) {
     }
   }
 
+  function handleApplyCampaignFilter() {
+    const resolvedCampaignName = resolveCampaignOptionLabel(campaignOptions, selectedCampaignDraft);
+    if (!resolvedCampaignName) {
+      return;
+    }
+
+    startFilterTransition(() => {
+      router.push(`/campanhas?campanha=${encodeURIComponent(resolvedCampaignName)}`);
+    });
+  }
+
   return (
     <section className={styles.dashboardSection}>
       <header className={styles.sectionHeaderBar}>
@@ -205,10 +396,42 @@ export function CampaignsContent({ dashboardData }) {
           <PageTitle loading={loadingState === "loading"} loadingLabel="Carregando campanha da HubSpot">
             Campanhas
           </PageTitle>
-          <p>Acompanhamento dedicado da campanha {PRIMARY_CAMPAIGN_NAME} com dados reais da HubSpot.</p>
         </div>
         <PageAgentToggleButton agentId="campaigns" open={agentOpen} onToggle={() => setAgentOpen((value) => !value)} />
       </header>
+
+      <div className={styles.campaignFilterBar}>
+        <label className={styles.campaignFilterField}>
+          <span>Escolher campanha</span>
+          <input
+            type="text"
+            list="campaigns-hubspot-options"
+            className={styles.campaignFilterInput}
+            placeholder={campaignOptionsLoading ? "Carregando campanhas da HubSpot..." : "Buscar campanha"}
+            value={selectedCampaignDraft}
+            onChange={(event) => setSelectedCampaignDraft(event.target.value)}
+            disabled={campaignOptionsLoading || isFilterPending}
+          />
+          <datalist id="campaigns-hubspot-options">
+            {campaignOptions.map((option) => (
+              <option key={option.id || option.label} value={option.label} />
+            ))}
+          </datalist>
+        </label>
+
+        <button
+          type="button"
+          className={`${styles.primaryActionButton} ${styles.filterApplyButton}`.trim()}
+          onClick={handleApplyCampaignFilter}
+          disabled={!selectedCampaignDraft.trim() || campaignOptionsLoading || isFilterPending}
+        >
+          Filtrar
+        </button>
+      </div>
+
+      {campaignOptionsError ? (
+        <SectionNotice variant="error">{campaignOptionsError}</SectionNotice>
+      ) : null}
 
       {agentOpen ? (
         <div className={styles.grid}>
@@ -220,20 +443,14 @@ export function CampaignsContent({ dashboardData }) {
         </div>
       ) : null}
 
-      <div className={styles.taskScopeHint}>
-        {summary
-          ? `Mostrando o acompanhamento da campanha ${summary.name}.`
-          : `Mostrando apenas a campanha ${PRIMARY_CAMPAIGN_NAME}.`}
-      </div>
-
       {stateErrors.length ? (
         <SectionNotice variant="error">{stateErrors[0] || "A campanha ainda nao conseguiu carregar dados reais."}</SectionNotice>
       ) : null}
 
       {!summary && loadingState === "ready" && !stateErrors.length ? (
         <SectionEmptyState
-          title={`Campanha ${PRIMARY_CAMPAIGN_NAME} sem dados sincronizados`}
-          description={`Assim que a HubSpot trouxer deals, contatos e atividades da campanha ${PRIMARY_CAMPAIGN_NAME}, o acompanhamento vai aparecer aqui.`}
+          title={`Campanha ${selectedCampaignDraft || "selecionada"} sem dados sincronizados`}
+          description="Assim que a HubSpot trouxer deals, contatos e atividades da campanha escolhida, o acompanhamento vai aparecer aqui."
         />
       ) : null}
 
@@ -286,27 +503,93 @@ export function CampaignsContent({ dashboardData }) {
 
           <Card eyebrow="SDR" title="Relatorios de prospeccao e atividade" wide>
             <div className={styles.metrics}>
-              <Metric title="Ligacoes hoje" value={`${summary.prospecting.callsDaily}`} note="Meta minima diaria: 15" />
-              <Metric title="Ligacoes na semana" value={`${summary.prospecting.callsWeekly}`} note="Volume semanal de prospeccao" />
-              <Metric title="Conexoes hoje" value={`${summary.prospecting.connectionsDaily}`} note="Meta minima diaria: 7" />
-              <Metric title="Conexoes na semana" value={`${summary.prospecting.connectionsWeekly}`} note="Emails, redes e outras interacoes" />
+              <CampaignMetricButton
+                title="Ligacoes hoje"
+                value={`${summary.prospecting.callsDaily}`}
+                note="Meta minima diaria: 15"
+                onClick={() => handleOpenDetail("callsDaily")}
+                expanded={activeDetail === "callsDaily"}
+              />
+              <CampaignMetricButton
+                title="Ligacoes na semana"
+                value={`${summary.prospecting.callsWeekly}`}
+                note="Volume semanal de prospeccao"
+                onClick={() => handleOpenDetail("callsWeekly")}
+                expanded={activeDetail === "callsWeekly"}
+              />
+              <CampaignMetricButton
+                title="Conexoes hoje"
+                value={`${summary.prospecting.connectionsDaily}`}
+                note="Meta minima diaria: 7"
+                onClick={() => handleOpenDetail("connectionsDaily")}
+                expanded={activeDetail === "connectionsDaily"}
+              />
+              <CampaignMetricButton
+                title="Conexoes na semana"
+                value={`${summary.prospecting.connectionsWeekly}`}
+                note="Emails, redes e outras interacoes"
+                onClick={() => handleOpenDetail("connectionsWeekly")}
+                expanded={activeDetail === "connectionsWeekly"}
+              />
             </div>
           </Card>
 
           <Card eyebrow="QUALIFICACAO" title="Relatorios de qualificacao e conversao">
             <div className={styles.metrics}>
-              <Metric title="Total de leads" value={`${summary.qualification.totalLeads}`} note="Base total de contatos da campanha" />
-              <Metric title="MQLs" value={`${summary.qualification.mqlCount}`} note="Leads de marketing mapeados" />
-              <Metric title="SQLs" value={`${summary.qualification.sqlCount}`} note="Meta da campanha: 40 ate 17/05/2026" />
-              <Metric title="Taxa MQL > SQL" value={`${summary.qualification.conversionRate}%`} note="Efetividade da qualificacao SDR" />
+              <CampaignMetricButton
+                title="Total de leads"
+                value={`${summary.qualification.totalLeads}`}
+                note="Base total de contatos da campanha"
+                onClick={() => handleOpenDetail("totalLeads")}
+                expanded={activeDetail === "totalLeads"}
+              />
+              <CampaignMetricButton
+                title="MQLs"
+                value={`${summary.qualification.mqlCount}`}
+                note="Leads de marketing mapeados"
+                onClick={() => handleOpenDetail("mqls")}
+                expanded={activeDetail === "mqls"}
+              />
+              <CampaignMetricButton
+                title="SQLs"
+                value={`${summary.qualification.sqlCount}`}
+                note="Meta da campanha: 40 ate 17/05/2026"
+                onClick={() => handleOpenDetail("sqls")}
+                expanded={activeDetail === "sqls"}
+              />
+              <CampaignMetricButton
+                title="Taxa MQL > SQL"
+                value={`${summary.qualification.conversionRate}%`}
+                note="Efetividade da qualificacao SDR"
+                onClick={() => handleOpenDetail("qualificationConversion")}
+                expanded={activeDetail === "qualificationConversion"}
+              />
             </div>
           </Card>
 
           <Card eyebrow="VENDAS" title="Relatorios de desempenho e fechamento">
             <div className={styles.metrics}>
-              <Metric title="Propostas" value={`${summary.sales.proposalCount}`} note="Deals em etapa de proposta" />
-              <Metric title="Fechados" value={`${summary.sales.closedWonCount}`} note="Meta da campanha: 15" />
-              <Metric title="Taxa proposta > fechamento" value={`${summary.sales.conversionRate}%`} note="Eficacia do fechamento" />
+              <CampaignMetricButton
+                title="Propostas"
+                value={`${summary.sales.proposalCount}`}
+                note="Deals em etapa de proposta"
+                onClick={() => handleOpenDetail("proposals")}
+                expanded={activeDetail === "proposals"}
+              />
+              <CampaignMetricButton
+                title="Fechados"
+                value={`${summary.sales.closedWonCount}`}
+                note="Meta da campanha: 15"
+                onClick={() => handleOpenDetail("closedWon")}
+                expanded={activeDetail === "closedWon"}
+              />
+              <CampaignMetricButton
+                title="Taxa proposta > fechamento"
+                value={`${summary.sales.conversionRate}%`}
+                note="Eficacia do fechamento"
+                onClick={() => handleOpenDetail("salesConversion")}
+                expanded={activeDetail === "salesConversion"}
+              />
             </div>
           </Card>
 
@@ -319,23 +602,38 @@ export function CampaignsContent({ dashboardData }) {
       {summary && activeDetailConfig ? (
         <div className={styles.stageModalBackdrop} role="presentation" onClick={() => setActiveDetail("")}>
           <div
-            className={`${styles.stageModal} ${styles.campaignMeetingsModal}`.trim()}
+            className={`${styles.stageModal} ${styles.campaignReportModal}`.trim()}
             role="dialog"
             aria-modal="true"
             aria-label={`${activeDetailConfig.title} da campanha ${summary.name}`}
             onClick={(event) => event.stopPropagation()}
           >
-            <header className={styles.stageModalHeader}>
-              <div>
-                <span>{activeDetailConfig.eyebrow}</span>
-                <h3>{summary.name}</h3>
-              </div>
-              <button type="button" className={styles.secondaryActionButton} onClick={() => setActiveDetail("")}>
-                Fechar
+            <header className={styles.campaignReportHeader}>
+              <h3>Detalhes do relatorio</h3>
+              <button
+                type="button"
+                className={styles.campaignReportClose}
+                onClick={() => setActiveDetail("")}
+                aria-label="Fechar detalhes"
+              >
+                ×
               </button>
             </header>
 
-            <div className={`${styles.stageModalList} ${styles.campaignMeetingsList}`.trim()}>
+            <div className={styles.campaignReportBody}>
+              <div className={styles.campaignReportBreadcrumb}>
+                <span>{summary.name}</span>
+                <span>›</span>
+                <span>{activeDetailConfig.title}</span>
+              </div>
+
+              <div className={styles.campaignReportMetaBar}>
+                <div className={styles.campaignReportMetaPrimary}>
+                  <strong>{activeDetailRows.length} linhas</strong>
+                  <span>{activeDetailConfig.description}</span>
+                </div>
+              </div>
+
               {detailLoadingKey === activeDetail ? (
                 <div className={styles.campaignDetailLoadingState} role="status" aria-live="polite">
                   <span className={styles.sectionLoadingSpinner} aria-hidden="true" />
@@ -345,78 +643,83 @@ export function CampaignsContent({ dashboardData }) {
                 <SectionNotice variant="error">{detailError}</SectionNotice>
               ) : activeDetailRows.length ? (
                 <>
-                  <div className={`${styles.tableHead} ${styles.campaignMeetingItem}`.trim()}>
-                    {activeDetailConfig.columns.map((column) => <span key={column}>{column}</span>)}
-                  </div>
-                  <div className={styles.campaignTableBody}>
-                    {paginatedDetailRows.map((item) => {
-                      const cellValues = getDetailCellValues(item);
-
-                      return (
-                        <article key={item.id} className={`${styles.stageModalItem} ${styles.campaignMeetingItem}`.trim()}>
-                          {cellValues.map((value, index) => (
-                            <div key={`${item.id}-${index}`}>
-                              <strong className={styles.campaignTableCellValue} title={value}>{value}</strong>
-                            </div>
-                          ))}
-                        </article>
-                      );
-                    })}
-                  </div>
-                  {activeDetailTotalPages > 1 ? (
-                    <div className={styles.popupPaginationBar}>
-                      <nav className={styles.popupPagination} aria-label={`Paginacao de ${activeDetailConfig.title}`}>
-                        <button
-                          type="button"
-                          className={styles.popupPaginationNav}
-                          onClick={() => setDetailPageByKey((current) => ({
-                            ...current,
-                            [activeDetail]: Math.max(1, activeDetailPage - 1),
-                          }))}
-                          disabled={activeDetailPage === 1}
-                        >
-                          <SimpleArrow />
-                          <span>Voltar</span>
-                        </button>
-
-                        <div className={styles.popupPaginationPages}>
-                          {Array.from({ length: activeDetailTotalPages }, (_, index) => {
-                            const page = index + 1;
-                            const isCurrentPage = activeDetailPage === page;
-
-                            return (
-                              <button
-                                key={page}
-                                type="button"
-                                className={`${styles.popupPaginationPage} ${isCurrentPage ? styles.popupPaginationPageActive : ""}`.trim()}
-                                onClick={() => setDetailPageByKey((current) => ({
-                                  ...current,
-                                  [activeDetail]: page,
-                                }))}
-                                aria-current={isCurrentPage ? "page" : undefined}
-                                aria-label={`Ir para pagina ${page}`}
-                              >
-                                {page}
-                              </button>
-                            );
-                          })}
-                        </div>
-
-                        <button
-                          type="button"
-                          className={styles.popupPaginationNav}
-                          onClick={() => setDetailPageByKey((current) => ({
-                            ...current,
-                            [activeDetail]: Math.min(activeDetailTotalPages, activeDetailPage + 1),
-                          }))}
-                          disabled={activeDetailPage === activeDetailTotalPages}
-                        >
-                          <span>Proximo</span>
-                          <SimpleArrow right />
-                        </button>
-                      </nav>
+                  <div className={styles.campaignReportTableFrame}>
+                    <div className={`${styles.tableHead} ${styles.campaignMeetingItem} ${styles.campaignReportTableHead}`.trim()}>
+                      {activeDetailConfig.columns.map((column) => <span key={column}>{column}</span>)}
                     </div>
-                  ) : null}
+                    <div className={styles.campaignTableBody}>
+                      {paginatedDetailRows.map((item) => {
+                        const cellValues = getDetailCellValues(item);
+
+                        return (
+                          <article key={item.id} className={`${styles.stageModalItem} ${styles.campaignMeetingItem} ${styles.campaignReportTableRow}`.trim()}>
+                            {cellValues.map((value, index) => (
+                              <div key={`${item.id}-${index}`}>
+                                <strong className={styles.campaignTableCellValue} title={value}>{value}</strong>
+                              </div>
+                            ))}
+                          </article>
+                        );
+                      })}
+                    </div>
+                  </div>
+                  <div className={styles.campaignReportFooter}>
+                    {activeDetailTotalPages > 1 ? (
+                      <div className={styles.popupPaginationBar}>
+                        <nav className={styles.popupPagination} aria-label={`Paginacao de ${activeDetailConfig.title}`}>
+                          <button
+                            type="button"
+                            className={styles.popupPaginationNav}
+                            onClick={() => setDetailPageByKey((current) => ({
+                              ...current,
+                              [activeDetail]: Math.max(1, activeDetailPage - 1),
+                            }))}
+                            disabled={activeDetailPage === 1}
+                          >
+                            <SimpleArrow />
+                            <span>Voltar</span>
+                          </button>
+
+                          <div className={styles.popupPaginationPages}>
+                            {Array.from({ length: activeDetailTotalPages }, (_, index) => {
+                              const page = index + 1;
+                              const isCurrentPage = activeDetailPage === page;
+
+                              return (
+                                <button
+                                  key={page}
+                                  type="button"
+                                  className={`${styles.popupPaginationPage} ${isCurrentPage ? styles.popupPaginationPageActive : ""}`.trim()}
+                                  onClick={() => setDetailPageByKey((current) => ({
+                                    ...current,
+                                    [activeDetail]: page,
+                                  }))}
+                                  aria-current={isCurrentPage ? "page" : undefined}
+                                  aria-label={`Ir para pagina ${page}`}
+                                >
+                                  {page}
+                                </button>
+                              );
+                            })}
+                          </div>
+
+                          <button
+                            type="button"
+                            className={styles.popupPaginationNav}
+                            onClick={() => setDetailPageByKey((current) => ({
+                              ...current,
+                              [activeDetail]: Math.min(activeDetailTotalPages, activeDetailPage + 1),
+                            }))}
+                            disabled={activeDetailPage === activeDetailTotalPages}
+                          >
+                            <span>Proximo</span>
+                            <SimpleArrow right />
+                          </button>
+                        </nav>
+                      </div>
+                    ) : <div />}
+                    <div className={styles.campaignReportPageSize}>10 linhas por pagina</div>
+                  </div>
                 </>
               ) : (
                 <p className={styles.sellerDetailNote}>Nenhum item sincronizado para este indicador no momento.</p>

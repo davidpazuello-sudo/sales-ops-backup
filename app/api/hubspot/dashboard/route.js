@@ -58,8 +58,30 @@ function normalizeDashboardSellerSearch(value) {
 
 function normalizeDashboardCampaignDetail(value) {
   const normalized = String(value || "").trim();
-  const allowedDetails = new Set(["totalLeads", "sqls", "meetings", "closedWon", "qualifiedOpportunities"]);
+  const allowedDetails = new Set([
+    "callsDaily",
+    "callsWeekly",
+    "connectionsDaily",
+    "connectionsWeekly",
+    "totalLeads",
+    "mqls",
+    "sqls",
+    "qualificationConversion",
+    "meetings",
+    "proposals",
+    "closedWon",
+    "salesConversion",
+    "qualifiedOpportunities",
+  ]);
   return allowedDetails.has(normalized) ? normalized : "";
+}
+
+function normalizeDashboardCampaignName(value) {
+  return String(value || "").trim();
+}
+
+function normalizeDashboardCampaignOptionsFlag(value) {
+  return String(value || "").trim() === "1";
 }
 
 export async function GET(request) {
@@ -72,6 +94,8 @@ export async function GET(request) {
   const sellerPage = scope === "sellers" ? normalizeDashboardSellerPage(searchParams.get("sellerPage")) : "";
   const sellerSearch = scope === "sellers" ? normalizeDashboardSellerSearch(searchParams.get("sellerSearch")) : "";
   const campaignDetailKey = scope === "campaigns" ? normalizeDashboardCampaignDetail(searchParams.get("campaignDetail")) : "";
+  const campaignName = scope === "campaigns" ? normalizeDashboardCampaignName(searchParams.get("campaign")) : "";
+  const campaignOptionsOnly = scope === "campaigns" ? normalizeDashboardCampaignOptionsFlag(searchParams.get("campaignOptions")) : false;
   const auth = await requireAuthenticatedUser({
     route: "api/hubspot/dashboard",
     action: "read-dashboard",
@@ -116,8 +140,12 @@ export async function GET(request) {
       sellerPage,
       sellerSearch,
       campaignDetailKey,
+      campaignName,
+      campaignOptionsOnly,
     }));
-    const data = assertDashboardData(await enrichDashboardWithOperationalData(baseData, auth.user, { scope }));
+    const data = campaignOptionsOnly
+      ? baseData
+      : assertDashboardData(await enrichDashboardWithOperationalData(baseData, auth.user, { scope }));
     return jsonWithApiObservation(
       observation,
       data,
