@@ -205,6 +205,14 @@ export function TasksContent({ dashboardData, sessionUser = {} }) {
           </div>
         </Card>
 
+        <Card eyebrow="TIPOS" title="Resumo por tipo" wide>
+          <div className={styles.metrics}>
+            <Metric title="Reunioes" value={`${groupedTasks.meeting.length}`} note="Atividades do tipo reuniao no recorte atual" />
+            <Metric title="Chamadas" value={`${groupedTasks.call.length}`} note="Atividades do tipo chamada no recorte atual" />
+            <Metric title="Outras tarefas" value={`${groupedTasks.task.length}`} note="Follow-ups e tarefas gerais visiveis no recorte atual" />
+          </div>
+        </Card>
+
         <TaskGroupCard
           eyebrow="REUNIOES"
           title="Reunioes"

@@ -561,14 +561,14 @@ export function CampaignsContent({ dashboardData }) {
                 expanded={activeDetail === "sqls"}
               />
               <CampaignMetricButton
-                title="Reunioes"
+                title="Reunioes programadas"
                 value={`${summary.meetingCount}`}
                 note="Meta da campanha: 70"
                 onClick={() => handleOpenDetail("meetings")}
                 expanded={activeDetail === "meetings"}
               />
               <CampaignMetricButton
-                title="Fechados"
+                title="Reuniao concluido"
                 value={`${summary.sales.closedWonCount}`}
                 note="Meta da campanha: 15"
                 onClick={() => handleOpenDetail("closedWon")}
@@ -594,63 +594,54 @@ export function CampaignsContent({ dashboardData }) {
               <CampaignMetricButton
                 title="Ligacoes hoje"
                 value={`${summary.prospecting.callsDaily}`}
-                note="Meta minima diaria: 15"
                 onClick={() => handleOpenDetail("callsDaily")}
                 expanded={activeDetail === "callsDaily"}
               />
               <CampaignMetricButton
                 title="Ligacoes na semana"
                 value={`${summary.prospecting.callsWeekly}`}
-                note="Volume semanal de prospeccao"
                 onClick={() => handleOpenDetail("callsWeekly")}
                 expanded={activeDetail === "callsWeekly"}
               />
               <CampaignMetricButton
                 title="Conexoes hoje"
                 value={`${summary.prospecting.connectionsDaily}`}
-                note="Meta minima diaria: 7"
                 onClick={() => handleOpenDetail("connectionsDaily")}
                 expanded={activeDetail === "connectionsDaily"}
               />
               <CampaignMetricButton
                 title="Conexoes na semana"
                 value={`${summary.prospecting.connectionsWeekly}`}
-                note="Emails, redes e outras interacoes"
                 onClick={() => handleOpenDetail("connectionsWeekly")}
                 expanded={activeDetail === "connectionsWeekly"}
               />
               <CampaignMetricButton
                 title="1a tentativa"
                 value={`${summary.prospecting.firstAttemptCount || 0}`}
-                note="Contatos no primeiro toque"
                 onClick={() => handleOpenDetail("firstAttemptContacts")}
                 expanded={activeDetail === "firstAttemptContacts"}
               />
               <CampaignMetricButton
                 title="2a tentativa"
                 value={`${summary.prospecting.secondAttemptCount || 0}`}
-                note="Contatos no segundo toque"
                 onClick={() => handleOpenDetail("secondAttemptContacts")}
                 expanded={activeDetail === "secondAttemptContacts"}
               />
               <CampaignMetricButton
                 title="3a tentativa"
                 value={`${summary.prospecting.thirdAttemptCount || 0}`}
-                note="Contatos no terceiro toque"
                 onClick={() => handleOpenDetail("thirdAttemptContacts")}
                 expanded={activeDetail === "thirdAttemptContacts"}
               />
               <CampaignMetricButton
                 title="4a tentativa+"
                 value={`${summary.prospecting.fourthAttemptCount || 0}`}
-                note="Contatos na quarta tentativa ou mais"
                 onClick={() => handleOpenDetail("fourthAttemptContacts")}
                 expanded={activeDetail === "fourthAttemptContacts"}
               />
               <CampaignMetricButton
                 title="Numeros desqualificados"
                 value={`${summary.prospecting.disqualifiedNumbersCount || 0}`}
-                note="Status desqualificado na HubSpot"
                 onClick={() => handleOpenDetail("disqualifiedNumbers")}
                 expanded={activeDetail === "disqualifiedNumbers"}
               />

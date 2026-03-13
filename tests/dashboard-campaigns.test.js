@@ -109,7 +109,7 @@ describe("dashboard campaigns service", () => {
     expect(campaigns[0].smartGoals).toHaveLength(4);
   });
 
-  it("builds attempt buckets and disqualified numbers from campaign contacts and activities", () => {
+  it("builds attempt buckets and disqualified numbers from the HubSpot contact lifecycle", () => {
     const campaigns = buildCampaignSummaries({
       contacts: [
         {
@@ -118,6 +118,7 @@ describe("dashboard campaigns service", () => {
           name: "Lead A",
           phone: "1111-1111",
           leadStatus: "NEW",
+          lifecycleStage: "1 tentativa",
           ownerName: "Ana",
         },
         {
@@ -126,6 +127,7 @@ describe("dashboard campaigns service", () => {
           name: "Lead B",
           phone: "2222-2222",
           leadStatus: "ATTEMPTED_TO_CONTACT",
+          lifecycleStage: "2 tentativa",
           ownerName: "Bruno",
         },
         {
@@ -134,6 +136,7 @@ describe("dashboard campaigns service", () => {
           name: "Lead C",
           phone: "3333-3333",
           leadStatus: "UNQUALIFIED",
+          lifecycleStage: "Desqualificado",
           ownerName: "Carla",
         },
         {
@@ -142,20 +145,18 @@ describe("dashboard campaigns service", () => {
           name: "Lead D",
           phone: "4444-4444",
           leadStatus: "OPEN_DEAL",
+          lifecycleStage: "4 tentativa",
           ownerName: "Diego",
         },
-      ],
-      activities: [
-        { id: "call-1", campaignName: PRIMARY_CAMPAIGN_CONTACT_VALUE, kind: "call", contactIds: ["contact-a"] },
-        { id: "call-2", campaignName: PRIMARY_CAMPAIGN_CONTACT_VALUE, kind: "call", contactIds: ["contact-b"] },
-        { id: "task-2", campaignName: PRIMARY_CAMPAIGN_CONTACT_VALUE, kind: "task", contactIds: ["contact-b"] },
-        { id: "call-3", campaignName: PRIMARY_CAMPAIGN_CONTACT_VALUE, kind: "call", contactIds: ["contact-c"] },
-        { id: "task-3", campaignName: PRIMARY_CAMPAIGN_CONTACT_VALUE, kind: "task", contactIds: ["contact-c"] },
-        { id: "call-4", campaignName: PRIMARY_CAMPAIGN_CONTACT_VALUE, kind: "call", contactIds: ["contact-c"] },
-        { id: "call-5", campaignName: PRIMARY_CAMPAIGN_CONTACT_VALUE, kind: "call", contactIds: ["contact-d"] },
-        { id: "task-5", campaignName: PRIMARY_CAMPAIGN_CONTACT_VALUE, kind: "task", contactIds: ["contact-d"] },
-        { id: "call-6", campaignName: PRIMARY_CAMPAIGN_CONTACT_VALUE, kind: "call", contactIds: ["contact-d"] },
-        { id: "task-6", campaignName: PRIMARY_CAMPAIGN_CONTACT_VALUE, kind: "task", contactIds: ["contact-d"] },
+        {
+          id: "contact-e",
+          campaignName: PRIMARY_CAMPAIGN_CONTACT_VALUE,
+          name: "Lead E",
+          phone: "5555-5555",
+          leadStatus: "ATTEMPTED_TO_CONTACT",
+          lifecycleStage: "3 tentativa",
+          ownerName: "Elisa",
+        },
       ],
     });
 
