@@ -160,6 +160,42 @@ function formatDateTime(value) {
   }).format(date);
 }
 
+function buildPopupPaginationItems(totalPages, currentPage) {
+  if (totalPages <= 7) {
+    return Array.from({ length: totalPages }, (_, index) => ({
+      type: "page",
+      value: index + 1,
+    }));
+  }
+
+  const items = [
+    { type: "page", value: 1 },
+    { type: "page", value: 2 },
+  ];
+  const middleStart = Math.max(3, currentPage - 1);
+  const middleEnd = Math.min(totalPages - 1, currentPage + 1);
+
+  if (middleStart > 3) {
+    items.push({ type: "ellipsis", value: "ellipsis-before" });
+  }
+
+  for (let page = middleStart; page <= middleEnd; page += 1) {
+    if (!items.some((item) => item.type === "page" && item.value === page)) {
+      items.push({ type: "page", value: page });
+    }
+  }
+
+  if (middleEnd < totalPages - 1) {
+    items.push({ type: "ellipsis", value: "ellipsis-after" });
+  }
+
+  if (!items.some((item) => item.type === "page" && item.value === totalPages)) {
+    items.push({ type: "page", value: totalPages });
+  }
+
+  return items;
+}
+
 function GoalList({ goals }) {
   return (
     <div className={styles.campaignGoalList}>
@@ -359,6 +395,10 @@ export function CampaignsContent({ dashboardData }) {
   const detailPageSize = 10;
   const resolvedCampaignSelection = resolveCampaignOptionLabel(campaignOptions, selectedCampaignDraft);
   const activeDetailTotalPages = Math.max(1, Math.ceil(activeDetailRows.length / detailPageSize));
+  const popupPaginationItems = useMemo(
+    () => buildPopupPaginationItems(activeDetailTotalPages, activeDetailPage),
+    [activeDetailPage, activeDetailTotalPages],
+  );
   const paginatedDetailRows = activeDetailRows.slice(
     (activeDetailPage - 1) * detailPageSize,
     activeDetailPage * detailPageSize,
@@ -802,8 +842,16 @@ export function CampaignsContent({ dashboardData }) {
                           </button>
 
                           <div className={styles.popupPaginationPages}>
-                            {Array.from({ length: activeDetailTotalPages }, (_, index) => {
-                              const page = index + 1;
+                            {popupPaginationItems.map((item) => {
+                              if (item.type === "ellipsis") {
+                                return (
+                                  <span key={item.value} className={styles.popupPaginationEllipsis} aria-hidden="true">
+                                    ...
+                                  </span>
+                                );
+                              }
+
+                              const page = item.value;
                               const isCurrentPage = activeDetailPage === page;
 
                               return (

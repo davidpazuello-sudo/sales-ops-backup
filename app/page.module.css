@@ -1758,8 +1758,8 @@
 }
 
 .campaignReportModal {
-  width: min(1710px, calc(100vw - 32px));
-  max-height: min(92vh, 980px);
+  width: min(1820px, calc(100vw - 72px));
+  max-height: min(90vh, 1040px);
   gap: 0;
   padding: 0;
   background: #f4f7fb;
@@ -1880,7 +1880,8 @@
   grid-template-columns: var(--campaign-report-columns);
   align-items: center;
   column-gap: 20px;
-  width: 100%;
+  width: max-content;
+  min-width: 100%;
 }
 
 .campaignMeetingItem {
@@ -1902,18 +1903,23 @@
   display: flex;
   justify-content: center;
   padding-top: 2px;
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
 }
 
 .campaignTableBody {
   display: grid;
   gap: 0;
+  width: max-content;
+  min-width: 100%;
 }
 
 .campaignTableCellValue {
   display: block;
-  width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  width: max-content;
+  min-width: 100%;
+  overflow: visible;
   white-space: nowrap;
   text-align: left;
   color: #304969;
@@ -1926,7 +1932,8 @@
   align-items: center;
   justify-content: center;
   gap: 10px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  white-space: nowrap;
   color: #0b8fb0;
 }
 
@@ -1934,7 +1941,9 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .popupPaginationNav,
@@ -1969,6 +1978,17 @@
   padding: 0 8px;
 }
 
+.popupPaginationEllipsis {
+  min-width: 20px;
+  color: #6783a6;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(13px * var(--font-scale));
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
 .popupPaginationPageActive {
   border: 1px solid #8ed3df;
   background: #e8f7fb;
@@ -1984,12 +2004,19 @@
   min-height: 0;
   display: grid;
   grid-template-rows: auto 1fr;
-  overflow: hidden;
+  max-height: min(52vh, 440px);
+  overflow-x: auto;
+  overflow-y: auto;
+  overscroll-behavior: contain;
   border: 1px solid #cfd9e6;
+  border-radius: 0;
   background: #ffffff;
 }
 
 .campaignReportTableHead {
+  position: sticky;
+  top: 0;
+  z-index: 1;
   min-height: 54px;
   padding: 0 18px;
   background: #eef2f6;
@@ -2020,7 +2047,8 @@
 
 .campaignReportCell {
   min-width: 0;
-  width: 100%;
+  width: max-content;
+  min-width: 100%;
   display: flex;
   align-items: center;
   justify-self: stretch;
@@ -2877,20 +2905,29 @@
   place-items: center;
   background: rgba(33, 52, 77, 0.34);
   backdrop-filter: blur(8px);
-  padding: 24px;
+  padding: clamp(24px, 3vw, 48px);
 }
 
 .stageModal {
-  width: min(860px, calc(100vw - 40px));
-  max-height: min(78vh, 720px);
+  width: min(1120px, calc(100vw - 72px));
+  max-height: min(88vh, 860px);
   display: grid;
   grid-template-rows: auto 1fr;
   gap: 14px;
-  padding: 16px;
+  padding: 20px;
   border-radius: 20px;
   background: var(--panel);
   border: 1px solid var(--border);
   box-shadow: 0 30px 60px rgba(17, 32, 58, 0.24);
+}
+
+.stageModal.campaignReportModal {
+  width: min(1820px, calc(100vw - 72px));
+  max-height: min(90vh, 1040px);
+  gap: 0;
+  padding: 0;
+  background: #f4f7fb;
+  border: 1px solid #d9e3ef;
 }
 
 .stageModalHeader {
