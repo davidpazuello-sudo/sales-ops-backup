@@ -177,6 +177,35 @@ describe("dashboard campaigns service", () => {
     });
   });
 
+  it("treats HubSpot qualified and disqualified custom statuses as popup rows", () => {
+    const campaigns = buildCampaignSummaries({
+      contacts: [
+        {
+          id: "contact-qualified",
+          campaignName: PRIMARY_CAMPAIGN_CONTACT_VALUE,
+          name: "Lead Qualificado",
+          email: "qualificado@empresa.com",
+          leadStatus: "Qualified",
+          lifecycleStage: "Prospect",
+        },
+        {
+          id: "contact-disqualified",
+          campaignName: PRIMARY_CAMPAIGN_CONTACT_VALUE,
+          name: "Lead Invalido",
+          phone: "1111-9999",
+          leadStatus: "Attempted to contact",
+          lifecycleStage: "Telefone incorreto",
+        },
+      ],
+    });
+
+    expect(campaigns).toHaveLength(1);
+    expect(campaigns[0].qualification.sqlCount).toBe(1);
+    expect(campaigns[0].qualification.sqlLeadItems).toHaveLength(1);
+    expect(campaigns[0].prospecting.disqualifiedNumbersCount).toBe(1);
+    expect(campaigns[0].prospecting.disqualifiedNumberItems).toHaveLength(1);
+  });
+
   it("accepts the HubSpot contact property value for the primary campaign", () => {
     const campaigns = buildCampaignSummaries({
       contacts: [

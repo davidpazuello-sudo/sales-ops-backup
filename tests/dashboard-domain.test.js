@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { buildDashboardDomainPayload, buildPipelineStages, normalizeHubSpotOwner } from "../lib/dashboard-domain";
+import {
+  buildDashboardDomainPayload,
+  buildPipelineStages,
+  normalizeHubSpotContact,
+  normalizeHubSpotOwner,
+} from "../lib/dashboard-domain";
 import { getDomainEntityNames } from "../lib/domain-model";
 
 describe("dashboard domain", () => {
@@ -34,6 +39,29 @@ describe("dashboard domain", () => {
       email: "ana@empresa.com",
       team: "Enterprise",
     });
+  });
+
+  it("normalizes HubSpot contact lifecycle stages and lead statuses for the dashboard", () => {
+    const contact = normalizeHubSpotContact({
+      id: "contact-1",
+      properties: {
+        firstname: "Ana",
+        lastname: "Gestora",
+        email: "ana@empresa.com",
+        lifecyclestage: "1321207898",
+        hs_lead_status: "OPEN_DEAL",
+        campanhas: "Aluno a Bordo 2026",
+        hubspot_owner_id: "99",
+      },
+    }, new Map([["99", {
+      id: "99",
+      name: "Ana Souza",
+      email: "ana@empresa.com",
+    }]]));
+
+    expect(contact.lifecycleStage).toBe("Desqualificado");
+    expect(contact.leadStatus).toBe("Qualified");
+    expect(contact.campaignName).toBe("Aluno a Bordo 2026");
   });
 
   it("builds pipeline stages and dashboard payload from HubSpot data", () => {
