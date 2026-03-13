@@ -630,7 +630,7 @@ export function CampaignsContent({ dashboardData }) {
           </Card>
 
           <Card eyebrow="SDR" title="Relatorios de prospeccao e atividade" wide>
-            <div className={styles.metrics}>
+            <div className={`${styles.metrics} ${styles.campaignProspectingMetrics}`.trim()}>
               <CampaignMetricButton
                 title="Ligacoes hoje"
                 value={`${summary.prospecting.callsDaily}`}

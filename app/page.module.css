@@ -1734,6 +1734,17 @@
   font-weight: 700;
 }
 
+.campaignProspectingMetrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 14px;
+  align-items: stretch;
+}
+
+.campaignProspectingMetrics > .metric {
+  min-width: 0;
+}
+
 .metricButton {
   border: 1px solid color-mix(in srgb, var(--border) 88%, transparent);
   cursor: pointer;

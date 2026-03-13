@@ -11,6 +11,7 @@ import styles from "../page.module.css";
 import {
   buildUpcomingTaskSummary,
   canViewTeamTasks,
+  getUpcomingTasks,
   getTaskOwnerOptions,
   getVisibleTasks,
   groupTasksByKind,
@@ -95,11 +96,12 @@ export function TasksContent({ dashboardData, sessionUser = {} }) {
   const [typeDraft, setTypeDraft] = useState("todos");
 
   const allTasks = dashboardData.tasks || [];
+  const upcomingTasks = getUpcomingTasks(allTasks);
   const teamAccess = canViewTeamTasks(sessionUser);
   const loadingState = dashboardData.states?.loading || "ready";
   const stateErrors = dashboardData.states?.errors || [];
-  const ownerOptions = teamAccess ? getTaskOwnerOptions(allTasks) : [];
-  const visibleTasks = getVisibleTasks(allTasks, sessionUser, {
+  const ownerOptions = teamAccess ? getTaskOwnerOptions(upcomingTasks) : [];
+  const visibleTasks = getVisibleTasks(upcomingTasks, sessionUser, {
     ownerFilter,
     typeFilter,
   });
@@ -107,9 +109,9 @@ export function TasksContent({ dashboardData, sessionUser = {} }) {
   const summary = buildUpcomingTaskSummary(visibleTasks);
   const scopeMessage = teamAccess
     ? (ownerFilter === "todos"
-      ? "Voce pode acompanhar todas as tarefas da HubSpot e filtrar por vendedor."
-      : `Mostrando todas as tarefas do vendedor ${ownerFilter}.`)
-    : "Mostrando todas as tarefas ligadas ao seu usuario na HubSpot.";
+      ? "Voce pode acompanhar apenas as proximas tarefas da HubSpot e filtrar por vendedor."
+      : `Mostrando apenas as proximas tarefas do vendedor ${ownerFilter}.`)
+    : "Mostrando apenas as suas proximas tarefas na HubSpot.";
   const filtersDirty = ownerDraft !== ownerFilter || typeDraft !== typeFilter;
 
   function handleApplyFilters(event) {
@@ -188,17 +190,17 @@ export function TasksContent({ dashboardData, sessionUser = {} }) {
         <SectionNotice variant="error">{stateErrors[0] || "As tarefas ainda nao conseguiram carregar dados reais."}</SectionNotice>
       ) : null}
 
-      {!allTasks.length && loadingState === "ready" && !stateErrors.length ? (
+      {!upcomingTasks.length && loadingState === "ready" && !stateErrors.length ? (
         <SectionEmptyState
-          title="Sem tarefas sincronizadas"
-          description="Quando a HubSpot retornar reunioes, chamadas e outras tarefas, elas aparecerao aqui."
+          title="Sem proximas tarefas"
+          description="Quando a HubSpot retornar reunioes, chamadas e outras tarefas futuras, elas aparecerao aqui."
         />
       ) : null}
 
       <div className={styles.grid}>
         <Card eyebrow="HUBSPOT" title="Resumo operacional" wide>
           <div className={styles.metrics}>
-            <Metric title="A fazer" value={`${summary.total}`} note="Atividades visiveis no recorte atual" />
+            <Metric title="A fazer" value={`${summary.total}`} note="Atividades futuras visiveis no recorte atual" />
             <Metric title="Hoje" value={`${summary.today}`} note="Itens agendados para hoje" />
             <Metric title="Proximos 7 dias" value={`${summary.thisWeek}`} note="Atividades previstas nos proximos 7 dias" />
             <Metric title="Depois" value={`${summary.later}`} note="Atividades previstas apos os proximos 7 dias" />
@@ -207,9 +209,9 @@ export function TasksContent({ dashboardData, sessionUser = {} }) {
 
         <Card eyebrow="TIPOS" title="Resumo por tipo" wide>
           <div className={styles.metrics}>
-            <Metric title="Reunioes" value={`${groupedTasks.meeting.length}`} note="Atividades do tipo reuniao no recorte atual" />
-            <Metric title="Chamadas" value={`${groupedTasks.call.length}`} note="Atividades do tipo chamada no recorte atual" />
-            <Metric title="Outras tarefas" value={`${groupedTasks.task.length}`} note="Follow-ups e tarefas gerais visiveis no recorte atual" />
+            <Metric title="Reunioes" value={`${groupedTasks.meeting.length}`} note="Atividades futuras do tipo reuniao no recorte atual" />
+            <Metric title="Chamadas" value={`${groupedTasks.call.length}`} note="Atividades futuras do tipo chamada no recorte atual" />
+            <Metric title="Outras tarefas" value={`${groupedTasks.task.length}`} note="Follow-ups e tarefas gerais futuras visiveis no recorte atual" />
           </div>
         </Card>
 

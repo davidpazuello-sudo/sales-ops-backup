@@ -3,6 +3,7 @@ import {
   buildUpcomingTaskSummary,
   buildTaskSummary,
   canViewTeamTasks,
+  getUpcomingTasks,
   getTaskOwnerOptions,
   getVisibleTasks,
   groupTasksByKind,
@@ -51,6 +52,15 @@ const tasks = [
     dueAt: futureLater,
   },
   {
+    id: "task-completed-future",
+    ownerEmail: "ana@empresa.com",
+    ownerName: "Ana Souza",
+    kind: "task",
+    isCompleted: true,
+    isOverdue: false,
+    dueAt: futureSoon,
+  },
+  {
     id: "task-3",
     ownerEmail: "ana@empresa.com",
     ownerName: "Ana Souza",
@@ -77,7 +87,7 @@ describe("dashboard tasks", () => {
       statusFilter: "todos",
     });
 
-    expect(visibleTasks.map((task) => task.id)).toEqual(["meeting-1", "call-1", "task-3"]);
+    expect(visibleTasks.map((task) => task.id)).toEqual(["meeting-1"]);
   });
 
   it("lets supervisors filter the full list by vendedor", () => {
@@ -88,33 +98,33 @@ describe("dashboard tasks", () => {
       statusFilter: "todos",
     });
 
-    expect(visibleTasks.map((task) => task.id)).toEqual(["task-1", "task-2"]);
-    expect(getTaskOwnerOptions(tasks)).toEqual(["Ana Souza", "Bruno Lima"]);
+    expect(visibleTasks.map((task) => task.id)).toEqual(["task-2"]);
+    expect(getTaskOwnerOptions(getUpcomingTasks(tasks))).toEqual(["Ana Souza", "Bruno Lima"]);
   });
 
-  it("summarizes and groups tasks by type", () => {
+  it("keeps only future, pending tasks in the dashboard view", () => {
     const visibleTasks = getVisibleTasks(tasks, { role: "Supervisor" }, { statusFilter: "todos" });
     const groupedTasks = groupTasksByKind(visibleTasks);
     const summary = buildTaskSummary(visibleTasks);
     const upcomingSummary = buildUpcomingTaskSummary(visibleTasks);
 
     expect(groupedTasks.meeting).toHaveLength(1);
-    expect(groupedTasks.call).toHaveLength(1);
-    expect(groupedTasks.task).toHaveLength(3);
+    expect(groupedTasks.call).toHaveLength(0);
+    expect(groupedTasks.task).toHaveLength(1);
     expect(summary).toEqual({
-      total: 5,
-      open: 4,
-      overdue: 1,
-      completed: 1,
+      total: 2,
+      open: 2,
+      overdue: 0,
+      completed: 0,
       meetings: 1,
-      calls: 1,
-      other: 3,
+      calls: 0,
+      other: 1,
     });
     expect(upcomingSummary).toEqual({
-      total: 5,
+      total: 2,
       today: 0,
       thisWeek: 1,
-      later: 2,
+      later: 1,
     });
   });
 });
