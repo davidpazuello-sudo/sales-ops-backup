@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Card, Metric, PageTitle } from "../dashboard-ui";
+import { Card, Metric, PageTitle, SimpleArrow } from "../dashboard-ui";
 import PageAgentPanel, { PageAgentToggleButton } from "../page-agent-panel";
 import {
   SectionEmptyState,
@@ -129,6 +129,15 @@ function CampaignMetricButton({ title, value, note, onClick, expanded = false })
       {note ? <small>{note}</small> : null}
     </button>
   );
+}
+
+function getDetailCellValues(item) {
+  return [
+    item.ownerName || "Sem proprietario",
+    item.leadName || item.recordName || "Sem registro",
+    item.dateLabel || item.detailLabel || "Sem detalhe",
+    item.statusLabel || "Sem status",
+  ];
 }
 
 export function CampaignsContent({ dashboardData }) {
@@ -339,45 +348,72 @@ export function CampaignsContent({ dashboardData }) {
                   <div className={`${styles.tableHead} ${styles.campaignMeetingItem}`.trim()}>
                     {activeDetailConfig.columns.map((column) => <span key={column}>{column}</span>)}
                   </div>
-                  {paginatedDetailRows.map((item) => (
-                    <article key={item.id} className={`${styles.stageModalItem} ${styles.campaignMeetingItem}`.trim()}>
-                      <div>
-                        <strong>{item.ownerName}</strong>
-                      </div>
-                      <div>
-                        <strong>{item.leadName || item.recordName || "Sem registro"}</strong>
-                      </div>
-                      <div>
-                        <strong>{item.dateLabel || item.detailLabel || "Sem detalhe"}</strong>
-                      </div>
-                      <div>
-                        <strong>{item.statusLabel}</strong>
-                      </div>
-                    </article>
-                  ))}
+                  <div className={styles.campaignTableBody}>
+                    {paginatedDetailRows.map((item) => {
+                      const cellValues = getDetailCellValues(item);
+
+                      return (
+                        <article key={item.id} className={`${styles.stageModalItem} ${styles.campaignMeetingItem}`.trim()}>
+                          {cellValues.map((value, index) => (
+                            <div key={`${item.id}-${index}`}>
+                              <strong className={styles.campaignTableCellValue} title={value}>{value}</strong>
+                            </div>
+                          ))}
+                        </article>
+                      );
+                    })}
+                  </div>
                   {activeDetailTotalPages > 1 ? (
                     <div className={styles.popupPaginationBar}>
-                      <nav className={styles.paginationNumbers} aria-label={`Paginacao de ${activeDetailConfig.title}`}>
-                        {Array.from({ length: activeDetailTotalPages }, (_, index) => {
-                          const page = index + 1;
-                          const isCurrentPage = activeDetailPage === page;
+                      <nav className={styles.popupPagination} aria-label={`Paginacao de ${activeDetailConfig.title}`}>
+                        <button
+                          type="button"
+                          className={styles.popupPaginationNav}
+                          onClick={() => setDetailPageByKey((current) => ({
+                            ...current,
+                            [activeDetail]: Math.max(1, activeDetailPage - 1),
+                          }))}
+                          disabled={activeDetailPage === 1}
+                        >
+                          <SimpleArrow />
+                          <span>Voltar</span>
+                        </button>
 
-                          return (
-                            <button
-                              key={page}
-                              type="button"
-                              className={`${styles.paginationNumberButton} ${isCurrentPage ? styles.paginationNumberButtonActive : ""}`.trim()}
-                              onClick={() => setDetailPageByKey((current) => ({
-                                ...current,
-                                [activeDetail]: page,
-                              }))}
-                              aria-current={isCurrentPage ? "page" : undefined}
-                              aria-label={`Ir para pagina ${page}`}
-                            >
-                              {page}
-                            </button>
-                          );
-                        })}
+                        <div className={styles.popupPaginationPages}>
+                          {Array.from({ length: activeDetailTotalPages }, (_, index) => {
+                            const page = index + 1;
+                            const isCurrentPage = activeDetailPage === page;
+
+                            return (
+                              <button
+                                key={page}
+                                type="button"
+                                className={`${styles.popupPaginationPage} ${isCurrentPage ? styles.popupPaginationPageActive : ""}`.trim()}
+                                onClick={() => setDetailPageByKey((current) => ({
+                                  ...current,
+                                  [activeDetail]: page,
+                                }))}
+                                aria-current={isCurrentPage ? "page" : undefined}
+                                aria-label={`Ir para pagina ${page}`}
+                              >
+                                {page}
+                              </button>
+                            );
+                          })}
+                        </div>
+
+                        <button
+                          type="button"
+                          className={styles.popupPaginationNav}
+                          onClick={() => setDetailPageByKey((current) => ({
+                            ...current,
+                            [activeDetail]: Math.min(activeDetailTotalPages, activeDetailPage + 1),
+                          }))}
+                          disabled={activeDetailPage === activeDetailTotalPages}
+                        >
+                          <span>Proximo</span>
+                          <SimpleArrow right />
+                        </button>
                       </nav>
                     </div>
                   ) : null}

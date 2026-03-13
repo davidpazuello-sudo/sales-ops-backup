@@ -416,6 +416,39 @@
   overflow: hidden;
 }
 
+.appRouteLoadingScreen {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: var(--bg);
+}
+
+.appRouteLoadingPanel {
+  min-width: min(460px, 100%);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 20px;
+  border: 1px solid color-mix(in srgb, var(--border) 88%, transparent);
+  border-radius: 20px;
+  background: linear-gradient(180deg, var(--panel), var(--panel-soft));
+  box-shadow: var(--surface-shadow);
+}
+
+.appRouteLoadingPanel strong {
+  display: block;
+  color: var(--heading);
+  font-size: calc(14px * var(--font-scale));
+}
+
+.appRouteLoadingPanel p {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: calc(12px * var(--font-scale));
+  line-height: 1.45;
+}
+
 .dashboardSection {
   min-width: 0;
   width: 100%;
@@ -1682,14 +1715,16 @@
 }
 
 .campaignMeetingsModal {
-  width: min(1080px, calc(100vw - 40px));
+  width: min(1220px, calc(100vw - 32px));
+  max-height: min(90vh, 860px);
 }
 
 .campaignMeetingsList {
   display: grid;
-  gap: 12px;
-  overflow: auto;
-  padding-right: 4px;
+  grid-template-rows: auto 1fr auto;
+  gap: 8px;
+  overflow: hidden;
+  padding-right: 0;
 }
 
 .campaignDetailLoadingState {
@@ -1708,18 +1743,96 @@
 
 .campaignMeetingItem {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  align-items: start;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 2.4fr) minmax(0, 1.4fr) minmax(0, 1fr);
+  align-items: center;
+  justify-items: start;
+  column-gap: 16px;
+  width: 100%;
+  text-align: left;
 }
 
 .campaignMeetingItem div {
   min-width: 0;
+  width: 100%;
 }
 
 .popupPaginationBar {
   display: flex;
-  justify-content: flex-end;
-  padding-top: 6px;
+  justify-content: center;
+  padding-top: 2px;
+}
+
+.campaignTableBody {
+  display: grid;
+  gap: 0;
+}
+
+.campaignTableCellValue {
+  display: block;
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: left;
+}
+
+.popupPagination {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.popupPaginationPages {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.popupPaginationNav,
+.popupPaginationPage {
+  border: 0;
+  background: transparent;
+  color: var(--accent);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font: inherit;
+  font-size: calc(13px * var(--font-scale));
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.popupPaginationNav svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.popupPaginationPage {
+  min-width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  padding: 0 8px;
+}
+
+.popupPaginationPageActive {
+  border: 1px solid color-mix(in srgb, var(--accent) 55%, transparent);
+  background: color-mix(in srgb, var(--accent) 14%, var(--panel));
+}
+
+.popupPaginationNav:disabled,
+.popupPaginationPage:disabled {
+  opacity: 0.42;
+  cursor: default;
 }
 
 .campaignGoalList {
@@ -2596,17 +2709,17 @@
 
 .stageModalList {
   display: grid;
-  gap: 10px;
-  overflow: auto;
-  padding-right: 4px;
+  gap: 6px;
+  overflow: hidden;
+  padding-right: 0;
 }
 
 .stageModalItem {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
-  gap: 12px;
-  padding: 14px 0;
+  gap: 10px;
+  padding: 8px 0;
   border-radius: 0;
   background: transparent;
   border: 0;
@@ -2620,7 +2733,8 @@
 
 .stageModalItem strong {
   color: var(--heading);
-  font-size: calc(13px * var(--font-scale));
+  font-size: calc(12px * var(--font-scale));
+  line-height: 1.25;
 }
 
 .stageModalItem span {

@@ -194,6 +194,27 @@ export function useDashboardShellState({
   );
 
   useEffect(() => {
+    const routesToPrefetch = [
+      "/relatorios",
+      "/vendedores",
+      "/negocios",
+      "/campanhas",
+      "/tarefas",
+      "/configuracoes",
+      "/perfil",
+      "/ai-agent",
+    ];
+
+    if (sessionUser?.isSuperAdmin) {
+      routesToPrefetch.push("/permissoes-e-acessos");
+    }
+
+    routesToPrefetch.forEach((route) => {
+      router.prefetch(route);
+    });
+  }, [router, sessionUser?.isSuperAdmin]);
+
+  useEffect(() => {
     function closeOnOutside(event) {
       if (!menuRef.current?.contains(event.target)) {
         setMenuOpen(false);
@@ -255,6 +276,8 @@ export function useDashboardShellState({
 
   useEffect(() => {
     let cancelled = false;
+    let deferredLoadTimeout = 0;
+    let deferredLoadFrame = 0;
     const hubspotScope = getDashboardHubSpotScope({ initialNav, initialProfileView });
     const pipelineId = hubspotScope === "deals" ? String(initialPipelineId || "").trim() : "";
     const ownerFilter = hubspotScope === "deals" ? String(initialOwnerFilter || "todos").trim() : "";
@@ -345,10 +368,26 @@ export function useDashboardShellState({
       }
     }
 
-    loadHubSpotData();
+    if (typeof window === "undefined") {
+      loadHubSpotData();
+    } else {
+      deferredLoadFrame = window.requestAnimationFrame(() => {
+        deferredLoadTimeout = window.setTimeout(() => {
+          loadHubSpotData();
+        }, 0);
+      });
+    }
 
     return () => {
       cancelled = true;
+      if (typeof window !== "undefined") {
+        if (deferredLoadFrame) {
+          window.cancelAnimationFrame(deferredLoadFrame);
+        }
+        if (deferredLoadTimeout) {
+          window.clearTimeout(deferredLoadTimeout);
+        }
+      }
     };
   }, [initialActivityWeeksFilter, initialNav, initialOwnerFilter, initialPipelineId, initialProfileView, initialSellerPage, initialSellerSearch]);
 
@@ -458,10 +497,13 @@ export function useDashboardShellState({
   }
 
   function navigateToMainSection(section) {
-    router.push(buildMainSectionRoute(section));
+    const route = buildMainSectionRoute(section);
+    router.prefetch(route);
+    router.push(route);
   }
 
   function navigateToPath(path) {
+    router.prefetch(path);
     router.push(path);
   }
 
