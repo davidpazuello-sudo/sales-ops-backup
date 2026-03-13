@@ -1796,10 +1796,16 @@
   align-items: center;
   justify-content: center;
   font: inherit;
-  font-size: 42px;
+  font-size: 0;
   font-weight: 300;
   line-height: 1;
   cursor: pointer;
+}
+
+.campaignReportClose::before {
+  content: "\00d7";
+  font-size: 42px;
+  line-height: 1;
 }
 
 .campaignReportBody {
@@ -1818,6 +1824,15 @@
   color: #6783a6;
   font-size: calc(12px * var(--font-scale));
   font-weight: 600;
+}
+
+.campaignReportBreadcrumb span:nth-child(2) {
+  font-size: 0;
+}
+
+.campaignReportBreadcrumb span:nth-child(2)::before {
+  content: "/";
+  font-size: calc(12px * var(--font-scale));
 }
 
 .campaignReportMetaBar {
@@ -1858,6 +1873,14 @@
 .campaignDetailLoadingState strong {
   color: var(--heading);
   font-size: calc(14px * var(--font-scale));
+}
+
+.campaignReportGrid {
+  display: grid;
+  grid-template-columns: var(--campaign-report-columns);
+  align-items: center;
+  column-gap: 20px;
+  width: 100%;
 }
 
 .campaignMeetingItem {
@@ -1971,7 +1994,7 @@
   padding: 0 18px;
   background: #eef2f6;
   border-bottom: 1px solid #cfd9e6;
-  color: #2c4b70;
+  color: #de8300;
   font-size: calc(11px * var(--font-scale));
   font-weight: 800;
   letter-spacing: 0.03em;
@@ -1983,6 +2006,8 @@
   align-items: center;
   width: 100%;
   min-height: 54px;
+  min-width: 0;
+  justify-self: stretch;
   text-align: left;
 }
 
@@ -1991,6 +2016,14 @@
   padding: 0 18px;
   background: #ffffff;
   border-bottom: 1px solid #d7e0ea;
+}
+
+.campaignReportCell {
+  min-width: 0;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-self: stretch;
 }
 
 .campaignReportTableRow:nth-child(even) {

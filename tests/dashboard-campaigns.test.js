@@ -109,6 +109,74 @@ describe("dashboard campaigns service", () => {
     expect(campaigns[0].smartGoals).toHaveLength(4);
   });
 
+  it("builds attempt buckets and disqualified numbers from campaign contacts and activities", () => {
+    const campaigns = buildCampaignSummaries({
+      contacts: [
+        {
+          id: "contact-a",
+          campaignName: PRIMARY_CAMPAIGN_CONTACT_VALUE,
+          name: "Lead A",
+          phone: "1111-1111",
+          leadStatus: "NEW",
+          ownerName: "Ana",
+        },
+        {
+          id: "contact-b",
+          campaignName: PRIMARY_CAMPAIGN_CONTACT_VALUE,
+          name: "Lead B",
+          phone: "2222-2222",
+          leadStatus: "ATTEMPTED_TO_CONTACT",
+          ownerName: "Bruno",
+        },
+        {
+          id: "contact-c",
+          campaignName: PRIMARY_CAMPAIGN_CONTACT_VALUE,
+          name: "Lead C",
+          phone: "3333-3333",
+          leadStatus: "UNQUALIFIED",
+          ownerName: "Carla",
+        },
+        {
+          id: "contact-d",
+          campaignName: PRIMARY_CAMPAIGN_CONTACT_VALUE,
+          name: "Lead D",
+          phone: "4444-4444",
+          leadStatus: "OPEN_DEAL",
+          ownerName: "Diego",
+        },
+      ],
+      activities: [
+        { id: "call-1", campaignName: PRIMARY_CAMPAIGN_CONTACT_VALUE, kind: "call", contactIds: ["contact-a"] },
+        { id: "call-2", campaignName: PRIMARY_CAMPAIGN_CONTACT_VALUE, kind: "call", contactIds: ["contact-b"] },
+        { id: "task-2", campaignName: PRIMARY_CAMPAIGN_CONTACT_VALUE, kind: "task", contactIds: ["contact-b"] },
+        { id: "call-3", campaignName: PRIMARY_CAMPAIGN_CONTACT_VALUE, kind: "call", contactIds: ["contact-c"] },
+        { id: "task-3", campaignName: PRIMARY_CAMPAIGN_CONTACT_VALUE, kind: "task", contactIds: ["contact-c"] },
+        { id: "call-4", campaignName: PRIMARY_CAMPAIGN_CONTACT_VALUE, kind: "call", contactIds: ["contact-c"] },
+        { id: "call-5", campaignName: PRIMARY_CAMPAIGN_CONTACT_VALUE, kind: "call", contactIds: ["contact-d"] },
+        { id: "task-5", campaignName: PRIMARY_CAMPAIGN_CONTACT_VALUE, kind: "task", contactIds: ["contact-d"] },
+        { id: "call-6", campaignName: PRIMARY_CAMPAIGN_CONTACT_VALUE, kind: "call", contactIds: ["contact-d"] },
+        { id: "task-6", campaignName: PRIMARY_CAMPAIGN_CONTACT_VALUE, kind: "task", contactIds: ["contact-d"] },
+      ],
+    });
+
+    expect(campaigns).toHaveLength(1);
+    expect(campaigns[0].prospecting.firstAttemptCount).toBe(1);
+    expect(campaigns[0].prospecting.secondAttemptCount).toBe(1);
+    expect(campaigns[0].prospecting.thirdAttemptCount).toBe(1);
+    expect(campaigns[0].prospecting.fourthAttemptCount).toBe(1);
+    expect(campaigns[0].prospecting.disqualifiedNumbersCount).toBe(1);
+    expect(campaigns[0].prospecting.firstAttemptItems[0]).toMatchObject({
+      leadName: "Lead A",
+      detailLabel: "1111-1111",
+      statusLabel: "1a tentativa",
+    });
+    expect(campaigns[0].prospecting.disqualifiedNumberItems[0]).toMatchObject({
+      leadName: "Lead C",
+      detailLabel: "3333-3333",
+      statusLabel: "UNQUALIFIED",
+    });
+  });
+
   it("accepts the HubSpot contact property value for the primary campaign", () => {
     const campaigns = buildCampaignSummaries({
       contacts: [

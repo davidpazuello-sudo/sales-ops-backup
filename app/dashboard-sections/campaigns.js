@@ -21,78 +21,126 @@ const OVERVIEW_DETAIL_CONFIG = {
     title: "Ligacoes hoje",
     description: "Ligacoes do dia na campanha",
     columns: ["Proprietario", "Lead", "Data", "Status"],
+    columnTemplate: "minmax(180px, 1.1fr) minmax(320px, 2.35fr) minmax(210px, 1.3fr) minmax(180px, 1fr)",
   },
   callsWeekly: {
     eyebrow: "SDR",
     title: "Ligacoes na semana",
     description: "Ligacoes da semana na campanha",
     columns: ["Proprietario", "Lead", "Data", "Status"],
+    columnTemplate: "minmax(180px, 1.1fr) minmax(320px, 2.35fr) minmax(210px, 1.3fr) minmax(180px, 1fr)",
   },
   connectionsDaily: {
     eyebrow: "SDR",
     title: "Conexoes hoje",
     description: "Conexoes do dia na campanha",
     columns: ["Proprietario", "Lead", "Data", "Status"],
+    columnTemplate: "minmax(180px, 1.1fr) minmax(320px, 2.35fr) minmax(210px, 1.3fr) minmax(180px, 1fr)",
   },
   connectionsWeekly: {
     eyebrow: "SDR",
     title: "Conexoes na semana",
     description: "Conexoes da semana na campanha",
     columns: ["Proprietario", "Lead", "Data", "Status"],
+    columnTemplate: "minmax(180px, 1.1fr) minmax(320px, 2.35fr) minmax(210px, 1.3fr) minmax(180px, 1fr)",
+  },
+  firstAttemptContacts: {
+    eyebrow: "SDR",
+    title: "1a tentativa",
+    description: "Contatos na primeira tentativa",
+    columns: ["Proprietario", "Lead", "Detalhe", "Status"],
+    columnTemplate: "minmax(180px, 1.1fr) minmax(360px, 2.65fr) minmax(260px, 1.7fr) minmax(210px, 1.1fr)",
+  },
+  secondAttemptContacts: {
+    eyebrow: "SDR",
+    title: "2a tentativa",
+    description: "Contatos na segunda tentativa",
+    columns: ["Proprietario", "Lead", "Detalhe", "Status"],
+    columnTemplate: "minmax(180px, 1.1fr) minmax(360px, 2.65fr) minmax(260px, 1.7fr) minmax(210px, 1.1fr)",
+  },
+  thirdAttemptContacts: {
+    eyebrow: "SDR",
+    title: "3a tentativa",
+    description: "Contatos na terceira tentativa",
+    columns: ["Proprietario", "Lead", "Detalhe", "Status"],
+    columnTemplate: "minmax(180px, 1.1fr) minmax(360px, 2.65fr) minmax(260px, 1.7fr) minmax(210px, 1.1fr)",
+  },
+  fourthAttemptContacts: {
+    eyebrow: "SDR",
+    title: "4a tentativa+",
+    description: "Contatos na quarta tentativa ou mais",
+    columns: ["Proprietario", "Lead", "Detalhe", "Status"],
+    columnTemplate: "minmax(180px, 1.1fr) minmax(360px, 2.65fr) minmax(260px, 1.7fr) minmax(210px, 1.1fr)",
+  },
+  disqualifiedNumbers: {
+    eyebrow: "SDR",
+    title: "Numeros desqualificados",
+    description: "Contatos desqualificados na campanha",
+    columns: ["Proprietario", "Lead", "Detalhe", "Status"],
+    columnTemplate: "minmax(180px, 1.1fr) minmax(360px, 2.65fr) minmax(260px, 1.7fr) minmax(210px, 1.1fr)",
   },
   totalLeads: {
     eyebrow: "LEADS",
     title: "Total de leads",
     description: "Leads mapeados na campanha",
     columns: ["Proprietario", "Lead", "Detalhe", "Status"],
+    columnTemplate: "minmax(180px, 1.1fr) minmax(360px, 2.65fr) minmax(280px, 1.8fr) minmax(190px, 1fr)",
   },
   sqls: {
     eyebrow: "SQLS",
     title: "Leads qualificados",
     description: "Leads qualificados por vendas",
     columns: ["Proprietario", "Lead", "Detalhe", "Status"],
+    columnTemplate: "minmax(180px, 1.1fr) minmax(360px, 2.65fr) minmax(280px, 1.8fr) minmax(190px, 1fr)",
   },
   mqls: {
     eyebrow: "QUALIFICACAO",
     title: "MQLs",
     description: "Leads de marketing da campanha",
     columns: ["Proprietario", "Lead", "Detalhe", "Status"],
+    columnTemplate: "minmax(180px, 1.1fr) minmax(360px, 2.65fr) minmax(280px, 1.8fr) minmax(190px, 1fr)",
   },
   qualificationConversion: {
     eyebrow: "QUALIFICACAO",
     title: "Taxa MQL > SQL",
     description: "Base de conversao de MQL para SQL",
     columns: ["Proprietario", "Lead", "Detalhe", "Status"],
+    columnTemplate: "minmax(180px, 1.1fr) minmax(360px, 2.65fr) minmax(280px, 1.8fr) minmax(190px, 1fr)",
   },
   meetings: {
     eyebrow: "REUNIOES",
     title: "Reunioes da campanha",
     description: "Reunioes sincronizadas da HubSpot",
     columns: ["Proprietario", "Lead", "Data", "Status"],
+    columnTemplate: "minmax(180px, 1.1fr) minmax(320px, 2.35fr) minmax(210px, 1.3fr) minmax(180px, 1fr)",
   },
   proposals: {
     eyebrow: "VENDAS",
     title: "Propostas",
     description: "Negocios em etapa de proposta",
     columns: ["Proprietario", "Negocio", "Valor", "Status"],
+    columnTemplate: "minmax(180px, 1.1fr) minmax(400px, 2.7fr) minmax(180px, 1.15fr) minmax(220px, 1.2fr)",
   },
   closedWon: {
     eyebrow: "FECHADOS",
     title: "Negocios fechados",
     description: "Contratos fechados na campanha",
     columns: ["Proprietario", "Negocio", "Valor", "Status"],
+    columnTemplate: "minmax(180px, 1.1fr) minmax(400px, 2.7fr) minmax(180px, 1.15fr) minmax(220px, 1.2fr)",
   },
   salesConversion: {
     eyebrow: "VENDAS",
     title: "Taxa proposta > fechamento",
     description: "Base de conversao de propostas em fechamentos",
     columns: ["Proprietario", "Negocio", "Valor", "Status"],
+    columnTemplate: "minmax(180px, 1.1fr) minmax(400px, 2.7fr) minmax(180px, 1.15fr) minmax(220px, 1.2fr)",
   },
   qualifiedOpportunities: {
     eyebrow: "OPORTUNIDADES",
     title: "Oportunidades qualificadas",
     description: "Negocios qualificados em aberto na campanha",
     columns: ["Proprietario", "Negocio", "Valor", "Status"],
+    columnTemplate: "minmax(180px, 1.1fr) minmax(400px, 2.7fr) minmax(180px, 1.15fr) minmax(220px, 1.2fr)",
   },
 };
 
@@ -181,6 +229,26 @@ function renderCampaignDetailRows(detailKey, summary) {
     return (summary.prospecting.connectionItems || []).filter((item) => formatDateBucket(item.dateValue, "week") === currentWeek);
   }
 
+  if (detailKey === "firstAttemptContacts") {
+    return summary.prospecting.firstAttemptItems || [];
+  }
+
+  if (detailKey === "secondAttemptContacts") {
+    return summary.prospecting.secondAttemptItems || [];
+  }
+
+  if (detailKey === "thirdAttemptContacts") {
+    return summary.prospecting.thirdAttemptItems || [];
+  }
+
+  if (detailKey === "fourthAttemptContacts") {
+    return summary.prospecting.fourthAttemptItems || [];
+  }
+
+  if (detailKey === "disqualifiedNumbers") {
+    return summary.prospecting.disqualifiedNumberItems || [];
+  }
+
   if (detailKey === "totalLeads") {
     return summary.qualification.totalLeadItems || [];
   }
@@ -228,7 +296,16 @@ function CampaignMetricButton({ title, value, note, onClick, expanded = false })
   );
 }
 
-function getDetailCellValues(item) {
+function getDetailCellValues(detailKey, item) {
+  if (["proposals", "closedWon", "salesConversion", "qualifiedOpportunities"].includes(detailKey)) {
+    return [
+      item.ownerName || "Sem proprietario",
+      item.recordName || "Negocio sem nome",
+      item.detailLabel || "Sem valor",
+      item.statusLabel || "Sem status",
+    ];
+  }
+
   return [
     item.ownerName || "Sem proprietario",
     item.leadName || item.recordName || "Sem registro",
@@ -276,8 +353,9 @@ export function CampaignsContent({ dashboardData }) {
   const duplicatedErrorMessage = primaryErrorMessage && primaryErrorMessage === String(campaignOptionsError || "").trim();
   const normalizedSummaryName = useMemo(() => normalizeCampaignLabel(summary?.name), [summary?.name]);
   const activeDetailConfig = OVERVIEW_DETAIL_CONFIG[activeDetail] || null;
-  const activeDetailRows = detailRowsByKey[activeDetail] || [];
-  const activeDetailPage = detailPageByKey[activeDetail] || 1;
+  const activeDetailCacheKey = activeDetail ? `${normalizedSummaryName || "sem-campanha"}::${activeDetail}` : "";
+  const activeDetailRows = activeDetailCacheKey ? detailRowsByKey[activeDetailCacheKey] || [] : [];
+  const activeDetailPage = activeDetailCacheKey ? detailPageByKey[activeDetailCacheKey] || 1 : 1;
   const detailPageSize = 10;
   const resolvedCampaignSelection = resolveCampaignOptionLabel(campaignOptions, selectedCampaignDraft);
   const activeDetailTotalPages = Math.max(1, Math.ceil(activeDetailRows.length / detailPageSize));
@@ -335,19 +413,26 @@ export function CampaignsContent({ dashboardData }) {
     }
   }, [normalizedSummaryName]);
 
+  useEffect(() => {
+    setActiveDetail("");
+    setDetailError("");
+    setDetailLoadingKey("");
+  }, [normalizedSummaryName]);
+
   async function handleOpenDetail(detailKey) {
+    const detailCacheKey = `${normalizedSummaryName || "sem-campanha"}::${detailKey}`;
     setActiveDetail(detailKey);
     setDetailError("");
     setDetailPageByKey((current) => ({
       ...current,
-      [detailKey]: 1,
+      [detailCacheKey]: 1,
     }));
 
-    if (detailRowsByKey[detailKey]) {
+    if (detailRowsByKey[detailCacheKey]) {
       return;
     }
 
-    setDetailLoadingKey(detailKey);
+    setDetailLoadingKey(detailCacheKey);
 
     try {
       const searchParams = new URLSearchParams({
@@ -372,7 +457,7 @@ export function CampaignsContent({ dashboardData }) {
       const detailSummary = Array.isArray(payload?.campaigns) ? payload.campaigns[0] || null : null;
       setDetailRowsByKey((current) => ({
         ...current,
-        [detailKey]: renderCampaignDetailRows(detailKey, detailSummary),
+        [detailCacheKey]: renderCampaignDetailRows(detailKey, detailSummary),
       }));
     } catch {
       setDetailError("Nao foi possivel carregar os detalhes deste indicador.");
@@ -534,6 +619,41 @@ export function CampaignsContent({ dashboardData }) {
                 onClick={() => handleOpenDetail("connectionsWeekly")}
                 expanded={activeDetail === "connectionsWeekly"}
               />
+              <CampaignMetricButton
+                title="1a tentativa"
+                value={`${summary.prospecting.firstAttemptCount || 0}`}
+                note="Contatos no primeiro toque"
+                onClick={() => handleOpenDetail("firstAttemptContacts")}
+                expanded={activeDetail === "firstAttemptContacts"}
+              />
+              <CampaignMetricButton
+                title="2a tentativa"
+                value={`${summary.prospecting.secondAttemptCount || 0}`}
+                note="Contatos no segundo toque"
+                onClick={() => handleOpenDetail("secondAttemptContacts")}
+                expanded={activeDetail === "secondAttemptContacts"}
+              />
+              <CampaignMetricButton
+                title="3a tentativa"
+                value={`${summary.prospecting.thirdAttemptCount || 0}`}
+                note="Contatos no terceiro toque"
+                onClick={() => handleOpenDetail("thirdAttemptContacts")}
+                expanded={activeDetail === "thirdAttemptContacts"}
+              />
+              <CampaignMetricButton
+                title="4a tentativa+"
+                value={`${summary.prospecting.fourthAttemptCount || 0}`}
+                note="Contatos na quarta tentativa ou mais"
+                onClick={() => handleOpenDetail("fourthAttemptContacts")}
+                expanded={activeDetail === "fourthAttemptContacts"}
+              />
+              <CampaignMetricButton
+                title="Numeros desqualificados"
+                value={`${summary.prospecting.disqualifiedNumbersCount || 0}`}
+                note="Status desqualificado na HubSpot"
+                onClick={() => handleOpenDetail("disqualifiedNumbers")}
+                expanded={activeDetail === "disqualifiedNumbers"}
+              />
             </div>
           </Card>
 
@@ -637,7 +757,7 @@ export function CampaignsContent({ dashboardData }) {
                 </div>
               </div>
 
-              {detailLoadingKey === activeDetail ? (
+              {detailLoadingKey === activeDetailCacheKey ? (
                 <div className={styles.campaignDetailLoadingState} role="status" aria-live="polite">
                   <span className={styles.sectionLoadingSpinner} aria-hidden="true" />
                   <strong>Carregando detalhes da HubSpot</strong>
@@ -647,17 +767,24 @@ export function CampaignsContent({ dashboardData }) {
               ) : activeDetailRows.length ? (
                 <>
                   <div className={styles.campaignReportTableFrame}>
-                    <div className={`${styles.tableHead} ${styles.campaignMeetingItem} ${styles.campaignReportTableHead}`.trim()}>
+                    <div
+                      className={`${styles.campaignReportGrid} ${styles.campaignReportTableHead}`.trim()}
+                      style={{ "--campaign-report-columns": activeDetailConfig.columnTemplate }}
+                    >
                       {activeDetailConfig.columns.map((column) => <span key={column}>{column}</span>)}
                     </div>
                     <div className={styles.campaignTableBody}>
                       {paginatedDetailRows.map((item) => {
-                        const cellValues = getDetailCellValues(item);
+                        const cellValues = getDetailCellValues(activeDetail, item);
 
                         return (
-                          <article key={item.id} className={`${styles.stageModalItem} ${styles.campaignMeetingItem} ${styles.campaignReportTableRow}`.trim()}>
+                          <article
+                            key={item.id}
+                            className={`${styles.campaignReportGrid} ${styles.campaignReportTableRow}`.trim()}
+                            style={{ "--campaign-report-columns": activeDetailConfig.columnTemplate }}
+                          >
                             {cellValues.map((value, index) => (
-                              <div key={`${item.id}-${index}`}>
+                              <div key={`${item.id}-${index}`} className={styles.campaignReportCell}>
                                 <strong className={styles.campaignTableCellValue} title={value}>{value}</strong>
                               </div>
                             ))}
@@ -675,7 +802,7 @@ export function CampaignsContent({ dashboardData }) {
                             className={styles.popupPaginationNav}
                             onClick={() => setDetailPageByKey((current) => ({
                               ...current,
-                              [activeDetail]: Math.max(1, activeDetailPage - 1),
+                              [activeDetailCacheKey]: Math.max(1, activeDetailPage - 1),
                             }))}
                             disabled={activeDetailPage === 1}
                           >
@@ -695,7 +822,7 @@ export function CampaignsContent({ dashboardData }) {
                                   className={`${styles.popupPaginationPage} ${isCurrentPage ? styles.popupPaginationPageActive : ""}`.trim()}
                                   onClick={() => setDetailPageByKey((current) => ({
                                     ...current,
-                                    [activeDetail]: page,
+                                    [activeDetailCacheKey]: page,
                                   }))}
                                   aria-current={isCurrentPage ? "page" : undefined}
                                   aria-label={`Ir para pagina ${page}`}
@@ -711,7 +838,7 @@ export function CampaignsContent({ dashboardData }) {
                             className={styles.popupPaginationNav}
                             onClick={() => setDetailPageByKey((current) => ({
                               ...current,
-                              [activeDetail]: Math.min(activeDetailTotalPages, activeDetailPage + 1),
+                              [activeDetailCacheKey]: Math.min(activeDetailTotalPages, activeDetailPage + 1),
                             }))}
                             disabled={activeDetailPage === activeDetailTotalPages}
                           >
