@@ -44,7 +44,22 @@ function normalizeDashboardActivityWeeks(value) {
 }
 
 function normalizeDashboardSellerPage(value) {
-  return String(value || "1").trim() === "2" ? "2" : "1";
+  const parsed = Number.parseInt(String(value || "1").trim(), 10);
+  if (!Number.isFinite(parsed) || parsed <= 0) {
+    return "1";
+  }
+
+  return String(parsed);
+}
+
+function normalizeDashboardSellerSearch(value) {
+  return String(value || "").trim();
+}
+
+function normalizeDashboardCampaignDetail(value) {
+  const normalized = String(value || "").trim();
+  const allowedDetails = new Set(["totalLeads", "sqls", "meetings", "closedWon", "qualifiedOpportunities"]);
+  return allowedDetails.has(normalized) ? normalized : "";
 }
 
 export async function GET(request) {
@@ -55,6 +70,8 @@ export async function GET(request) {
   const ownerFilter = scope === "deals" ? normalizeDashboardOwnerFilter(searchParams.get("owner")) : "";
   const activityWeeksFilter = scope === "deals" ? normalizeDashboardActivityWeeks(searchParams.get("activityWeeks")) : "";
   const sellerPage = scope === "sellers" ? normalizeDashboardSellerPage(searchParams.get("sellerPage")) : "";
+  const sellerSearch = scope === "sellers" ? normalizeDashboardSellerSearch(searchParams.get("sellerSearch")) : "";
+  const campaignDetailKey = scope === "campaigns" ? normalizeDashboardCampaignDetail(searchParams.get("campaignDetail")) : "";
   const auth = await requireAuthenticatedUser({
     route: "api/hubspot/dashboard",
     action: "read-dashboard",
@@ -97,6 +114,8 @@ export async function GET(request) {
       ownerFilter,
       activityWeeksFilter,
       sellerPage,
+      sellerSearch,
+      campaignDetailKey,
     }));
     const data = assertDashboardData(await enrichDashboardWithOperationalData(baseData, auth.user, { scope }));
     return jsonWithApiObservation(

@@ -1502,6 +1502,30 @@
   color: #166534;
 }
 
+:global(html[data-theme="dark"]) .sectionNotice {
+  border-color: rgba(104, 141, 192, 0.24);
+  background: rgba(19, 33, 52, 0.88);
+  color: #dce9ff;
+}
+
+:global(html[data-theme="dark"]) .sectionNoticeInfo {
+  border-color: rgba(96, 165, 250, 0.28);
+  background: rgba(18, 40, 67, 0.9);
+  color: #d8e9ff;
+}
+
+:global(html[data-theme="dark"]) .sectionNoticeError {
+  border-color: rgba(248, 113, 113, 0.3);
+  background: rgba(95, 24, 32, 0.34);
+  color: #ffd7d2;
+}
+
+:global(html[data-theme="dark"]) .sectionNoticeSuccess {
+  border-color: rgba(74, 222, 128, 0.28);
+  background: rgba(18, 68, 45, 0.32);
+  color: #d8ffe7;
+}
+
 .sectionEmptyPanel {
   display: grid;
   gap: 6px;
@@ -1620,6 +1644,20 @@
   gap: 12px;
   overflow: auto;
   padding-right: 4px;
+}
+
+.campaignDetailLoadingState {
+  min-height: 260px;
+  display: grid;
+  place-items: center;
+  gap: 12px;
+  text-align: center;
+  color: var(--muted);
+}
+
+.campaignDetailLoadingState strong {
+  color: var(--heading);
+  font-size: calc(14px * var(--font-scale));
 }
 
 .campaignMeetingItem {

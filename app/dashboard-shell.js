@@ -44,6 +44,7 @@ export default function DashboardShell({
   initialOwnerFilter = "todos",
   initialActivityWeeksFilter = "1",
   initialSellerPage = "1",
+  initialSellerSearch = "",
   sellerSlug = "",
   sellerMeetingsView = false,
   sellerMeetingId = "",
@@ -100,6 +101,7 @@ export default function DashboardShell({
     initialOwnerFilter,
     initialActivityWeeksFilter,
     initialSellerPage,
+    initialSellerSearch,
   });
   const notificationBadge = unreadNotificationsCount > 99 ? "99+" : String(unreadNotificationsCount);
   const settingsHeaderAgentId = activeNav === "profile" || profileViewOpen ? "profile" : "settings";

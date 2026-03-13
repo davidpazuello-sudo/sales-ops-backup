@@ -29,13 +29,29 @@ import {
 } from "lib/services/dashboard-sellers";
 import { formatCurrency } from "lib/services/dashboard-deals";
 
+function buildSellerPageSuffix(page, searchQuery = "") {
+  const params = new URLSearchParams();
+  if (Number(page || 1) > 1) {
+    params.set("pagina", String(page));
+  }
+  if (String(searchQuery || "").trim()) {
+    params.set("busca", String(searchQuery).trim());
+  }
+
+  const suffix = params.toString();
+  return suffix ? `?${suffix}` : "";
+}
+
 export function SellerMeetingsContent({ dashboardData, sellerSlug }) {
   const router = useRouter();
   const seller = dashboardData.sellers.find((item) => sellerToSlug(item.name) === sellerSlug) || dashboardData.sellers[0];
   const meetings = getMeetingsForSeller(dashboardData, seller);
   const loadingState = dashboardData.states?.loading || "ready";
   const stateErrors = dashboardData.states?.errors || [];
-  const sellerPageSuffix = dashboardData.sellerPagination?.currentPage === 2 ? "?pagina=2" : "";
+  const sellerPageSuffix = buildSellerPageSuffix(
+    dashboardData.sellerPagination?.currentPage,
+    dashboardData.sellerPagination?.searchQuery,
+  );
 
   if (!seller) {
     return (
@@ -121,7 +137,10 @@ export function SellerMeetingDetailContent({ dashboardData, sellerSlug, meetingI
   const loadingState = dashboardData.states?.loading || "ready";
   const stateErrors = dashboardData.states?.errors || [];
   const seller = dashboardData.sellers.find((item) => sellerToSlug(item.name) === sellerSlug) || dashboardData.sellers[0];
-  const sellerPageSuffix = dashboardData.sellerPagination?.currentPage === 2 ? "?pagina=2" : "";
+  const sellerPageSuffix = buildSellerPageSuffix(
+    dashboardData.sellerPagination?.currentPage,
+    dashboardData.sellerPagination?.searchQuery,
+  );
   const meetings = getMeetingsForSeller(dashboardData, seller);
   const selectedMeeting = meetings.find((item) => (item.slug || meetingToSlug(item)) === meetingId) || meetings[0];
   const meeting = selectedMeeting
@@ -327,8 +346,9 @@ export function SellerMeetingDetailContent({ dashboardData, sellerSlug, meetingI
 
 export function SellersContent({ dashboardData }) {
   const router = useRouter();
-  const [sellerFilter, setSellerFilter] = useState("");
-  const [sellerDraft, setSellerDraft] = useState("");
+  const initialSearchQuery = dashboardData.sellerPagination?.searchQuery || "";
+  const [sellerFilter, setSellerFilter] = useState(initialSearchQuery);
+  const [sellerDraft, setSellerDraft] = useState(initialSearchQuery);
   const [agentOpen, setAgentOpen] = useState(false);
   const loadingState = dashboardData.states?.loading || "ready";
   const stateErrors = dashboardData.states?.errors || [];
@@ -338,15 +358,26 @@ export function SellersContent({ dashboardData }) {
     totalOwners: dashboardData.sellers.length,
     pageSize: dashboardData.sellers.length,
   };
-  const sellerPageSuffix = sellerPagination.currentPage === 2 ? "?pagina=2" : "";
-  const filteredSellers = dashboardData.sellers.filter((seller) =>
-    seller.name.toLowerCase().includes(sellerFilter.trim().toLowerCase()),
-  );
+  const sellerPageSuffix = buildSellerPageSuffix(sellerPagination.currentPage, sellerFilter);
+  const filteredSellers = dashboardData.sellers;
   const filtersDirty = sellerDraft.trim() !== sellerFilter;
+  const sellerRangeStart = sellerPagination.totalOwners
+    ? (sellerPagination.currentPage === 1 ? 1 : sellerPagination.currentPage === 2 ? 13 : 25)
+    : 0;
+  const sellerRangeEnd = sellerRangeStart
+    ? Math.min(sellerPagination.totalOwners, sellerRangeStart + sellerPagination.pageSize - 1)
+    : 0;
+
+  useEffect(() => {
+    setSellerFilter(initialSearchQuery);
+    setSellerDraft(initialSearchQuery);
+  }, [initialSearchQuery]);
 
   function handleApplyFilters(event) {
     event.preventDefault();
-    setSellerFilter(sellerDraft.trim());
+    const nextFilter = sellerDraft.trim();
+    setSellerFilter(nextFilter);
+    router.push(`/vendedores${buildSellerPageSuffix(1, nextFilter)}`);
   }
 
   return (
@@ -378,32 +409,33 @@ export function SellersContent({ dashboardData }) {
         </div>
       </form>
 
-      {sellerPagination.totalPages > 1 ? (
-        <div className={styles.dealsFilterSummary}>
-          <span>
-            Mostrando {sellerPagination.currentPage === 1 ? "os primeiros 10" : "os demais"} usuarios da HubSpot
-            {" "}de um total de {sellerPagination.totalOwners}.
-          </span>
-          <div className={styles.filterActionGroup}>
-            <button
-              type="button"
-              className={`${styles.secondaryActionButton} ${sellerPagination.currentPage === 1 ? styles.secondaryActionButtonActive : ""}`.trim()}
-              onClick={() => router.push("/vendedores")}
-              disabled={sellerPagination.currentPage === 1}
-            >
-              Pagina 1
-            </button>
-            <button
-              type="button"
-              className={`${styles.secondaryActionButton} ${sellerPagination.currentPage === 2 ? styles.secondaryActionButtonActive : ""}`.trim()}
-              onClick={() => router.push("/vendedores?pagina=2")}
-              disabled={sellerPagination.currentPage === 2}
-            >
-              Pagina 2
-            </button>
+        {sellerPagination.totalPages > 1 ? (
+          <div className={styles.dealsFilterSummary}>
+            <span>
+              Mostrando usuarios {sellerRangeStart} a {sellerRangeEnd} da HubSpot
+              {" "}de um total de {sellerPagination.totalOwners}.
+              {sellerFilter ? ` Busca ativa: "${sellerFilter}".` : ""}
+            </span>
+            <div className={styles.filterActionGroup}>
+              {Array.from({ length: sellerPagination.totalPages }, (_, index) => {
+                const page = index + 1;
+                const isCurrentPage = sellerPagination.currentPage === page;
+
+                return (
+                  <button
+                    key={page}
+                    type="button"
+                    className={`${styles.secondaryActionButton} ${isCurrentPage ? styles.secondaryActionButtonActive : ""}`.trim()}
+                    onClick={() => router.push(`/vendedores${buildSellerPageSuffix(page, sellerFilter)}`)}
+                    disabled={isCurrentPage}
+                  >
+                    Pagina {page}
+                  </button>
+                );
+              })}
+            </div>
           </div>
-        </div>
-      ) : null}
+        ) : null}
 
       {stateErrors.length ? (
         <SectionNotice variant="error">{stateErrors[0] || "A lista de vendedores ainda nao conseguiu carregar dados reais."}</SectionNotice>
@@ -471,7 +503,10 @@ export function SellerProfileContent({ dashboardData, sellerSlug }) {
   const [selectedStage, setSelectedStage] = useState("");
   const loadingState = dashboardData.states?.loading || "ready";
   const seller = dashboardData.sellers.find((item) => sellerToSlug(item.name) === sellerSlug) || dashboardData.sellers[0];
-  const sellerPageSuffix = dashboardData.sellerPagination?.currentPage === 2 ? "?pagina=2" : "";
+  const sellerPageSuffix = buildSellerPageSuffix(
+    dashboardData.sellerPagination?.currentPage,
+    dashboardData.sellerPagination?.searchQuery,
+  );
 
   if (!seller) {
     return (

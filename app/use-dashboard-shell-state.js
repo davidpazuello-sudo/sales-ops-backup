@@ -102,7 +102,8 @@ function buildDashboardScopeCacheKey(scope, options = {}) {
   const ownerFilter = String(options.ownerFilter || "").trim();
   const activityWeeksFilter = String(options.activityWeeksFilter || "").trim();
   const sellerPage = String(options.sellerPage || "").trim();
-  const suffixParts = [pipelineId, ownerFilter, activityWeeksFilter, sellerPage].filter(Boolean);
+  const sellerSearch = String(options.sellerSearch || "").trim();
+  const suffixParts = [pipelineId, ownerFilter, activityWeeksFilter, sellerPage, sellerSearch].filter(Boolean);
   return suffixParts.length ? `${scope}:${suffixParts.join(":")}` : scope;
 }
 
@@ -168,6 +169,7 @@ export function useDashboardShellState({
   initialOwnerFilter = "todos",
   initialActivityWeeksFilter = "1",
   initialSellerPage = "1",
+  initialSellerSearch = "",
 }) {
   const router = useRouter();
   const menuRef = useRef(null);
@@ -258,6 +260,7 @@ export function useDashboardShellState({
     const ownerFilter = hubspotScope === "deals" ? String(initialOwnerFilter || "todos").trim() : "";
     const activityWeeksFilter = hubspotScope === "deals" ? String(initialActivityWeeksFilter || "1").trim() : "";
     const sellerPage = hubspotScope === "sellers" ? String(initialSellerPage || "1").trim() : "";
+    const sellerSearch = hubspotScope === "sellers" ? String(initialSellerSearch || "").trim() : "";
 
     async function loadHubSpotData() {
       if (hubspotScope === "none") {
@@ -271,6 +274,7 @@ export function useDashboardShellState({
           ownerFilter,
           activityWeeksFilter,
           sellerPage,
+          sellerSearch,
         });
       if (cachedPayload) {
         setDashboardData(cachedPayload);
@@ -291,6 +295,9 @@ export function useDashboardShellState({
         }
         if (sellerPage) {
           searchParams.set("sellerPage", sellerPage);
+        }
+        if (sellerSearch) {
+          searchParams.set("sellerSearch", sellerSearch);
         }
 
         const response = await fetch(`/api/hubspot/dashboard?${searchParams.toString()}`);
@@ -318,6 +325,7 @@ export function useDashboardShellState({
           ownerFilter,
           activityWeeksFilter,
           sellerPage,
+          sellerSearch,
         });
         setHubspotMessage("Dados da HubSpot sincronizados.");
       } catch {
@@ -342,7 +350,7 @@ export function useDashboardShellState({
     return () => {
       cancelled = true;
     };
-  }, [initialActivityWeeksFilter, initialNav, initialOwnerFilter, initialPipelineId, initialProfileView, initialSellerPage]);
+  }, [initialActivityWeeksFilter, initialNav, initialOwnerFilter, initialPipelineId, initialProfileView, initialSellerPage, initialSellerSearch]);
 
   useEffect(() => {
     let cancelled = false;

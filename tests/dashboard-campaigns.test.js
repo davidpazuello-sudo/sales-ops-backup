@@ -134,6 +134,35 @@ describe("dashboard campaigns service", () => {
     expect(campaigns[0].qualification.sqlCount).toBe(1);
   });
 
+  it("can build campaign summaries without eager detail rows", () => {
+    const campaigns = buildCampaignSummaries({
+      contacts: [
+        {
+          id: "contact-2026-1",
+          campaignName: PRIMARY_CAMPAIGN_CONTACT_VALUE,
+          lifecycleStage: "marketingqualifiedlead",
+          leadStatus: "",
+        },
+      ],
+      activities: [
+        {
+          id: "meeting-1",
+          campaignName: PRIMARY_CAMPAIGN_CONTACT_VALUE,
+          kind: "meeting",
+          updatedAt: new Date().toISOString(),
+        },
+      ],
+    }, {
+      includeDetails: false,
+    });
+
+    expect(campaigns).toHaveLength(1);
+    expect(campaigns[0].qualification.totalLeads).toBe(1);
+    expect(campaigns[0].qualification.totalLeadItems).toHaveLength(0);
+    expect(campaigns[0].meetings).toHaveLength(0);
+    expect(campaigns[0].meetingCount).toBe(1);
+  });
+
   it("canonicalizes primary campaign variants and HubSpot boolean markers", () => {
     const campaigns = buildCampaignSummaries({
       deals: [

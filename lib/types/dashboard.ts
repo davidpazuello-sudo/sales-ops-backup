@@ -49,6 +49,7 @@ export type DashboardSellerPagination = {
   totalPages: number;
   totalOwners: number;
   pageSize: number;
+  searchQuery?: string;
 };
 
 export type DashboardDeal = {

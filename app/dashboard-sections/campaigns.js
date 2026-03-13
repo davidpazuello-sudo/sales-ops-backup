@@ -134,12 +134,48 @@ function CampaignMetricButton({ title, value, note, onClick, expanded = false })
 export function CampaignsContent({ dashboardData }) {
   const [agentOpen, setAgentOpen] = useState(false);
   const [activeDetail, setActiveDetail] = useState("");
+  const [detailRowsByKey, setDetailRowsByKey] = useState({});
+  const [detailLoadingKey, setDetailLoadingKey] = useState("");
+  const [detailError, setDetailError] = useState("");
   const campaigns = Array.isArray(dashboardData.campaigns) ? dashboardData.campaigns : EMPTY_CAMPAIGNS;
   const summary = getPrimaryCampaign(campaigns);
   const loadingState = dashboardData.states?.loading || "ready";
   const stateErrors = dashboardData.states?.errors || [];
   const activeDetailConfig = OVERVIEW_DETAIL_CONFIG[activeDetail] || null;
-  const activeDetailRows = renderCampaignDetailRows(activeDetail, summary);
+  const activeDetailRows = detailRowsByKey[activeDetail] || [];
+
+  async function handleOpenDetail(detailKey) {
+    setActiveDetail(detailKey);
+    setDetailError("");
+
+    if (detailRowsByKey[detailKey]) {
+      return;
+    }
+
+    setDetailLoadingKey(detailKey);
+
+    try {
+      const response = await fetch(`/api/hubspot/dashboard?scope=campaigns&campaignDetail=${encodeURIComponent(detailKey)}`, {
+        cache: "no-store",
+      });
+      const payload = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        setDetailError(payload?.error || "Nao foi possivel carregar os detalhes deste indicador.");
+        return;
+      }
+
+      const detailSummary = getPrimaryCampaign(Array.isArray(payload?.campaigns) ? payload.campaigns : []);
+      setDetailRowsByKey((current) => ({
+        ...current,
+        [detailKey]: renderCampaignDetailRows(detailKey, detailSummary),
+      }));
+    } catch {
+      setDetailError("Nao foi possivel carregar os detalhes deste indicador.");
+    } finally {
+      setDetailLoadingKey("");
+    }
+  }
 
   return (
     <section className={styles.dashboardSection}>
@@ -188,35 +224,35 @@ export function CampaignsContent({ dashboardData }) {
                 title="Total de leads"
                 value={`${summary.qualification.totalLeads}`}
                 note="Base total mapeada na campanha"
-                onClick={() => setActiveDetail("totalLeads")}
+                onClick={() => handleOpenDetail("totalLeads")}
                 expanded={activeDetail === "totalLeads"}
               />
               <CampaignMetricButton
                 title="SQLs"
                 value={`${summary.qualification.sqlCount}`}
                 note="Meta da campanha: 40"
-                onClick={() => setActiveDetail("sqls")}
+                onClick={() => handleOpenDetail("sqls")}
                 expanded={activeDetail === "sqls"}
               />
               <CampaignMetricButton
                 title="Reunioes"
                 value={`${summary.meetingCount}`}
                 note="Meta da campanha: 70"
-                onClick={() => setActiveDetail("meetings")}
+                onClick={() => handleOpenDetail("meetings")}
                 expanded={activeDetail === "meetings"}
               />
               <CampaignMetricButton
                 title="Fechados"
                 value={`${summary.sales.closedWonCount}`}
                 note="Meta da campanha: 15"
-                onClick={() => setActiveDetail("closedWon")}
+                onClick={() => handleOpenDetail("closedWon")}
                 expanded={activeDetail === "closedWon"}
               />
               <CampaignMetricButton
                 title="Oportunidades qualificadas"
                 value={`${summary.qualifiedOpportunityCount}`}
                 note="Objetivo principal: 65"
-                onClick={() => setActiveDetail("qualifiedOpportunities")}
+                onClick={() => handleOpenDetail("qualifiedOpportunities")}
                 expanded={activeDetail === "qualifiedOpportunities"}
               />
             </div>
@@ -272,7 +308,11 @@ export function CampaignsContent({ dashboardData }) {
               <div>
                 <span>{activeDetailConfig.eyebrow}</span>
                 <h3>{summary.name}</h3>
-                <p>{`${activeDetailRows.length} item(ns) em ${activeDetailConfig.description.toLowerCase()}`}</p>
+                <p>
+                  {detailLoadingKey === activeDetail
+                    ? `Carregando ${activeDetailConfig.description.toLowerCase()}`
+                    : `${activeDetailRows.length} item(ns) em ${activeDetailConfig.description.toLowerCase()}`}
+                </p>
               </div>
               <button type="button" className={styles.secondaryActionButton} onClick={() => setActiveDetail("")}>
                 Fechar
@@ -280,7 +320,14 @@ export function CampaignsContent({ dashboardData }) {
             </header>
 
             <div className={`${styles.stageModalList} ${styles.campaignMeetingsList}`.trim()}>
-              {activeDetailRows.length ? (
+              {detailLoadingKey === activeDetail ? (
+                <div className={styles.campaignDetailLoadingState} role="status" aria-live="polite">
+                  <span className={styles.sectionLoadingSpinner} aria-hidden="true" />
+                  <strong>Carregando detalhes da HubSpot</strong>
+                </div>
+              ) : detailError ? (
+                <SectionNotice variant="error">{detailError}</SectionNotice>
+              ) : activeDetailRows.length ? (
                 <>
                   <div className={`${styles.tableHead} ${styles.campaignMeetingItem}`.trim()}>
                     {activeDetailConfig.columns.map((column) => <span key={column}>{column}</span>)}
