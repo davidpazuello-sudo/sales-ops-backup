@@ -134,6 +134,7 @@ function CampaignMetricButton({ title, value, note, onClick, expanded = false })
 export function CampaignsContent({ dashboardData }) {
   const [agentOpen, setAgentOpen] = useState(false);
   const [activeDetail, setActiveDetail] = useState("");
+  const [detailPageByKey, setDetailPageByKey] = useState({});
   const [detailRowsByKey, setDetailRowsByKey] = useState({});
   const [detailLoadingKey, setDetailLoadingKey] = useState("");
   const [detailError, setDetailError] = useState("");
@@ -143,10 +144,21 @@ export function CampaignsContent({ dashboardData }) {
   const stateErrors = dashboardData.states?.errors || [];
   const activeDetailConfig = OVERVIEW_DETAIL_CONFIG[activeDetail] || null;
   const activeDetailRows = detailRowsByKey[activeDetail] || [];
+  const activeDetailPage = detailPageByKey[activeDetail] || 1;
+  const detailPageSize = 10;
+  const activeDetailTotalPages = Math.max(1, Math.ceil(activeDetailRows.length / detailPageSize));
+  const paginatedDetailRows = activeDetailRows.slice(
+    (activeDetailPage - 1) * detailPageSize,
+    activeDetailPage * detailPageSize,
+  );
 
   async function handleOpenDetail(detailKey) {
     setActiveDetail(detailKey);
     setDetailError("");
+    setDetailPageByKey((current) => ({
+      ...current,
+      [detailKey]: 1,
+    }));
 
     if (detailRowsByKey[detailKey]) {
       return;
@@ -308,11 +320,6 @@ export function CampaignsContent({ dashboardData }) {
               <div>
                 <span>{activeDetailConfig.eyebrow}</span>
                 <h3>{summary.name}</h3>
-                <p>
-                  {detailLoadingKey === activeDetail
-                    ? `Carregando ${activeDetailConfig.description.toLowerCase()}`
-                    : `${activeDetailRows.length} item(ns) em ${activeDetailConfig.description.toLowerCase()}`}
-                </p>
               </div>
               <button type="button" className={styles.secondaryActionButton} onClick={() => setActiveDetail("")}>
                 Fechar
@@ -332,26 +339,48 @@ export function CampaignsContent({ dashboardData }) {
                   <div className={`${styles.tableHead} ${styles.campaignMeetingItem}`.trim()}>
                     {activeDetailConfig.columns.map((column) => <span key={column}>{column}</span>)}
                   </div>
-                  {activeDetailRows.map((item) => (
+                  {paginatedDetailRows.map((item) => (
                     <article key={item.id} className={`${styles.stageModalItem} ${styles.campaignMeetingItem}`.trim()}>
                       <div>
                         <strong>{item.ownerName}</strong>
-                        <span>{activeDetailConfig.columns[0]}</span>
                       </div>
                       <div>
                         <strong>{item.leadName || item.recordName || "Sem registro"}</strong>
-                        <span>{activeDetailConfig.columns[1]}</span>
                       </div>
                       <div>
                         <strong>{item.dateLabel || item.detailLabel || "Sem detalhe"}</strong>
-                        <span>{activeDetailConfig.columns[2]}</span>
                       </div>
                       <div>
                         <strong>{item.statusLabel}</strong>
-                        <span>{activeDetailConfig.columns[3]}</span>
                       </div>
                     </article>
                   ))}
+                  {activeDetailTotalPages > 1 ? (
+                    <div className={styles.popupPaginationBar}>
+                      <nav className={styles.paginationNumbers} aria-label={`Paginacao de ${activeDetailConfig.title}`}>
+                        {Array.from({ length: activeDetailTotalPages }, (_, index) => {
+                          const page = index + 1;
+                          const isCurrentPage = activeDetailPage === page;
+
+                          return (
+                            <button
+                              key={page}
+                              type="button"
+                              className={`${styles.paginationNumberButton} ${isCurrentPage ? styles.paginationNumberButtonActive : ""}`.trim()}
+                              onClick={() => setDetailPageByKey((current) => ({
+                                ...current,
+                                [activeDetail]: page,
+                              }))}
+                              aria-current={isCurrentPage ? "page" : undefined}
+                              aria-label={`Ir para pagina ${page}`}
+                            >
+                              {page}
+                            </button>
+                          );
+                        })}
+                      </nav>
+                    </div>
+                  ) : null}
                 </>
               ) : (
                 <p className={styles.sellerDetailNote}>Nenhum item sincronizado para este indicador no momento.</p>

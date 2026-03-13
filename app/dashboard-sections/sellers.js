@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import {
   Card,
@@ -346,10 +346,12 @@ export function SellerMeetingDetailContent({ dashboardData, sellerSlug, meetingI
 
 export function SellersContent({ dashboardData }) {
   const router = useRouter();
+  const [isNavigating, startNavigation] = useTransition();
   const initialSearchQuery = dashboardData.sellerPagination?.searchQuery || "";
   const [sellerFilter, setSellerFilter] = useState(initialSearchQuery);
   const [sellerDraft, setSellerDraft] = useState(initialSearchQuery);
   const [agentOpen, setAgentOpen] = useState(false);
+  const [paginationLoading, setPaginationLoading] = useState(false);
   const loadingState = dashboardData.states?.loading || "ready";
   const stateErrors = dashboardData.states?.errors || [];
   const sellerPagination = dashboardData.sellerPagination || {
@@ -373,18 +375,32 @@ export function SellersContent({ dashboardData }) {
     setSellerDraft(initialSearchQuery);
   }, [initialSearchQuery]);
 
+  useEffect(() => {
+    setPaginationLoading(false);
+  }, [sellerPagination.currentPage, initialSearchQuery]);
+
+  function navigateToSellersPage(page, searchQuery) {
+    setPaginationLoading(true);
+    startNavigation(() => {
+      router.push(`/vendedores${buildSellerPageSuffix(page, searchQuery)}`);
+    });
+  }
+
   function handleApplyFilters(event) {
     event.preventDefault();
     const nextFilter = sellerDraft.trim();
     setSellerFilter(nextFilter);
-    router.push(`/vendedores${buildSellerPageSuffix(1, nextFilter)}`);
+    navigateToSellersPage(1, nextFilter);
   }
 
   return (
     <section className={styles.dashboardSection}>
       <header className={styles.sectionHeaderBar}>
         <div className={styles.settingsHeader}>
-          <PageTitle loading={loadingState === "loading"} loadingLabel="Carregando usuarios da HubSpot">
+          <PageTitle
+            loading={loadingState === "loading" || paginationLoading || isNavigating}
+            loadingLabel="Carregando usuarios da HubSpot"
+          >
             Vendedores
           </PageTitle>
         </div>
@@ -416,7 +432,7 @@ export function SellersContent({ dashboardData }) {
               {" "}de um total de {sellerPagination.totalOwners}.
               {sellerFilter ? ` Busca ativa: "${sellerFilter}".` : ""}
             </span>
-            <div className={styles.filterActionGroup}>
+            <nav className={styles.paginationNumbers} aria-label="Paginacao de vendedores">
               {Array.from({ length: sellerPagination.totalPages }, (_, index) => {
                 const page = index + 1;
                 const isCurrentPage = sellerPagination.currentPage === page;
@@ -425,15 +441,17 @@ export function SellersContent({ dashboardData }) {
                   <button
                     key={page}
                     type="button"
-                    className={`${styles.secondaryActionButton} ${isCurrentPage ? styles.secondaryActionButtonActive : ""}`.trim()}
-                    onClick={() => router.push(`/vendedores${buildSellerPageSuffix(page, sellerFilter)}`)}
-                    disabled={isCurrentPage}
+                    className={`${styles.paginationNumberButton} ${isCurrentPage ? styles.paginationNumberButtonActive : ""}`.trim()}
+                    onClick={() => navigateToSellersPage(page, sellerFilter)}
+                    disabled={isCurrentPage || paginationLoading || isNavigating}
+                    aria-current={isCurrentPage ? "page" : undefined}
+                    aria-label={`Ir para pagina ${page}`}
                   >
-                    Pagina {page}
+                    {page}
                   </button>
                 );
               })}
-            </div>
+            </nav>
           </div>
         ) : null}
 

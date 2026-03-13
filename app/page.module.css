@@ -748,7 +748,7 @@
 }
 
 .tableHead {
-  color: var(--muted);
+  color: var(--accent);
   font-size: calc(11px * var(--font-scale));
   font-weight: 800;
   letter-spacing: 0.05em;
@@ -1360,6 +1360,52 @@
   color: var(--heading);
 }
 
+.paginationNumbers {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.paginationNumberButton {
+  min-width: 42px;
+  height: 42px;
+  padding: 0 14px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--panel);
+  color: var(--heading);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font: inherit;
+  font-size: calc(13px * var(--font-scale));
+  font-weight: 800;
+  cursor: pointer;
+  transition:
+    transform var(--motion-fast) ease,
+    background var(--motion-fast) ease,
+    border-color var(--motion-fast) ease,
+    color var(--motion-fast) ease,
+    box-shadow var(--motion-fast) ease;
+}
+
+.paginationNumberButton:hover {
+  transform: translateY(-1px);
+  border-color: color-mix(in srgb, var(--accent) 34%, var(--border));
+}
+
+.paginationNumberButtonActive {
+  border-color: color-mix(in srgb, var(--accent) 70%, transparent);
+  background: linear-gradient(135deg, var(--accent), #f3a43d);
+  color: #ffffff;
+  box-shadow: 0 10px 20px rgba(222, 131, 0, 0.18);
+}
+
+.paginationNumberButton:disabled {
+  cursor: default;
+}
+
 .filterApplyButton {
   min-width: 112px;
   justify-content: center;
@@ -1668,6 +1714,12 @@
 
 .campaignMeetingItem div {
   min-width: 0;
+}
+
+.popupPaginationBar {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 6px;
 }
 
 .campaignGoalList {
@@ -2554,15 +2606,16 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 12px 14px;
-  border-radius: 14px;
-  background: linear-gradient(180deg, var(--panel), var(--panel-soft));
-  border: 1px solid color-mix(in srgb, var(--border) 88%, transparent);
+  padding: 14px 0;
+  border-radius: 0;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 88%, transparent);
 }
 
 .stageModalItem div {
   display: grid;
-  gap: 4px;
+  gap: 0;
 }
 
 .stageModalItem strong {
