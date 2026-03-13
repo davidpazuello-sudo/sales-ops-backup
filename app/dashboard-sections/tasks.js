@@ -107,9 +107,9 @@ export function TasksContent({ dashboardData, sessionUser = {} }) {
   const summary = buildUpcomingTaskSummary(visibleTasks);
   const scopeMessage = teamAccess
     ? (ownerFilter === "todos"
-      ? "Voce pode acompanhar as proximas tarefas da HubSpot e filtrar por vendedor."
-      : `Mostrando as proximas tarefas do vendedor ${ownerFilter}.`)
-    : "Mostrando apenas tarefas futuras ligadas ao seu usuario na HubSpot.";
+      ? "Voce pode acompanhar todas as tarefas da HubSpot e filtrar por vendedor."
+      : `Mostrando todas as tarefas do vendedor ${ownerFilter}.`)
+    : "Mostrando todas as tarefas ligadas ao seu usuario na HubSpot.";
   const filtersDirty = ownerDraft !== ownerFilter || typeDraft !== typeFilter;
 
   function handleApplyFilters(event) {
@@ -125,7 +125,7 @@ export function TasksContent({ dashboardData, sessionUser = {} }) {
           <PageTitle loading={loadingState === "loading"} loadingLabel="Carregando tarefas da HubSpot">
             Tarefas
           </PageTitle>
-          <p>Reunioes, chamadas e tarefas comerciais futuras sincronizadas com a HubSpot e respeitando o cargo do usuario.</p>
+          <p>Reunioes, chamadas e tarefas comerciais sincronizadas com a HubSpot e respeitando o cargo do usuario.</p>
         </div>
         <PageAgentToggleButton agentId="tasks" open={agentOpen} onToggle={() => setAgentOpen((value) => !value)} />
       </header>
@@ -190,18 +190,18 @@ export function TasksContent({ dashboardData, sessionUser = {} }) {
 
       {!allTasks.length && loadingState === "ready" && !stateErrors.length ? (
         <SectionEmptyState
-          title="Sem tarefas futuras"
-          description="Quando a HubSpot retornar reunioes, chamadas e outras tarefas a fazer, elas aparecerao aqui."
+          title="Sem tarefas sincronizadas"
+          description="Quando a HubSpot retornar reunioes, chamadas e outras tarefas, elas aparecerao aqui."
         />
       ) : null}
 
       <div className={styles.grid}>
         <Card eyebrow="HUBSPOT" title="Resumo operacional" wide>
           <div className={styles.metrics}>
-            <Metric title="A fazer" value={`${summary.total}`} note="Tarefas futuras visiveis no recorte atual" />
-            <Metric title="Hoje" value={`${summary.today}`} note="Itens agendados para o restante do dia" />
-            <Metric title="Proximos 7 dias" value={`${summary.thisWeek}`} note="Tarefas previstas ainda nesta semana" />
-            <Metric title="Depois" value={`${summary.later}`} note="Atividades futuras apos os proximos 7 dias" />
+            <Metric title="A fazer" value={`${summary.total}`} note="Atividades visiveis no recorte atual" />
+            <Metric title="Hoje" value={`${summary.today}`} note="Itens agendados para hoje" />
+            <Metric title="Proximos 7 dias" value={`${summary.thisWeek}`} note="Atividades previstas nos proximos 7 dias" />
+            <Metric title="Depois" value={`${summary.later}`} note="Atividades previstas apos os proximos 7 dias" />
           </div>
         </Card>
 
@@ -210,7 +210,7 @@ export function TasksContent({ dashboardData, sessionUser = {} }) {
           title="Reunioes"
           tasks={groupedTasks.meeting}
           emptyTitle="Nenhuma reuniao neste recorte"
-          emptyDescription="Ajuste os filtros ou aguarde novas reunioes futuras sincronizadas pela HubSpot."
+          emptyDescription="Ajuste os filtros ou aguarde novas reunioes sincronizadas pela HubSpot."
         />
 
         <TaskGroupCard
@@ -218,7 +218,7 @@ export function TasksContent({ dashboardData, sessionUser = {} }) {
           title="Chamadas"
           tasks={groupedTasks.call}
           emptyTitle="Nenhuma chamada neste recorte"
-          emptyDescription="Quando houver chamadas futuras ligadas ao usuario ou ao vendedor filtrado, elas aparecerao aqui."
+          emptyDescription="Quando houver chamadas ligadas ao usuario ou ao vendedor filtrado, elas aparecerao aqui."
         />
 
         <TaskGroupCard
@@ -226,7 +226,7 @@ export function TasksContent({ dashboardData, sessionUser = {} }) {
           title="Outras tarefas"
           tasks={groupedTasks.task}
           emptyTitle="Nenhuma outra tarefa neste recorte"
-          emptyDescription="Use esta area para acompanhar follow-ups, lembretes e atividades gerais futuras vindas da HubSpot."
+          emptyDescription="Use esta area para acompanhar follow-ups, lembretes e atividades gerais vindas da HubSpot."
         />
       </div>
     </section>

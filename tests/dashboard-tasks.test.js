@@ -77,7 +77,7 @@ describe("dashboard tasks", () => {
       statusFilter: "todos",
     });
 
-    expect(visibleTasks.map((task) => task.id)).toEqual(["meeting-1"]);
+    expect(visibleTasks.map((task) => task.id)).toEqual(["meeting-1", "call-1", "task-3"]);
   });
 
   it("lets supervisors filter the full list by vendedor", () => {
@@ -88,7 +88,7 @@ describe("dashboard tasks", () => {
       statusFilter: "todos",
     });
 
-    expect(visibleTasks.map((task) => task.id)).toEqual(["task-2"]);
+    expect(visibleTasks.map((task) => task.id)).toEqual(["task-1", "task-2"]);
     expect(getTaskOwnerOptions(tasks)).toEqual(["Ana Souza", "Bruno Lima"]);
   });
 
@@ -99,22 +99,22 @@ describe("dashboard tasks", () => {
     const upcomingSummary = buildUpcomingTaskSummary(visibleTasks);
 
     expect(groupedTasks.meeting).toHaveLength(1);
-    expect(groupedTasks.call).toHaveLength(0);
-    expect(groupedTasks.task).toHaveLength(1);
+    expect(groupedTasks.call).toHaveLength(1);
+    expect(groupedTasks.task).toHaveLength(3);
     expect(summary).toEqual({
-      total: 2,
-      open: 2,
-      overdue: 0,
-      completed: 0,
+      total: 5,
+      open: 4,
+      overdue: 1,
+      completed: 1,
       meetings: 1,
-      calls: 0,
-      other: 1,
+      calls: 1,
+      other: 3,
     });
     expect(upcomingSummary).toEqual({
-      total: 2,
+      total: 5,
       today: 0,
       thisWeek: 1,
-      later: 1,
+      later: 2,
     });
   });
 });

@@ -1,7 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { startTransition, useCallback, useEffect, useRef, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import { createDashboardFallbackData } from "lib/dashboard-fallback";
 import {
   buildMainSectionRoute,
@@ -23,9 +23,13 @@ import {
 } from "./dashboard-shell-config";
 
 const SESSION_USER_STORAGE_KEY = "salesops:session-user";
+const SESSION_USER_CACHE_KEY = "salesops:session-user-cache";
 const BROWSER_NOTIFICATION_IDS_KEY = "salesops:browser-notification-ids";
+const NOTIFICATIONS_CACHE_KEY = "salesops:admin-notifications-cache";
 const DASHBOARD_SCOPE_CACHE_PREFIX = "salesops:dashboard-scope:";
 const DASHBOARD_SCOPE_CACHE_TTL_MS = 60 * 1000;
+const SESSION_USER_CACHE_TTL_MS = 5 * 60 * 1000;
+const NOTIFICATIONS_CACHE_TTL_MS = 30 * 1000;
 
 const defaultDashboardData = createDashboardFallbackData({
   loading: "loading",
@@ -64,6 +68,57 @@ function readStoredSessionUser() {
     window.sessionStorage.removeItem(SESSION_USER_STORAGE_KEY);
     return defaultSessionUser;
   }
+}
+
+function readTimedSessionCache(storageKey, ttlMs) {
+  if (typeof window === "undefined") {
+    return null;
+  }
+
+  try {
+    const storedValue = window.sessionStorage.getItem(storageKey);
+    if (!storedValue) {
+      return null;
+    }
+
+    const parsedValue = JSON.parse(storedValue);
+    const cachedAt = Number(parsedValue?.cachedAt || 0);
+    if (!cachedAt || (Date.now() - cachedAt) > ttlMs) {
+      window.sessionStorage.removeItem(storageKey);
+      return null;
+    }
+
+    return parsedValue?.payload || null;
+  } catch {
+    window.sessionStorage.removeItem(storageKey);
+    return null;
+  }
+}
+
+function writeTimedSessionCache(storageKey, payload) {
+  if (typeof window === "undefined" || !payload) {
+    return;
+  }
+
+  window.sessionStorage.setItem(storageKey, JSON.stringify({
+    cachedAt: Date.now(),
+    payload,
+  }));
+}
+
+function scheduleDeferredBrowserTask(callback, timeoutMs = 250) {
+  if (typeof window === "undefined") {
+    callback();
+    return () => {};
+  }
+
+  if (typeof window.requestIdleCallback === "function") {
+    const idleId = window.requestIdleCallback(callback, { timeout: timeoutMs });
+    return () => window.cancelIdleCallback?.(idleId);
+  }
+
+  const timeoutId = window.setTimeout(callback, timeoutMs);
+  return () => window.clearTimeout(timeoutId);
 }
 
 function getBrowserNotificationSupport() {
@@ -174,6 +229,7 @@ export function useDashboardShellState({
   initialSellerSearch = "",
 }) {
   const router = useRouter();
+  const pathname = usePathname();
   const menuRef = useRef(null);
   const [personalization, setPersonalization] = useState(personalizationDefaults);
   const [dashboardData, setDashboardData] = useState(defaultDashboardData);
@@ -196,24 +252,28 @@ export function useDashboardShellState({
   );
 
   useEffect(() => {
-    const routesToPrefetch = [
-      "/relatorios",
-      "/vendedores",
-      "/negocios",
-      "/campanhas",
-      "/tarefas",
-      "/configuracoes",
-      "/perfil",
-      "/ai-agent",
-    ];
+    const cancelDeferredPrefetch = scheduleDeferredBrowserTask(() => {
+      const routesToPrefetch = [
+        "/relatorios",
+        "/vendedores",
+        "/negocios",
+        "/campanhas",
+        "/tarefas",
+        "/configuracoes",
+        "/perfil",
+        "/ai-agent",
+      ];
 
-    if (sessionUser?.isSuperAdmin) {
-      routesToPrefetch.push("/permissoes-e-acessos");
-    }
+      if (sessionUser?.isSuperAdmin) {
+        routesToPrefetch.push("/permissoes-e-acessos");
+      }
 
-    routesToPrefetch.forEach((route) => {
-      router.prefetch(route);
-    });
+      routesToPrefetch.forEach((route) => {
+        router.prefetch(route);
+      });
+    }, 1200);
+
+    return cancelDeferredPrefetch;
   }, [router, sessionUser?.isSuperAdmin]);
 
   useEffect(() => {
@@ -278,8 +338,7 @@ export function useDashboardShellState({
 
   useEffect(() => {
     let cancelled = false;
-    let deferredLoadTimeout = 0;
-    let deferredLoadFrame = 0;
+    const abortController = new AbortController();
     const hubspotScope = getDashboardHubSpotScope({ initialNav, initialProfileView });
     const pipelineId = hubspotScope === "deals" ? String(initialPipelineId || "").trim() : "";
     const ownerFilter = hubspotScope === "deals" ? String(initialOwnerFilter || "todos").trim() : "";
@@ -330,7 +389,10 @@ export function useDashboardShellState({
           searchParams.set("sellerSearch", sellerSearch);
         }
 
-        const response = await fetch(`/api/hubspot/dashboard?${searchParams.toString()}`);
+        const response = await fetch(`/api/hubspot/dashboard?${searchParams.toString()}`, {
+          signal: abortController.signal,
+          cache: "no-store",
+        });
         const payload = await response.json();
         if (cancelled) {
           return;
@@ -359,8 +421,8 @@ export function useDashboardShellState({
           sellerSearch,
         });
         setHubspotMessage("Dados da HubSpot sincronizados.");
-      } catch {
-        if (cancelled) {
+      } catch (error) {
+        if (cancelled || error?.name === "AbortError") {
           return;
         }
 
@@ -376,34 +438,38 @@ export function useDashboardShellState({
       }
     }
 
-    if (typeof window === "undefined") {
+    const cancelDeferredLoad = scheduleDeferredBrowserTask(() => {
       loadHubSpotData();
-    } else {
-      deferredLoadFrame = window.requestAnimationFrame(() => {
-        deferredLoadTimeout = window.setTimeout(() => {
-          loadHubSpotData();
-        }, 0);
-      });
-    }
+    }, 160);
 
     return () => {
       cancelled = true;
-      if (typeof window !== "undefined") {
-        if (deferredLoadFrame) {
-          window.cancelAnimationFrame(deferredLoadFrame);
-        }
-        if (deferredLoadTimeout) {
-          window.clearTimeout(deferredLoadTimeout);
-        }
-      }
+      abortController.abort();
+      cancelDeferredLoad();
     };
   }, [initialActivityWeeksFilter, initialCampaignName, initialNav, initialOwnerFilter, initialPipelineId, initialProfileView, initialSellerPage, initialSellerSearch]);
 
   useEffect(() => {
     let cancelled = false;
+    const abortController = new AbortController();
+
+    const cachedUser = readTimedSessionCache(SESSION_USER_CACHE_KEY, SESSION_USER_CACHE_TTL_MS);
+    if (cachedUser) {
+      setSessionUser({
+        name: cachedUser.name || "Usuario",
+        role: cachedUser.role || "Cargo",
+        email: cachedUser.email || "",
+        isSuperAdmin: Boolean(cachedUser.isSuperAdmin),
+        twoFactorEnabled: Boolean(cachedUser.twoFactorEnabled),
+        twoFactorLevel: cachedUser.twoFactorLevel || null,
+      });
+    }
 
     async function loadSessionUser() {
-      const response = await fetch("/api/auth/session", { cache: "no-store" }).catch(() => null);
+      const response = await fetch("/api/auth/session", {
+        cache: "no-store",
+        signal: abortController.signal,
+      }).catch((error) => (error?.name === "AbortError" ? null : null));
       if (!response?.ok || cancelled) {
         return;
       }
@@ -413,37 +479,67 @@ export function useDashboardShellState({
         return;
       }
 
-      setSessionUser({
+      const nextSessionUser = {
         name: payload.user.name || "Usuario",
         role: payload.user.role || "Cargo",
         email: payload.user.email || "",
         isSuperAdmin: Boolean(payload.user.isSuperAdmin),
         twoFactorEnabled: Boolean(payload.twoFactorEnabled),
         twoFactorLevel: payload.twoFactorLevel || null,
-      });
+      };
+
+      setSessionUser(nextSessionUser);
+      writeTimedSessionCache(SESSION_USER_CACHE_KEY, nextSessionUser);
     }
 
-    loadSessionUser();
+    const cancelDeferredSessionLoad = scheduleDeferredBrowserTask(() => {
+      loadSessionUser();
+    }, cachedUser ? 1200 : 200);
 
     return () => {
       cancelled = true;
+      abortController.abort();
+      cancelDeferredSessionLoad();
     };
   }, []);
 
-  const refreshNotifications = useCallback(async (currentUser = sessionUser) => {
+  const refreshNotifications = useCallback(async (currentUser = sessionUser, signal) => {
     if (!currentUser?.isSuperAdmin) {
       setAdminNotifications([]);
       return;
     }
 
-    const response = await fetch("/api/notifications", { cache: "no-store" }).catch(() => null);
+    const response = await fetch("/api/notifications", {
+      cache: "no-store",
+      ...(signal ? { signal } : {}),
+    }).catch((error) => (error?.name === "AbortError" ? null : null));
     const payload = await response?.json().catch(() => null);
-    setAdminNotifications(Array.isArray(payload?.notifications) ? payload.notifications : []);
+    const nextNotifications = Array.isArray(payload?.notifications) ? payload.notifications : [];
+    setAdminNotifications(nextNotifications);
+    writeTimedSessionCache(NOTIFICATIONS_CACHE_KEY, nextNotifications);
   }, [sessionUser]);
 
   useEffect(() => {
-    refreshNotifications();
-  }, [refreshNotifications]);
+    if (!sessionUser?.isSuperAdmin) {
+      setAdminNotifications([]);
+      return undefined;
+    }
+
+    const abortController = new AbortController();
+    const cachedNotifications = readTimedSessionCache(NOTIFICATIONS_CACHE_KEY, NOTIFICATIONS_CACHE_TTL_MS);
+    if (Array.isArray(cachedNotifications)) {
+      setAdminNotifications(cachedNotifications);
+    }
+
+    const cancelDeferredNotificationsLoad = scheduleDeferredBrowserTask(() => {
+      refreshNotifications(sessionUser, abortController.signal);
+    }, cachedNotifications ? 1400 : 350);
+
+    return () => {
+      abortController.abort();
+      cancelDeferredNotificationsLoad();
+    };
+  }, [refreshNotifications, sessionUser, sessionUser?.isSuperAdmin]);
 
   useEffect(() => {
     if (!getBrowserNotificationSupport()) {
@@ -506,13 +602,23 @@ export function useDashboardShellState({
 
   function navigateToMainSection(section) {
     const route = buildMainSectionRoute(section);
-    router.prefetch(route);
-    router.push(route);
+    if (pathname === route) {
+      return;
+    }
+
+    startTransition(() => {
+      router.push(route);
+    });
   }
 
   function navigateToPath(path) {
-    router.prefetch(path);
-    router.push(path);
+    if (pathname === path) {
+      return;
+    }
+
+    startTransition(() => {
+      router.push(path);
+    });
   }
 
   const handleTwoFactorStatusChange = useCallback((mfaState) => {
