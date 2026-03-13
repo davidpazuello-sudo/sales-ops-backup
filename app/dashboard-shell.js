@@ -43,6 +43,7 @@ export default function DashboardShell({
   initialPipelineId = "",
   initialOwnerFilter = "todos",
   initialActivityWeeksFilter = "1",
+  initialSellerPage = "1",
   sellerSlug = "",
   sellerMeetingsView = false,
   sellerMeetingId = "",
@@ -98,6 +99,7 @@ export default function DashboardShell({
     initialPipelineId,
     initialOwnerFilter,
     initialActivityWeeksFilter,
+    initialSellerPage,
   });
   const notificationBadge = unreadNotificationsCount > 99 ? "99+" : String(unreadNotificationsCount);
   const settingsHeaderAgentId = activeNav === "profile" || profileViewOpen ? "profile" : "settings";

@@ -1,7 +1,18 @@
 import DashboardShell from "../../dashboard-shell";
 
-export default async function SellerProfilePage({ params }) {
-  const resolvedParams = await params;
+function normalizeSellerPage(value) {
+  return String(value || "1").trim() === "2" ? "2" : "1";
+}
 
-  return <DashboardShell initialNav="sellers" sellerSlug={resolvedParams?.sellerId || ""} />;
+export default async function SellerProfilePage({ params, searchParams }) {
+  const resolvedParams = await params;
+  const resolvedSearchParams = await searchParams;
+
+  return (
+    <DashboardShell
+      initialNav="sellers"
+      initialSellerPage={normalizeSellerPage(resolvedSearchParams?.pagina)}
+      sellerSlug={resolvedParams?.sellerId || ""}
+    />
+  );
 }

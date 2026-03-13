@@ -43,6 +43,10 @@ function normalizeDashboardActivityWeeks(value) {
   return String(Math.min(parsed, 12));
 }
 
+function normalizeDashboardSellerPage(value) {
+  return String(value || "1").trim() === "2" ? "2" : "1";
+}
+
 export async function GET(request) {
   const observation = startApiObservation(request, "api/hubspot/dashboard");
   const searchParams = readRequestSearchParams(request);
@@ -50,6 +54,7 @@ export async function GET(request) {
   const pipelineId = scope === "deals" ? normalizeDashboardPipelineId(searchParams.get("pipelineId")) : "";
   const ownerFilter = scope === "deals" ? normalizeDashboardOwnerFilter(searchParams.get("owner")) : "";
   const activityWeeksFilter = scope === "deals" ? normalizeDashboardActivityWeeks(searchParams.get("activityWeeks")) : "";
+  const sellerPage = scope === "sellers" ? normalizeDashboardSellerPage(searchParams.get("sellerPage")) : "";
   const auth = await requireAuthenticatedUser({
     route: "api/hubspot/dashboard",
     action: "read-dashboard",
@@ -91,6 +96,7 @@ export async function GET(request) {
       pipelineId,
       ownerFilter,
       activityWeeksFilter,
+      sellerPage,
     }));
     const data = assertDashboardData(await enrichDashboardWithOperationalData(baseData, auth.user, { scope }));
     return jsonWithApiObservation(

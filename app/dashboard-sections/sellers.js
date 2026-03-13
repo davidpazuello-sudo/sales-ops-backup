@@ -35,6 +35,7 @@ export function SellerMeetingsContent({ dashboardData, sellerSlug }) {
   const meetings = getMeetingsForSeller(dashboardData, seller);
   const loadingState = dashboardData.states?.loading || "ready";
   const stateErrors = dashboardData.states?.errors || [];
+  const sellerPageSuffix = dashboardData.sellerPagination?.currentPage === 2 ? "?pagina=2" : "";
 
   if (!seller) {
     return (
@@ -65,7 +66,7 @@ export function SellerMeetingsContent({ dashboardData, sellerSlug }) {
           <p>{seller.name} · Lista consolidada de alinhamentos internos e rituais de acompanhamento.</p>
         </div>
         <div className={styles.sellerMeetingActions}>
-          <button type="button" className={styles.primaryActionButton} onClick={() => router.push(`/vendedores/${sellerSlug}/reunioes/nova`)}>
+          <button type="button" className={styles.primaryActionButton} onClick={() => router.push(`/vendedores/${sellerSlug}/reunioes/nova${sellerPageSuffix}`)}>
             <MeetingIcon />
             <span>Registrar nova reuniao</span>
           </button>
@@ -84,7 +85,7 @@ export function SellerMeetingsContent({ dashboardData, sellerSlug }) {
       ) : (
         <section className={styles.meetingsList}>
           {meetings.map((meeting) => (
-            <button key={meeting.id} type="button" className={styles.meetingRow} onClick={() => router.push(`/vendedores/${sellerSlug}/reunioes/${meeting.slug || meetingToSlug(meeting)}`)}>
+            <button key={meeting.id} type="button" className={styles.meetingRow} onClick={() => router.push(`/vendedores/${sellerSlug}/reunioes/${meeting.slug || meetingToSlug(meeting)}${sellerPageSuffix}`)}>
               <div className={styles.meetingPrimary}>
                 <strong>{meeting.title}</strong>
                 <span>{meeting.summary}</span>
@@ -120,6 +121,7 @@ export function SellerMeetingDetailContent({ dashboardData, sellerSlug, meetingI
   const loadingState = dashboardData.states?.loading || "ready";
   const stateErrors = dashboardData.states?.errors || [];
   const seller = dashboardData.sellers.find((item) => sellerToSlug(item.name) === sellerSlug) || dashboardData.sellers[0];
+  const sellerPageSuffix = dashboardData.sellerPagination?.currentPage === 2 ? "?pagina=2" : "";
   const meetings = getMeetingsForSeller(dashboardData, seller);
   const selectedMeeting = meetings.find((item) => (item.slug || meetingToSlug(item)) === meetingId) || meetings[0];
   const meeting = selectedMeeting
@@ -212,7 +214,7 @@ export function SellerMeetingDetailContent({ dashboardData, sellerSlug, meetingI
     }
 
     setFormMessage(payload?.message || "Reuniao registrada com sucesso.");
-    router.push(`/vendedores/${sellerSlug}/reunioes`);
+    router.push(`/vendedores/${sellerSlug}/reunioes${sellerPageSuffix}`);
   }
 
   return (
@@ -330,6 +332,13 @@ export function SellersContent({ dashboardData }) {
   const [agentOpen, setAgentOpen] = useState(false);
   const loadingState = dashboardData.states?.loading || "ready";
   const stateErrors = dashboardData.states?.errors || [];
+  const sellerPagination = dashboardData.sellerPagination || {
+    currentPage: 1,
+    totalPages: 1,
+    totalOwners: dashboardData.sellers.length,
+    pageSize: dashboardData.sellers.length,
+  };
+  const sellerPageSuffix = sellerPagination.currentPage === 2 ? "?pagina=2" : "";
   const filteredSellers = dashboardData.sellers.filter((seller) =>
     seller.name.toLowerCase().includes(sellerFilter.trim().toLowerCase()),
   );
@@ -369,6 +378,33 @@ export function SellersContent({ dashboardData }) {
         </div>
       </form>
 
+      {sellerPagination.totalPages > 1 ? (
+        <div className={styles.dealsFilterSummary}>
+          <span>
+            Mostrando {sellerPagination.currentPage === 1 ? "os primeiros 10" : "os demais"} usuarios da HubSpot
+            {" "}de um total de {sellerPagination.totalOwners}.
+          </span>
+          <div className={styles.filterActionGroup}>
+            <button
+              type="button"
+              className={`${styles.secondaryActionButton} ${sellerPagination.currentPage === 1 ? styles.secondaryActionButtonActive : ""}`.trim()}
+              onClick={() => router.push("/vendedores")}
+              disabled={sellerPagination.currentPage === 1}
+            >
+              Pagina 1
+            </button>
+            <button
+              type="button"
+              className={`${styles.secondaryActionButton} ${sellerPagination.currentPage === 2 ? styles.secondaryActionButtonActive : ""}`.trim()}
+              onClick={() => router.push("/vendedores?pagina=2")}
+              disabled={sellerPagination.currentPage === 2}
+            >
+              Pagina 2
+            </button>
+          </div>
+        </div>
+      ) : null}
+
       {stateErrors.length ? (
         <SectionNotice variant="error">{stateErrors[0] || "A lista de vendedores ainda nao conseguiu carregar dados reais."}</SectionNotice>
       ) : null}
@@ -382,13 +418,10 @@ export function SellersContent({ dashboardData }) {
 
       <div className={styles.sellerProfilesGrid}>
         {filteredSellers.map((seller) => {
-          const sellerDeals = getSellerDeals(dashboardData, seller);
-          const totalPipeline = getSellerPipelineValue(sellerDeals);
-          const pendingTasks = getPendingSellerTasks(dashboardData, seller);
           const motivationStatus = getMotivationStatus(seller);
 
           return (
-            <button key={seller.name} type="button" className={styles.sellerProfileContainer} onClick={() => router.push(`/vendedores/${sellerToSlug(seller.name)}`)}>
+            <button key={seller.name} type="button" className={styles.sellerProfileContainer} onClick={() => router.push(`/vendedores/${sellerToSlug(seller.name)}${sellerPageSuffix}`)}>
               <article className={styles.sellerProfileCard}>
                 <div className={styles.sellerProfileTop}>
                   <div className={styles.sellerAvatar}>{seller.initials}</div>
@@ -400,19 +433,19 @@ export function SellersContent({ dashboardData }) {
 
                 <div className={styles.sellerStats}>
                   <div>
-                    <span>Negocios abertos</span>
-                    <strong>{seller.openDeals}</strong>
+                    <span>Total de negocios</span>
+                    <strong>{seller.totalDeals}</strong>
                   </div>
                   <div>
                     <span>Valor total na pipeline</span>
-                    <strong>{formatCurrency(totalPipeline)}</strong>
+                    <strong>{formatCurrency(seller.pipelineAmount)}</strong>
                   </div>
                 </div>
 
                 <div className={styles.sellerStats}>
                   <div>
                     <span>Atividades pendentes</span>
-                    <strong>{pendingTasks}</strong>
+                    <strong>{seller.pendingActivities}</strong>
                   </div>
                   <div>
                     <span>Status motivacao</span>
@@ -438,6 +471,7 @@ export function SellerProfileContent({ dashboardData, sellerSlug }) {
   const [selectedStage, setSelectedStage] = useState("");
   const loadingState = dashboardData.states?.loading || "ready";
   const seller = dashboardData.sellers.find((item) => sellerToSlug(item.name) === sellerSlug) || dashboardData.sellers[0];
+  const sellerPageSuffix = dashboardData.sellerPagination?.currentPage === 2 ? "?pagina=2" : "";
 
   if (!seller) {
     return (
@@ -458,8 +492,8 @@ export function SellerProfileContent({ dashboardData, sellerSlug }) {
 
   const sellerDeals = getSellerDeals(dashboardData, seller);
   const conversionRate = getSellerConversionRate(seller);
-  const totalPipelineValue = getSellerPipelineValue(sellerDeals);
-  const pendingTasks = getPendingSellerTasks(dashboardData, seller);
+  const totalPipelineValue = seller.pipelineAmount || getSellerPipelineValue(sellerDeals);
+  const pendingTasks = seller.pendingActivities ?? getPendingSellerTasks(dashboardData, seller);
   const motivationStatus = getMotivationStatus(seller);
   const activityKpis = getSellerActivityKpis(seller);
   const kanbanColumns = getSellerKanbanColumns(sellerDeals);
@@ -480,7 +514,7 @@ export function SellerProfileContent({ dashboardData, sellerSlug }) {
             <p>{seller.team}</p>
           </div>
           <div className={`${styles.sellerMeetingActions} ${styles.sellerProfileMeetingActions}`.trim()}>
-            <button type="button" className={styles.primaryActionButton} onClick={() => router.push(`/vendedores/${sellerSlug}/reunioes`)}>
+            <button type="button" className={styles.primaryActionButton} onClick={() => router.push(`/vendedores/${sellerSlug}/reunioes${sellerPageSuffix}`)}>
               <MeetingIcon />
               <span>Reunioes internas</span>
             </button>

@@ -29,9 +29,12 @@ export type SellerSummary = {
   email: string;
   team: string;
   initials: string;
+  totalDeals: number;
   openDeals: number;
   wonDeals: number;
   stalledDeals: number;
+  pendingActivities: number;
+  meetingsCount: number;
   pipelineAmount: number;
   pipelineLabel: string;
   compactPipeline: string;
@@ -39,6 +42,13 @@ export type SellerSummary = {
   health: string;
   status: string;
   note: string;
+};
+
+export type DashboardSellerPagination = {
+  currentPage: number;
+  totalPages: number;
+  totalOwners: number;
+  pageSize: number;
 };
 
 export type DashboardDeal = {
@@ -219,6 +229,7 @@ export type DashboardData = {
   summary: DashboardSummary;
   pipeline?: DashboardPipeline;
   states?: DashboardStates;
+  sellerPagination?: DashboardSellerPagination;
   sellers: SellerSummary[];
   alerts: string[][];
   deals: DashboardDeal[];

@@ -1340,6 +1340,24 @@
 .filterActionGroup {
   display: flex;
   align-items: flex-end;
+  gap: 10px;
+}
+
+.dealsFilterSummary {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  margin: -4px 0 18px;
+  color: var(--muted);
+  font-size: calc(13px * var(--font-scale));
+}
+
+.secondaryActionButtonActive {
+  border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+  background: color-mix(in srgb, var(--accent) 18%, var(--panel));
+  color: var(--heading);
 }
 
 .filterApplyButton {

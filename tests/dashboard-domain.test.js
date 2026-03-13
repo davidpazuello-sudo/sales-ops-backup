@@ -138,8 +138,8 @@ describe("dashboard domain", () => {
     expect(payload.pipeline.stages[0].label).toBe("Proposta Enviada");
     expect(payload.deals[0].pipelineLabel).toBe("Brasil Publico");
     expect(payload.deals[0].ownerEmail).toBe("ana@empresa.com");
-    expect(payload.sellers).toHaveLength(1);
-    expect(payload.sellers.map((seller) => seller.name)).toEqual(["Ana Souza"]);
+    expect(payload.sellers).toHaveLength(2);
+    expect(payload.sellers.map((seller) => seller.name)).toEqual(["Ana Souza", "Bruno Lima"]);
     expect(payload.tasks).toHaveLength(3);
     expect(payload.tasks.every((task) => task.ownerEmail === "ana@empresa.com")).toBe(true);
     expect(payload.tasks.map((task) => task.kind).sort()).toEqual(["call", "meeting", "task"]);
@@ -216,7 +216,7 @@ describe("dashboard domain", () => {
     expect(payload.sellers.map((seller) => seller.name)).toEqual(["Ana Souza", "Bruno Lima"]);
   });
 
-  it("keeps only sellers with operational activity or active pipeline", () => {
+  it("tracks operational counters even when the seller has only activities", () => {
     const nextHour = new Date(Date.now() + 3600000).toISOString();
     const payload = buildDashboardDomainPayload(
       [
@@ -290,7 +290,9 @@ describe("dashboard domain", () => {
       ],
     );
 
-    expect(payload.sellers.map((seller) => seller.name)).toEqual(["Ana Souza", "Carla Melo"]);
+    expect(payload.sellers.map((seller) => seller.name)).toEqual(["Ana Souza", "Bruno Lima", "Carla Melo"]);
+    expect(payload.sellers.find((seller) => seller.name === "Carla Melo")?.pendingActivities).toBe(1);
+    expect(payload.sellers.find((seller) => seller.name === "Carla Melo")?.meetingsCount).toBe(1);
   });
 
   it("infers Aluno a Bordo campaign from deal names and contact markers", () => {
