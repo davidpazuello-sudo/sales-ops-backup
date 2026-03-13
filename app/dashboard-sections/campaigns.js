@@ -252,7 +252,7 @@ function resolveCampaignOptionLabel(options = [], value = "") {
   }
 
   const exactOption = options.find((option) => normalizeCampaignSearchValue(option?.label) === normalizedValue);
-  return exactOption?.label || String(value || "").trim();
+  return exactOption?.label || "";
 }
 
 export function CampaignsContent({ dashboardData }) {
@@ -272,11 +272,14 @@ export function CampaignsContent({ dashboardData }) {
   const summary = campaigns[0] || null;
   const loadingState = dashboardData.states?.loading || "ready";
   const stateErrors = dashboardData.states?.errors || [];
+  const primaryErrorMessage = String(stateErrors[0] || "").trim();
+  const duplicatedErrorMessage = primaryErrorMessage && primaryErrorMessage === String(campaignOptionsError || "").trim();
   const normalizedSummaryName = useMemo(() => normalizeCampaignLabel(summary?.name), [summary?.name]);
   const activeDetailConfig = OVERVIEW_DETAIL_CONFIG[activeDetail] || null;
   const activeDetailRows = detailRowsByKey[activeDetail] || [];
   const activeDetailPage = detailPageByKey[activeDetail] || 1;
   const detailPageSize = 10;
+  const resolvedCampaignSelection = resolveCampaignOptionLabel(campaignOptions, selectedCampaignDraft);
   const activeDetailTotalPages = Math.max(1, Math.ceil(activeDetailRows.length / detailPageSize));
   const paginatedDetailRows = activeDetailRows.slice(
     (activeDetailPage - 1) * detailPageSize,
@@ -379,7 +382,7 @@ export function CampaignsContent({ dashboardData }) {
   }
 
   function handleApplyCampaignFilter() {
-    const resolvedCampaignName = resolveCampaignOptionLabel(campaignOptions, selectedCampaignDraft);
+    const resolvedCampaignName = resolvedCampaignSelection;
     if (!resolvedCampaignName) {
       return;
     }
@@ -423,13 +426,13 @@ export function CampaignsContent({ dashboardData }) {
           type="button"
           className={`${styles.primaryActionButton} ${styles.filterApplyButton}`.trim()}
           onClick={handleApplyCampaignFilter}
-          disabled={!selectedCampaignDraft.trim() || campaignOptionsLoading || isFilterPending}
+          disabled={!resolvedCampaignSelection || campaignOptionsLoading || isFilterPending}
         >
           Filtrar
         </button>
       </div>
 
-      {campaignOptionsError ? (
+      {campaignOptionsError && !duplicatedErrorMessage ? (
         <SectionNotice variant="error">{campaignOptionsError}</SectionNotice>
       ) : null}
 
@@ -443,11 +446,11 @@ export function CampaignsContent({ dashboardData }) {
         </div>
       ) : null}
 
-      {stateErrors.length ? (
-        <SectionNotice variant="error">{stateErrors[0] || "A campanha ainda nao conseguiu carregar dados reais."}</SectionNotice>
+      {primaryErrorMessage ? (
+        <SectionNotice variant="error">{primaryErrorMessage || "A campanha ainda nao conseguiu carregar dados reais."}</SectionNotice>
       ) : null}
 
-      {!summary && loadingState === "ready" && !stateErrors.length ? (
+      {!summary && loadingState === "ready" && !primaryErrorMessage ? (
         <SectionEmptyState
           title={`Campanha ${selectedCampaignDraft || "selecionada"} sem dados sincronizados`}
           description="Assim que a HubSpot trouxer deals, contatos e atividades da campanha escolhida, o acompanhamento vai aparecer aqui."
