@@ -73,10 +73,10 @@ describe("dashboard shell helpers", () => {
     })).toBe("Solicitação de acesso");
 
     expect(getNotificationDisplayTitle({
-      title: "Ligacao com cliente amanha",
-      body: "Existe uma ligacao marcada para 10h.",
+      title: "Chamada com cliente amanha",
+      body: "Existe uma chamada marcada para 10h.",
       tag: "Tarefa",
-    })).toBe("Próxima ligação");
+    })).toBe("Próxima chamada");
 
     expect(getNotificationDisplayTitle({
       title: "Reuniao de alinhamento",
@@ -87,8 +87,8 @@ describe("dashboard shell helpers", () => {
 
   it("routes task-like notifications to the tarefas page", () => {
     expect(getNotificationAction({
-      title: "Ligacao com cliente amanha",
-      body: "Existe uma ligacao marcada para 10h.",
+      title: "Chamada com cliente amanha",
+      body: "Existe uma chamada marcada para 10h.",
       tag: "Tarefa",
     })).toEqual({
       route: "/tarefas",

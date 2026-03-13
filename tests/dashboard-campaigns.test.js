@@ -262,6 +262,49 @@ describe("dashboard campaigns service", () => {
     expect(campaigns[0].qualification.sqlCount).toBe(1);
   });
 
+  it("tracks leads without call records for the overview card", () => {
+    const campaigns = buildCampaignSummaries({
+      contacts: [
+        {
+          id: "contact-sem-chamada",
+          campaignName: PRIMARY_CAMPAIGN_CONTACT_VALUE,
+          name: "Lead Sem Chamada",
+          phone: "1111-1111",
+          lifecycleStage: "lead",
+          leadStatus: "NEW",
+          ownerName: "Ana",
+        },
+        {
+          id: "contact-com-chamada",
+          campaignName: PRIMARY_CAMPAIGN_CONTACT_VALUE,
+          name: "Lead Com Chamada",
+          phone: "2222-2222",
+          lifecycleStage: "lead",
+          leadStatus: "NEW",
+          ownerName: "Bruno",
+        },
+      ],
+      activities: [
+        {
+          id: "call-1",
+          campaignName: PRIMARY_CAMPAIGN_CONTACT_VALUE,
+          kind: "call",
+          contactIds: ["contact-com-chamada"],
+          leadName: "Lead Com Chamada",
+          updatedAt: new Date().toISOString(),
+        },
+      ],
+    });
+
+    expect(campaigns).toHaveLength(1);
+    expect(campaigns[0].qualification.uncontactedLeadCount).toBe(1);
+    expect(campaigns[0].qualification.uncontactedLeadItems).toHaveLength(1);
+    expect(campaigns[0].qualification.uncontactedLeadItems[0]).toMatchObject({
+      leadName: "Lead Sem Chamada",
+      detailLabel: "1111-1111",
+    });
+  });
+
   it("can build campaign summaries without eager detail rows", () => {
     const campaigns = buildCampaignSummaries({
       contacts: [

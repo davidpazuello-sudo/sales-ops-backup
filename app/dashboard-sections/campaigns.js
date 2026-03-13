@@ -18,15 +18,15 @@ const EMPTY_CAMPAIGN_OPTIONS = [];
 const OVERVIEW_DETAIL_CONFIG = {
   callsDaily: {
     eyebrow: "SDR",
-    title: "Ligacoes hoje",
-    description: "Ligacoes do dia na campanha",
+    title: "Chamadas hoje",
+    description: "Chamadas do dia na campanha",
     columns: ["Proprietario", "Lead", "Data", "Status"],
     columnTemplate: "minmax(180px, 1.1fr) minmax(320px, 2.35fr) minmax(210px, 1.3fr) minmax(180px, 1fr)",
   },
   callsWeekly: {
     eyebrow: "SDR",
-    title: "Ligacoes na semana",
-    description: "Ligacoes da semana na campanha",
+    title: "Chamadas na semana",
+    description: "Chamadas da semana na campanha",
     columns: ["Proprietario", "Lead", "Data", "Status"],
     columnTemplate: "minmax(180px, 1.1fr) minmax(320px, 2.35fr) minmax(210px, 1.3fr) minmax(180px, 1fr)",
   },
@@ -97,6 +97,13 @@ const OVERVIEW_DETAIL_CONFIG = {
     eyebrow: "LEADS",
     title: "Total de leads",
     description: "Leads mapeados na campanha",
+    columns: ["Proprietario", "Lead", "Detalhe", "Status"],
+    columnTemplate: "minmax(180px, 1.1fr) minmax(360px, 2.65fr) minmax(280px, 1.8fr) minmax(190px, 1fr)",
+  },
+  uncontactedLeads: {
+    eyebrow: "SQLS",
+    title: "Leads sem contato",
+    description: "Leads sem registro de chamada",
     columns: ["Proprietario", "Lead", "Detalhe", "Status"],
     columnTemplate: "minmax(180px, 1.1fr) minmax(360px, 2.65fr) minmax(280px, 1.8fr) minmax(190px, 1fr)",
   },
@@ -309,6 +316,10 @@ function renderCampaignDetailRows(detailKey, summary) {
 
   if (detailKey === "totalLeads") {
     return summary.qualification.totalLeadItems || [];
+  }
+
+  if (detailKey === "uncontactedLeads") {
+    return summary.qualification.uncontactedLeadItems || [];
   }
 
   if (detailKey === "mqls" || detailKey === "qualificationConversion") {
@@ -616,11 +627,11 @@ export function CampaignsContent({ dashboardData }) {
                 expanded={activeDetail === "totalLeads"}
               />
               <CampaignMetricButton
-                title="SQLs"
-                value={`${summary.qualification.sqlCount}`}
-                note="Meta da campanha: 40"
-                onClick={() => handleOpenDetail("sqls")}
-                expanded={activeDetail === "sqls"}
+                title="Leads sem contato"
+                value={`${summary.qualification.uncontactedLeadCount || 0}`}
+                note="Sem registro de chamada"
+                onClick={() => handleOpenDetail("uncontactedLeads")}
+                expanded={activeDetail === "uncontactedLeads"}
               />
               <CampaignMetricButton
                 title="Reunioes programadas"
@@ -654,13 +665,13 @@ export function CampaignsContent({ dashboardData }) {
           <Card eyebrow="SDR" title="Relatorios de prospeccao e atividade" wide>
             <div className={`${styles.metrics} ${styles.campaignProspectingMetrics}`.trim()}>
               <CampaignMetricButton
-                title="Ligacoes hoje"
+                title="Chamadas hoje"
                 value={`${summary.prospecting.callsDaily}`}
                 onClick={() => handleOpenDetail("callsDaily")}
                 expanded={activeDetail === "callsDaily"}
               />
               <CampaignMetricButton
-                title="Ligacoes na semana"
+                title="Chamadas na semana"
                 value={`${summary.prospecting.callsWeekly}`}
                 onClick={() => handleOpenDetail("callsWeekly")}
                 expanded={activeDetail === "callsWeekly"}
