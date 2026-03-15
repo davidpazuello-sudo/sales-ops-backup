@@ -211,9 +211,9 @@ export function PageTitle({
   );
 }
 
-export function Card({ eyebrow, title, children, wide = false, className = "" }) {
+export function Card({ eyebrow, title, children, wide = false, className = "", ...props }) {
   return (
-    <section className={`${styles.card} ${wide ? styles.cardWide : ""} ${className}`.trim()}>
+    <section className={`${styles.card} ${wide ? styles.cardWide : ""} ${className}`.trim()} {...props}>
       <span className={styles.cardEyebrow}>{eyebrow}</span>
       {title ? <h2 className={styles.cardTitle}>{title}</h2> : null}
       {children}

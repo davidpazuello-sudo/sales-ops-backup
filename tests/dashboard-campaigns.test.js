@@ -208,6 +208,35 @@ describe("dashboard campaigns service", () => {
     });
   });
 
+  it("counts connections only from non-call follow-up tasks and not from meetings", () => {
+    const campaigns = buildCampaignSummaries({
+      activities: [
+        {
+          id: "task-hoje",
+          campaignName: PRIMARY_CAMPAIGN_CONTACT_VALUE,
+          kind: "task",
+          updatedAt: new Date().toISOString(),
+        },
+        {
+          id: "meeting-hoje",
+          campaignName: PRIMARY_CAMPAIGN_CONTACT_VALUE,
+          kind: "meeting",
+          updatedAt: new Date().toISOString(),
+        },
+        {
+          id: "call-hoje",
+          campaignName: PRIMARY_CAMPAIGN_CONTACT_VALUE,
+          kind: "call",
+          updatedAt: new Date().toISOString(),
+        },
+      ],
+    });
+
+    expect(campaigns).toHaveLength(1);
+    expect(campaigns[0].prospecting.callsDaily).toBe(1);
+    expect(campaigns[0].prospecting.connectionsDaily).toBe(1);
+  });
+
   it("treats HubSpot qualified and disqualified custom statuses as popup rows", () => {
     const campaigns = buildCampaignSummaries({
       contacts: [

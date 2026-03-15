@@ -627,21 +627,21 @@ export function CampaignsContent({ dashboardData }) {
                 expanded={activeDetail === "totalLeads"}
               />
               <CampaignMetricButton
-                title="Leads sem contato"
-                value={`${summary.qualification.uncontactedLeadCount || 0}`}
-                note="Sem registro de chamada"
-                onClick={() => handleOpenDetail("uncontactedLeads")}
-                expanded={activeDetail === "uncontactedLeads"}
+                title="SQLs"
+                value={`${summary.qualification.sqlCount}`}
+                note="Meta da campanha: 40"
+                onClick={() => handleOpenDetail("sqls")}
+                expanded={activeDetail === "sqls"}
               />
               <CampaignMetricButton
-                title="Reunioes programadas"
+                title="Reunioes"
                 value={`${summary.meetingCount}`}
                 note="Meta da campanha: 70"
                 onClick={() => handleOpenDetail("meetings")}
                 expanded={activeDetail === "meetings"}
               />
               <CampaignMetricButton
-                title="Reuniao concluido"
+                title="Fechados"
                 value={`${summary.sales.closedWonCount}`}
                 note="Meta da campanha: 15"
                 onClick={() => handleOpenDetail("closedWon")}
