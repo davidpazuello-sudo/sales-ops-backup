@@ -272,6 +272,58 @@ describe("dashboard campaigns service", () => {
     ]);
   });
 
+  it("classifies meetings without explicit HubSpot outcome by schedule date", () => {
+    const tomorrow = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+    const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    const campaigns = buildCampaignSummaries({
+      activities: [
+        {
+          id: "meeting-future-no-outcome",
+          campaignName: PRIMARY_CAMPAIGN_CONTACT_VALUE,
+          kind: "meeting",
+          ownerName: "Ana Souza",
+          leadName: "Conta Solar",
+          dueAt: tomorrow,
+          dueLabel: "Amanha",
+          status: "MEETING",
+          statusLabel: "Meeting",
+        },
+        {
+          id: "meeting-past-no-outcome",
+          campaignName: PRIMARY_CAMPAIGN_CONTACT_VALUE,
+          kind: "meeting",
+          ownerName: "Bruno Lima",
+          leadName: "Conta Lunar",
+          dueAt: yesterday,
+          dueLabel: "Ontem",
+          status: "MEETING",
+          statusLabel: "Meeting",
+        },
+        {
+          id: "meeting-no-show",
+          campaignName: PRIMARY_CAMPAIGN_CONTACT_VALUE,
+          kind: "meeting",
+          ownerName: "Carla Dias",
+          leadName: "Conta Nebula",
+          dueAt: yesterday,
+          dueLabel: "Ontem",
+          status: "NO_SHOW",
+          statusLabel: "Nao compareceu",
+        },
+      ],
+    });
+
+    expect(campaigns).toHaveLength(1);
+    expect(campaigns[0].meetingCount).toBe(1);
+    expect(campaigns[0].completedMeetingCount).toBe(1);
+    expect(campaigns[0].meetings[0]).toMatchObject({
+      id: "meeting-future-no-outcome",
+    });
+    expect(campaigns[0].completedMeetings[0]).toMatchObject({
+      id: "meeting-past-no-outcome",
+    });
+  });
+
   it("counts connections only from non-call follow-up tasks and not from meetings", () => {
     const campaigns = buildCampaignSummaries({
       contacts: [
