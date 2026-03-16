@@ -71,6 +71,8 @@ function normalizeDashboardCampaignDetail(value) {
     "updatedPhones",
     "disqualifiedNumbers",
     "totalLeads",
+    "leadStage",
+    "prospects",
     "uncontactedLeads",
     "mqls",
     "sqls",

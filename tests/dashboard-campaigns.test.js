@@ -274,11 +274,29 @@ describe("dashboard campaigns service", () => {
         {
           id: "contact-2026-1",
           campaignName: PRIMARY_CAMPAIGN_CONTACT_VALUE,
+          name: "Lead Base",
+          email: "lead@empresa.com",
+          ownerName: "Ana",
+          lifecycleStage: "lead",
+          leadStatus: "NEW",
+        },
+        {
+          id: "contact-2026-2",
+          campaignName: PRIMARY_CAMPAIGN_CONTACT_VALUE,
+          name: "Prospect Base",
+          email: "prospect@empresa.com",
+          ownerName: "Bruno",
+          lifecycleStage: "Prospect",
+          leadStatus: "OPEN",
+        },
+        {
+          id: "contact-2026-3",
+          campaignName: PRIMARY_CAMPAIGN_CONTACT_VALUE,
           lifecycleStage: "marketingqualifiedlead",
           leadStatus: "",
         },
         {
-          id: "contact-2026-2",
+          id: "contact-2026-4",
           campaignName: PRIMARY_CAMPAIGN_CONTACT_VALUE,
           lifecycleStage: "salesqualifiedlead",
           leadStatus: "SQL",
@@ -288,7 +306,19 @@ describe("dashboard campaigns service", () => {
 
     expect(campaigns).toHaveLength(1);
     expect(campaigns[0].name).toBe(PRIMARY_CAMPAIGN_CONTACT_VALUE);
-    expect(campaigns[0].qualification.totalLeads).toBe(2);
+    expect(campaigns[0].qualification.totalLeads).toBe(4);
+    expect(campaigns[0].qualification.leadCount).toBe(1);
+    expect(campaigns[0].qualification.prospectCount).toBe(1);
+    expect(campaigns[0].qualification.leadItems[0]).toMatchObject({
+      leadName: "Lead Base",
+      detailLabel: "lead@empresa.com",
+      statusLabel: "NEW",
+    });
+    expect(campaigns[0].qualification.prospectItems[0]).toMatchObject({
+      leadName: "Prospect Base",
+      detailLabel: "prospect@empresa.com",
+      statusLabel: "OPEN",
+    });
     expect(campaigns[0].qualification.mqlCount).toBe(1);
     expect(campaigns[0].qualification.sqlCount).toBe(1);
   });

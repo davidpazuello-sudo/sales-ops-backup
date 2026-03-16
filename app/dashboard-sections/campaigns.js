@@ -100,6 +100,20 @@ const OVERVIEW_DETAIL_CONFIG = {
     columns: ["Proprietario", "Lead", "Detalhe", "Status"],
     columnTemplate: "minmax(180px, 1.1fr) minmax(360px, 2.65fr) minmax(280px, 1.8fr) minmax(190px, 1fr)",
   },
+  leadStage: {
+    eyebrow: "QUALIFICACAO",
+    title: "Lead",
+    description: "Contatos em etapa Lead",
+    columns: ["Proprietario", "Lead", "Detalhe", "Status"],
+    columnTemplate: "minmax(180px, 1.1fr) minmax(360px, 2.65fr) minmax(280px, 1.8fr) minmax(190px, 1fr)",
+  },
+  prospects: {
+    eyebrow: "QUALIFICACAO",
+    title: "Prospect",
+    description: "Contatos em etapa Prospect",
+    columns: ["Proprietario", "Lead", "Detalhe", "Status"],
+    columnTemplate: "minmax(180px, 1.1fr) minmax(360px, 2.65fr) minmax(280px, 1.8fr) minmax(190px, 1fr)",
+  },
   uncontactedLeads: {
     eyebrow: "SQLS",
     title: "Leads sem contato",
@@ -316,6 +330,14 @@ function renderCampaignDetailRows(detailKey, summary) {
 
   if (detailKey === "totalLeads") {
     return summary.qualification.totalLeadItems || [];
+  }
+
+  if (detailKey === "leadStage") {
+    return summary.qualification.leadItems || [];
+  }
+
+  if (detailKey === "prospects") {
+    return summary.qualification.prospectItems || [];
   }
 
   if (detailKey === "uncontactedLeads") {
@@ -741,6 +763,20 @@ export function CampaignsContent({ dashboardData }) {
                 note="Base total de contatos da campanha"
                 onClick={() => handleOpenDetail("totalLeads")}
                 expanded={activeDetail === "totalLeads"}
+              />
+              <CampaignMetricButton
+                title="Lead"
+                value={`${summary.qualification.leadCount || 0}`}
+                note="Contatos em etapa Lead"
+                onClick={() => handleOpenDetail("leadStage")}
+                expanded={activeDetail === "leadStage"}
+              />
+              <CampaignMetricButton
+                title="Prospect"
+                value={`${summary.qualification.prospectCount || 0}`}
+                note="Contatos em etapa Prospect"
+                onClick={() => handleOpenDetail("prospects")}
+                expanded={activeDetail === "prospects"}
               />
               <CampaignMetricButton
                 title="MQLs"
