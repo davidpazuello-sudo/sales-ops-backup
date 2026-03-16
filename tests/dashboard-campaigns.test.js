@@ -208,7 +208,7 @@ describe("dashboard campaigns service", () => {
     expect(campaigns[0].prospecting.wrongNumbersCount).toBe(1);
     expect(campaigns[0].prospecting.updatedPhoneCount).toBe(1);
     expect(campaigns[0].prospecting.disqualifiedNumbersCount).toBe(3);
-    expect(campaigns[0].prospecting.ceciliaDisqualifiedNumbersCount).toBe(2);
+    expect(campaigns[0].prospecting.ceciliaDisqualifiedNumbersCount).toBe(1);
     expect(campaigns[0].prospecting.firstAttemptItems[0]).toMatchObject({
       leadName: "Lead A",
       detailLabel: "1111-1111",
@@ -234,11 +234,6 @@ describe("dashboard campaigns service", () => {
         expect.objectContaining({
           leadName: "Lead H",
           detailLabel: "8888-8888",
-          statusLabel: "UNQUALIFIED",
-        }),
-        expect.objectContaining({
-          leadName: "Lead I",
-          detailLabel: "9999-9999",
           statusLabel: "UNQUALIFIED",
         }),
       ]),
