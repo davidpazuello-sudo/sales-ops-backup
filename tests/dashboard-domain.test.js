@@ -35,6 +35,7 @@ describe("dashboard domain", () => {
     expect(owner).toEqual({
       id: "99",
       hubspotOwnerId: "99",
+      userId: "",
       name: "Ana Souza",
       email: "ana@empresa.com",
       team: "Enterprise",
@@ -62,6 +63,42 @@ describe("dashboard domain", () => {
     expect(contact.lifecycleStage).toBe("Desqualificado");
     expect(contact.leadStatus).toBe("Qualified");
     expect(contact.campaignName).toBe("Aluno a Bordo 2026");
+  });
+
+  it("maps the lifecycle updater from HubSpot history to the owner directory", () => {
+    const contact = normalizeHubSpotContact({
+      id: "contact-history-1",
+      properties: {
+        firstname: "Contato",
+        lastname: "Historico",
+        email: "historico@empresa.com",
+        lifecyclestage: "Desqualificado",
+        hs_lead_status: "UNQUALIFIED",
+        hubspot_owner_id: "99",
+      },
+      propertiesWithHistory: {
+        lifecyclestage: [
+          {
+            value: "Desqualificado",
+            timestamp: "2026-03-16T14:18:00.000Z",
+            sourceId: { userId: 321 },
+          },
+        ],
+      },
+    }, new Map([["99", {
+      id: "99",
+      name: "Ana Souza",
+      email: "ana@empresa.com",
+    }]]), [{
+      id: "654",
+      hubspotOwnerId: "654",
+      userId: "321",
+      name: "Mercado Privado",
+      email: "mercado.privado@sasi.com.br",
+      team: "AM.Comercial",
+    }]);
+
+    expect(contact.lifecycleUpdatedBy).toBe("Mercado Privado");
   });
 
   it("builds pipeline stages and dashboard payload from HubSpot data", () => {

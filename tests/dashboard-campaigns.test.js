@@ -184,7 +184,8 @@ describe("dashboard campaigns service", () => {
           phone: "8888-8888",
           leadStatus: "UNQUALIFIED",
           lifecycleStage: "Desqualificado",
-          ownerName: "Cecilia Costa",
+          ownerName: "Carla Costa",
+          lifecycleUpdatedBy: "Mercado Privado",
         },
         {
           id: "contact-i",
@@ -193,7 +194,8 @@ describe("dashboard campaigns service", () => {
           phone: "9999-9999",
           leadStatus: "UNQUALIFIED",
           lifecycleStage: "Desqualificado",
-          ownerName: "Cecília Ramos",
+          ownerName: "Ana Ramos",
+          lifecycleUpdatedBy: "Cecília",
         },
       ],
     });
