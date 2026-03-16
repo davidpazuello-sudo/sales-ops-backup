@@ -177,6 +177,24 @@ describe("dashboard campaigns service", () => {
           lifecycleStage: "Desqualificado",
           ownerName: "Giovana",
         },
+        {
+          id: "contact-h",
+          campaignName: PRIMARY_CAMPAIGN_CONTACT_VALUE,
+          name: "Lead H",
+          phone: "8888-8888",
+          leadStatus: "UNQUALIFIED",
+          lifecycleStage: "Desqualificado",
+          ownerName: "Cecilia Costa",
+        },
+        {
+          id: "contact-i",
+          campaignName: PRIMARY_CAMPAIGN_CONTACT_VALUE,
+          name: "Lead I",
+          phone: "9999-9999",
+          leadStatus: "UNQUALIFIED",
+          lifecycleStage: "Desqualificado",
+          ownerName: "Cecília Ramos",
+        },
       ],
     });
 
@@ -187,7 +205,8 @@ describe("dashboard campaigns service", () => {
     expect(campaigns[0].prospecting.fourthAttemptCount).toBe(1);
     expect(campaigns[0].prospecting.wrongNumbersCount).toBe(1);
     expect(campaigns[0].prospecting.updatedPhoneCount).toBe(1);
-    expect(campaigns[0].prospecting.disqualifiedNumbersCount).toBe(1);
+    expect(campaigns[0].prospecting.disqualifiedNumbersCount).toBe(3);
+    expect(campaigns[0].prospecting.ceciliaDisqualifiedNumbersCount).toBe(2);
     expect(campaigns[0].prospecting.firstAttemptItems[0]).toMatchObject({
       leadName: "Lead A",
       detailLabel: "1111-1111",
@@ -208,6 +227,20 @@ describe("dashboard campaigns service", () => {
       detailLabel: "7777-7777",
       statusLabel: "UNQUALIFIED",
     });
+    expect(campaigns[0].prospecting.ceciliaDisqualifiedNumberItems).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          leadName: "Lead H",
+          detailLabel: "8888-8888",
+          statusLabel: "UNQUALIFIED",
+        }),
+        expect.objectContaining({
+          leadName: "Lead I",
+          detailLabel: "9999-9999",
+          statusLabel: "UNQUALIFIED",
+        }),
+      ]),
+    );
   });
 
   it("counts only scheduled meetings in the campaign meeting card", () => {

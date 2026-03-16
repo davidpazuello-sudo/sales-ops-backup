@@ -93,6 +93,13 @@ const OVERVIEW_DETAIL_CONFIG = {
     columns: ["Proprietario", "Lead", "Detalhe", "Status"],
     columnTemplate: "minmax(180px, 1.1fr) minmax(360px, 2.65fr) minmax(260px, 1.7fr) minmax(210px, 1.1fr)",
   },
+  ceciliaDisqualifiedNumbers: {
+    eyebrow: "SDR",
+    title: "Desqualificados pela Cecilia",
+    description: "Contatos desqualificados com proprietaria Cecilia",
+    columns: ["Proprietario", "Lead", "Detalhe", "Status"],
+    columnTemplate: "minmax(180px, 1.1fr) minmax(360px, 2.65fr) minmax(260px, 1.7fr) minmax(210px, 1.1fr)",
+  },
   totalLeads: {
     eyebrow: "LEADS",
     title: "Total de leads",
@@ -333,6 +340,10 @@ function renderCampaignDetailRows(detailKey, summary) {
 
   if (detailKey === "disqualifiedNumbers") {
     return summary.prospecting.disqualifiedNumberItems || [];
+  }
+
+  if (detailKey === "ceciliaDisqualifiedNumbers") {
+    return summary.prospecting.ceciliaDisqualifiedNumberItems || [];
   }
 
   if (detailKey === "totalLeads") {
@@ -845,6 +856,12 @@ export function CampaignsContent({ dashboardData, initialOwnerFilter = "todos" }
                 value={`${summary.prospecting.disqualifiedNumbersCount || 0}`}
                 onClick={() => handleOpenDetail("disqualifiedNumbers")}
                 expanded={activeDetail === "disqualifiedNumbers"}
+              />
+              <CampaignMetricButton
+                title="Desqualificados pela Cecilia"
+                value={`${summary.prospecting.ceciliaDisqualifiedNumbersCount || 0}`}
+                onClick={() => handleOpenDetail("ceciliaDisqualifiedNumbers")}
+                expanded={activeDetail === "ceciliaDisqualifiedNumbers"}
               />
             </div>
           </Card>
