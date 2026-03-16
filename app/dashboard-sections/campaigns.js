@@ -144,8 +144,15 @@ const OVERVIEW_DETAIL_CONFIG = {
   },
   meetings: {
     eyebrow: "REUNIOES",
-    title: "Reunioes da campanha",
-    description: "Reunioes sincronizadas da HubSpot",
+    title: "Reunioes programadas",
+    description: "Reunioes agendadas da campanha",
+    columns: ["Proprietario", "Lead", "Data", "Status"],
+    columnTemplate: "minmax(180px, 1.1fr) minmax(320px, 2.35fr) minmax(210px, 1.3fr) minmax(180px, 1fr)",
+  },
+  completedMeetings: {
+    eyebrow: "REUNIOES",
+    title: "Reunioes concluidas",
+    description: "Reunioes concluidas da campanha",
     columns: ["Proprietario", "Lead", "Data", "Status"],
     columnTemplate: "minmax(180px, 1.1fr) minmax(320px, 2.35fr) minmax(210px, 1.3fr) minmax(180px, 1fr)",
   },
@@ -356,6 +363,10 @@ function renderCampaignDetailRows(detailKey, summary) {
     return summary.meetings || [];
   }
 
+  if (detailKey === "completedMeetings") {
+    return summary.completedMeetings || [];
+  }
+
   if (detailKey === "closedWon") {
     return summary.sales.closedWonItems || [];
   }
@@ -423,7 +434,41 @@ function resolveCampaignOptionLabel(options = [], value = "") {
   return exactOption?.label || "";
 }
 
-export function CampaignsContent({ dashboardData }) {
+function buildOwnerOptions(ownerDirectory = []) {
+  const uniqueOwners = new Map();
+
+  ownerDirectory.forEach((owner) => {
+    const label = String(owner?.name || "").trim();
+    if (!label) {
+      return;
+    }
+
+    const normalizedLabel = normalizeCampaignSearchValue(label);
+    if (!uniqueOwners.has(normalizedLabel)) {
+      uniqueOwners.set(normalizedLabel, {
+        id: String(owner?.id || normalizedLabel).trim(),
+        label,
+      });
+    }
+  });
+
+  return [{
+    id: "todos",
+    label: "Todos",
+  }, ...[...uniqueOwners.values()].sort((left, right) => left.label.localeCompare(right.label, "pt-BR"))];
+}
+
+function resolveOwnerOptionLabel(options = [], value = "") {
+  const normalizedValue = normalizeCampaignSearchValue(value);
+  if (!normalizedValue) {
+    return "Todos";
+  }
+
+  const exactOption = options.find((option) => normalizeCampaignSearchValue(option?.label) === normalizedValue);
+  return exactOption?.label || "";
+}
+
+export function CampaignsContent({ dashboardData, initialOwnerFilter = "todos" }) {
   const router = useRouter();
   const [agentOpen, setAgentOpen] = useState(false);
   const [activeDetail, setActiveDetail] = useState("");
@@ -435,6 +480,7 @@ export function CampaignsContent({ dashboardData }) {
   const [campaignOptionsLoading, setCampaignOptionsLoading] = useState(false);
   const [campaignOptionsError, setCampaignOptionsError] = useState("");
   const [selectedCampaignDraft, setSelectedCampaignDraft] = useState("");
+  const [selectedOwnerDraft, setSelectedOwnerDraft] = useState("");
   const [isFilterPending, startFilterTransition] = useTransition();
   const campaigns = Array.isArray(dashboardData.campaigns) ? dashboardData.campaigns : EMPTY_CAMPAIGNS;
   const summary = campaigns[0] || null;
@@ -444,11 +490,19 @@ export function CampaignsContent({ dashboardData }) {
   const duplicatedErrorMessage = primaryErrorMessage && primaryErrorMessage === String(campaignOptionsError || "").trim();
   const normalizedSummaryName = useMemo(() => normalizeCampaignLabel(summary?.name), [summary?.name]);
   const activeDetailConfig = OVERVIEW_DETAIL_CONFIG[activeDetail] || null;
-  const activeDetailCacheKey = activeDetail ? `${normalizedSummaryName || "sem-campanha"}::${activeDetail}` : "";
+  const resolvedCampaignSelection = resolveCampaignOptionLabel(campaignOptions, selectedCampaignDraft);
+  const ownerOptions = useMemo(
+    () => buildOwnerOptions(Array.isArray(dashboardData.integration?.ownerDirectory) ? dashboardData.integration.ownerDirectory : []),
+    [dashboardData.integration?.ownerDirectory],
+  );
+  const resolvedOwnerSelection = resolveOwnerOptionLabel(ownerOptions, selectedOwnerDraft);
+  const normalizedOwnerSelection = normalizeCampaignSearchValue(resolvedOwnerSelection || "Todos");
+  const activeDetailCacheKey = activeDetail
+    ? `${normalizedSummaryName || "sem-campanha"}::${normalizedOwnerSelection || "todos"}::${activeDetail}`
+    : "";
   const activeDetailRows = activeDetailCacheKey ? detailRowsByKey[activeDetailCacheKey] || [] : [];
   const activeDetailPage = activeDetailCacheKey ? detailPageByKey[activeDetailCacheKey] || 1 : 1;
   const detailPageSize = 10;
-  const resolvedCampaignSelection = resolveCampaignOptionLabel(campaignOptions, selectedCampaignDraft);
   const activeDetailTotalPages = Math.max(1, Math.ceil(activeDetailRows.length / detailPageSize));
   const popupPaginationItems = useMemo(
     () => buildPopupPaginationItems(activeDetailTotalPages, activeDetailPage),
@@ -506,7 +560,11 @@ export function CampaignsContent({ dashboardData }) {
     if (normalizedSummaryName) {
       setSelectedCampaignDraft(normalizedSummaryName);
     }
-  }, [normalizedSummaryName]);
+  }, [initialOwnerFilter, normalizedSummaryName]);
+
+  useEffect(() => {
+    setSelectedOwnerDraft(initialOwnerFilter || "todos");
+  }, [initialOwnerFilter]);
 
   useEffect(() => {
     setActiveDetail("");
@@ -515,7 +573,7 @@ export function CampaignsContent({ dashboardData }) {
   }, [normalizedSummaryName]);
 
   async function handleOpenDetail(detailKey) {
-    const detailCacheKey = `${normalizedSummaryName || "sem-campanha"}::${detailKey}`;
+    const detailCacheKey = `${normalizedSummaryName || "sem-campanha"}::${normalizedOwnerSelection || "todos"}::${detailKey}`;
     setActiveDetail(detailKey);
     setDetailError("");
     setDetailPageByKey((current) => ({
@@ -537,6 +595,9 @@ export function CampaignsContent({ dashboardData }) {
 
       if (summary?.name) {
         searchParams.set("campaign", summary.name);
+      }
+      if (resolvedOwnerSelection && normalizeCampaignSearchValue(resolvedOwnerSelection) !== "todos") {
+        searchParams.set("owner", resolvedOwnerSelection);
       }
 
       const response = await fetch(`/api/hubspot/dashboard?${searchParams.toString()}`, {
@@ -563,12 +624,22 @@ export function CampaignsContent({ dashboardData }) {
 
   function handleApplyCampaignFilter() {
     const resolvedCampaignName = resolvedCampaignSelection;
+    const resolvedOwnerName = resolvedOwnerSelection || "Todos";
+
     if (!resolvedCampaignName) {
       return;
     }
 
     startFilterTransition(() => {
-      router.push(`/campanhas?campanha=${encodeURIComponent(resolvedCampaignName)}`);
+      const searchParams = new URLSearchParams({
+        campanha: resolvedCampaignName,
+      });
+
+      if (resolvedOwnerName && normalizeCampaignSearchValue(resolvedOwnerName) !== "todos") {
+        searchParams.set("proprietario", resolvedOwnerName);
+      }
+
+      router.push(`/campanhas?${searchParams.toString()}`);
     });
   }
 
@@ -602,11 +673,29 @@ export function CampaignsContent({ dashboardData }) {
           </datalist>
         </label>
 
+        <label className={styles.campaignFilterField}>
+          <span>Proprietario</span>
+          <input
+            type="text"
+            list="campaigns-owner-options"
+            className={styles.campaignFilterInput}
+            placeholder="Buscar proprietario"
+            value={selectedOwnerDraft}
+            onChange={(event) => setSelectedOwnerDraft(event.target.value)}
+            disabled={isFilterPending}
+          />
+          <datalist id="campaigns-owner-options">
+            {ownerOptions.map((option) => (
+              <option key={option.id || option.label} value={option.label} />
+            ))}
+          </datalist>
+        </label>
+
         <button
           type="button"
           className={`${styles.primaryActionButton} ${styles.filterApplyButton}`.trim()}
           onClick={handleApplyCampaignFilter}
-          disabled={!resolvedCampaignSelection || campaignOptionsLoading || isFilterPending}
+          disabled={!resolvedCampaignSelection || !resolvedOwnerSelection || campaignOptionsLoading || isFilterPending}
         >
           Filtrar
         </button>
@@ -656,18 +745,18 @@ export function CampaignsContent({ dashboardData }) {
                 expanded={activeDetail === "sqls"}
               />
               <CampaignMetricButton
-                title="Reunioes"
+                title="Reunioes programadas"
                 value={`${summary.meetingCount}`}
                 note="Meta da campanha: 70"
                 onClick={() => handleOpenDetail("meetings")}
                 expanded={activeDetail === "meetings"}
               />
               <CampaignMetricButton
-                title="Fechados"
-                value={`${summary.sales.closedWonCount}`}
-                note="Meta da campanha: 15"
-                onClick={() => handleOpenDetail("closedWon")}
-                expanded={activeDetail === "closedWon"}
+                title="Reunioes concluidas"
+                value={`${summary.completedMeetingCount || 0}`}
+                note="Reunioes realizadas na campanha"
+                onClick={() => handleOpenDetail("completedMeetings")}
+                expanded={activeDetail === "completedMeetings"}
               />
               <CampaignMetricButton
                 title="Oportunidades qualificadas"

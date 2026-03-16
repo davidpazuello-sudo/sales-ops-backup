@@ -210,6 +210,68 @@ describe("dashboard campaigns service", () => {
     });
   });
 
+  it("counts only scheduled meetings in the campaign meeting card", () => {
+    const campaigns = buildCampaignSummaries({
+      activities: [
+        {
+          id: "meeting-scheduled",
+          campaignName: PRIMARY_CAMPAIGN_CONTACT_VALUE,
+          kind: "meeting",
+          ownerName: "Ana Souza",
+          leadName: "Conta Solaris",
+          dueLabel: "12/03/2026, 10:00",
+          status: "SCHEDULED",
+          statusLabel: "Agendada",
+          updatedAt: new Date().toISOString(),
+        },
+        {
+          id: "meeting-completed",
+          campaignName: PRIMARY_CAMPAIGN_CONTACT_VALUE,
+          kind: "meeting",
+          ownerName: "Bruno Lima",
+          leadName: "Conta Orion",
+          dueLabel: "11/03/2026, 14:00",
+          status: "COMPLETED",
+          statusLabel: "Concluida",
+          updatedAt: new Date().toISOString(),
+        },
+        {
+          id: "meeting-noshow",
+          campaignName: PRIMARY_CAMPAIGN_CONTACT_VALUE,
+          kind: "meeting",
+          ownerName: "Carla Dias",
+          leadName: "Conta Aurora",
+          dueLabel: "10/03/2026, 09:00",
+          status: "NO_SHOW",
+          statusLabel: "Nao compareceu",
+          updatedAt: new Date().toISOString(),
+        },
+      ],
+    });
+
+    expect(campaigns).toHaveLength(1);
+    expect(campaigns[0].meetingCount).toBe(1);
+    expect(campaigns[0].meetings).toEqual([
+      {
+        id: "meeting-scheduled",
+        ownerName: "Ana Souza",
+        leadName: "Conta Solaris",
+        dateLabel: "12/03/2026, 10:00",
+        statusLabel: "Agendada",
+      },
+    ]);
+    expect(campaigns[0].completedMeetingCount).toBe(1);
+    expect(campaigns[0].completedMeetings).toEqual([
+      {
+        id: "meeting-completed",
+        ownerName: "Bruno Lima",
+        leadName: "Conta Orion",
+        dateLabel: "11/03/2026, 14:00",
+        statusLabel: "Concluida",
+      },
+    ]);
+  });
+
   it("counts connections only from non-call follow-up tasks and not from meetings", () => {
     const campaigns = buildCampaignSummaries({
       contacts: [
@@ -512,6 +574,8 @@ describe("dashboard campaigns service", () => {
           id: "meeting-1",
           campaignName: PRIMARY_CAMPAIGN_CONTACT_VALUE,
           kind: "meeting",
+          status: "SCHEDULED",
+          statusLabel: "Agendada",
           updatedAt: new Date().toISOString(),
         },
       ],

@@ -341,7 +341,9 @@ export function useDashboardShellState({
     const abortController = new AbortController();
     const hubspotScope = getDashboardHubSpotScope({ initialNav, initialProfileView });
     const pipelineId = hubspotScope === "deals" ? String(initialPipelineId || "").trim() : "";
-    const ownerFilter = hubspotScope === "deals" ? String(initialOwnerFilter || "todos").trim() : "";
+    const ownerFilter = hubspotScope === "deals" || hubspotScope === "campaigns"
+      ? String(initialOwnerFilter || "todos").trim()
+      : "";
     const activityWeeksFilter = hubspotScope === "deals" ? String(initialActivityWeeksFilter || "1").trim() : "";
     const campaignName = hubspotScope === "campaigns" ? String(initialCampaignName || "").trim() : "";
     const sellerPage = hubspotScope === "sellers" ? String(initialSellerPage || "1").trim() : "";

@@ -319,7 +319,10 @@ export default function DashboardShell({
         ) : activeNav === "reports" ? (
           <ReportsContent dashboardData={dashboardData} />
         ) : activeNav === "campaigns" ? (
-          <CampaignsContent dashboardData={dashboardData} />
+          <CampaignsContent
+            dashboardData={dashboardData}
+            initialOwnerFilter={initialOwnerFilter}
+          />
         ) : activeNav === "tasks" ? (
           <TasksContent dashboardData={dashboardData} sessionUser={sessionUser} />
         ) : activeNav === "deals" ? (

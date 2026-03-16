@@ -78,6 +78,7 @@ function normalizeDashboardCampaignDetail(value) {
     "sqls",
     "qualificationConversion",
     "meetings",
+    "completedMeetings",
     "proposals",
     "closedWon",
     "salesConversion",
@@ -99,7 +100,9 @@ export async function GET(request) {
   const searchParams = readRequestSearchParams(request);
   const scope = normalizeDashboardScope(searchParams.get("scope"));
   const pipelineId = scope === "deals" ? normalizeDashboardPipelineId(searchParams.get("pipelineId")) : "";
-  const ownerFilter = scope === "deals" ? normalizeDashboardOwnerFilter(searchParams.get("owner")) : "";
+  const ownerFilter = scope === "deals" || scope === "campaigns"
+    ? normalizeDashboardOwnerFilter(searchParams.get("owner"))
+    : "";
   const activityWeeksFilter = scope === "deals" ? normalizeDashboardActivityWeeks(searchParams.get("activityWeeks")) : "";
   const sellerPage = scope === "sellers" ? normalizeDashboardSellerPage(searchParams.get("sellerPage")) : "";
   const sellerSearch = scope === "sellers" ? normalizeDashboardSellerSearch(searchParams.get("sellerSearch")) : "";
