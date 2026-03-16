@@ -33,7 +33,7 @@ const OVERVIEW_DETAIL_CONFIG = {
   connectionsDaily: {
     eyebrow: "SDR",
     title: "Conexoes hoje",
-    description: "Conexoes do dia na campanha",
+    description: "Chamadas registradas no dia na campanha",
     columns: ["Proprietario", "Lead", "Data", "Status"],
     columnTemplate: "minmax(180px, 1.1fr) minmax(320px, 2.35fr) minmax(210px, 1.3fr) minmax(180px, 1fr)",
   },
@@ -292,7 +292,7 @@ function renderCampaignDetailRows(detailKey, summary) {
 
   if (detailKey === "connectionsDaily") {
     const today = formatDateBucket(new Date().toISOString(), "day");
-    return (summary.prospecting.connectionItems || []).filter((item) => formatDateBucket(item.dateValue, "day") === today);
+    return (summary.prospecting.callItems || []).filter((item) => formatDateBucket(item.dateValue, "day") === today);
   }
 
   if (detailKey === "connectionsWeekly") {

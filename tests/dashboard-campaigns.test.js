@@ -294,6 +294,75 @@ describe("dashboard campaigns service", () => {
 
     expect(campaigns).toHaveLength(1);
     expect(campaigns[0].prospecting.callsDaily).toBe(2);
+    expect(campaigns[0].prospecting.connectionsDaily).toBe(3);
+  });
+
+  it("counts all call records for campaign contacts across the current week from sunday to sunday", () => {
+    const now = new Date();
+    const sunday = new Date(now);
+    sunday.setHours(10, 0, 0, 0);
+    sunday.setDate(now.getDate() - now.getDay());
+
+    const monday = new Date(sunday);
+    monday.setDate(sunday.getDate() + 1);
+
+    const saturday = new Date(sunday);
+    saturday.setDate(sunday.getDate() + 6);
+
+    const previousSaturday = new Date(sunday);
+    previousSaturday.setDate(sunday.getDate() - 1);
+
+    const campaigns = buildCampaignSummaries({
+      contacts: [
+        {
+          id: "contact-week-1",
+          campaignName: PRIMARY_CAMPAIGN_CONTACT_VALUE,
+          name: "Contato Semana 1",
+          lifecycleStage: "lead",
+          leadStatus: "NEW",
+        },
+        {
+          id: "contact-week-2",
+          campaignName: PRIMARY_CAMPAIGN_CONTACT_VALUE,
+          name: "Contato Semana 2",
+          lifecycleStage: "lead",
+          leadStatus: "NEW",
+        },
+      ],
+      activities: [
+        {
+          id: "call-week-1",
+          campaignName: PRIMARY_CAMPAIGN_CONTACT_VALUE,
+          kind: "call",
+          contactIds: ["contact-week-1"],
+          updatedAt: sunday.toISOString(),
+        },
+        {
+          id: "call-week-2",
+          campaignName: PRIMARY_CAMPAIGN_CONTACT_VALUE,
+          kind: "call",
+          contactIds: ["contact-week-1"],
+          updatedAt: monday.toISOString(),
+        },
+        {
+          id: "call-week-3",
+          campaignName: PRIMARY_CAMPAIGN_CONTACT_VALUE,
+          kind: "call",
+          contactIds: ["contact-week-2"],
+          updatedAt: saturday.toISOString(),
+        },
+        {
+          id: "call-outside-week",
+          campaignName: PRIMARY_CAMPAIGN_CONTACT_VALUE,
+          kind: "call",
+          contactIds: ["contact-week-2"],
+          updatedAt: previousSaturday.toISOString(),
+        },
+      ],
+    });
+
+    expect(campaigns).toHaveLength(1);
+    expect(campaigns[0].prospecting.callsWeekly).toBe(3);
   });
 
   it("treats HubSpot qualified and disqualified custom statuses as popup rows", () => {
