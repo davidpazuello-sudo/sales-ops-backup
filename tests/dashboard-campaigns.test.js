@@ -212,6 +212,15 @@ describe("dashboard campaigns service", () => {
 
   it("counts connections only from non-call follow-up tasks and not from meetings", () => {
     const campaigns = buildCampaignSummaries({
+      contacts: [
+        {
+          id: "contact-hoje",
+          campaignName: PRIMARY_CAMPAIGN_CONTACT_VALUE,
+          name: "Contato do dia",
+          lifecycleStage: "lead",
+          leadStatus: "NEW",
+        },
+      ],
       activities: [
         {
           id: "task-hoje",
@@ -229,6 +238,7 @@ describe("dashboard campaigns service", () => {
           id: "call-hoje",
           campaignName: PRIMARY_CAMPAIGN_CONTACT_VALUE,
           kind: "call",
+          contactIds: ["contact-hoje"],
           updatedAt: new Date().toISOString(),
         },
       ],
@@ -237,6 +247,53 @@ describe("dashboard campaigns service", () => {
     expect(campaigns).toHaveLength(1);
     expect(campaigns[0].prospecting.callsDaily).toBe(1);
     expect(campaigns[0].prospecting.connectionsDaily).toBe(1);
+  });
+
+  it("counts unique campaign contacts with calls on the same day", () => {
+    const campaigns = buildCampaignSummaries({
+      contacts: [
+        {
+          id: "contact-1",
+          campaignName: PRIMARY_CAMPAIGN_CONTACT_VALUE,
+          name: "Contato 1",
+          lifecycleStage: "lead",
+          leadStatus: "NEW",
+        },
+        {
+          id: "contact-2",
+          campaignName: PRIMARY_CAMPAIGN_CONTACT_VALUE,
+          name: "Contato 2",
+          lifecycleStage: "lead",
+          leadStatus: "NEW",
+        },
+      ],
+      activities: [
+        {
+          id: "call-1",
+          campaignName: PRIMARY_CAMPAIGN_CONTACT_VALUE,
+          kind: "call",
+          contactIds: ["contact-1"],
+          updatedAt: new Date().toISOString(),
+        },
+        {
+          id: "call-2",
+          campaignName: PRIMARY_CAMPAIGN_CONTACT_VALUE,
+          kind: "call",
+          contactIds: ["contact-1"],
+          updatedAt: new Date().toISOString(),
+        },
+        {
+          id: "call-3",
+          campaignName: PRIMARY_CAMPAIGN_CONTACT_VALUE,
+          kind: "call",
+          contactIds: ["contact-2"],
+          updatedAt: new Date().toISOString(),
+        },
+      ],
+    });
+
+    expect(campaigns).toHaveLength(1);
+    expect(campaigns[0].prospecting.callsDaily).toBe(2);
   });
 
   it("treats HubSpot qualified and disqualified custom statuses as popup rows", () => {

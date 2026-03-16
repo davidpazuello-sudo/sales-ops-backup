@@ -18,8 +18,8 @@ const EMPTY_CAMPAIGN_OPTIONS = [];
 const OVERVIEW_DETAIL_CONFIG = {
   callsDaily: {
     eyebrow: "SDR",
-    title: "Chamadas hoje",
-    description: "Chamadas do dia na campanha",
+    title: "Contatos conectados hoje",
+    description: "Contatos da campanha com chamada no dia",
     columns: ["Proprietario", "Lead", "Data", "Status"],
     columnTemplate: "minmax(180px, 1.1fr) minmax(320px, 2.35fr) minmax(210px, 1.3fr) minmax(180px, 1fr)",
   },
@@ -687,7 +687,7 @@ export function CampaignsContent({ dashboardData }) {
           <Card eyebrow="SDR" title="Relatorios de prospeccao e atividade" wide>
             <div className={`${styles.metrics} ${styles.campaignProspectingMetrics}`.trim()}>
               <CampaignMetricButton
-                title="Chamadas hoje"
+                title="Contatos conectados hoje"
                 value={`${summary.prospecting.callsDaily}`}
                 onClick={() => handleOpenDetail("callsDaily")}
                 expanded={activeDetail === "callsDaily"}
