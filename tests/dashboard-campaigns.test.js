@@ -2,9 +2,11 @@ import { describe, expect, it } from "vitest";
 import {
   aggregateCampaignSummary,
   buildCampaignSummaries,
+  getConfiguredCampaignSegmentListNames,
   inferPrimaryCampaignLabel,
   PRIMARY_CAMPAIGN_CONTACT_VALUE,
   PRIMARY_CAMPAIGN_NAME,
+  PRIMARY_CAMPAIGN_SEGMENT_LIST_NAMES,
 } from "../lib/services/dashboard-campaigns";
 
 describe("dashboard campaigns service", () => {
@@ -289,6 +291,11 @@ describe("dashboard campaigns service", () => {
     expect(campaigns[0].qualification.totalLeads).toBe(2);
     expect(campaigns[0].qualification.mqlCount).toBe(1);
     expect(campaigns[0].qualification.sqlCount).toBe(1);
+  });
+
+  it("exposes the configured HubSpot segment lists for the primary campaign", () => {
+    expect(getConfiguredCampaignSegmentListNames(PRIMARY_CAMPAIGN_CONTACT_VALUE)).toEqual(PRIMARY_CAMPAIGN_SEGMENT_LIST_NAMES);
+    expect(getConfiguredCampaignSegmentListNames("Outra campanha")).toEqual([]);
   });
 
   it("tracks leads without call records for the overview card", () => {
