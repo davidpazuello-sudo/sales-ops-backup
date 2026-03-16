@@ -479,6 +479,7 @@ export function CampaignsContent({ dashboardData, initialOwnerFilter = "todos" }
   const [campaignOptions, setCampaignOptions] = useState(EMPTY_CAMPAIGN_OPTIONS);
   const [campaignOptionsLoading, setCampaignOptionsLoading] = useState(false);
   const [campaignOptionsError, setCampaignOptionsError] = useState("");
+  const [ownerDirectory, setOwnerDirectory] = useState([]);
   const [selectedCampaignDraft, setSelectedCampaignDraft] = useState("");
   const [selectedOwnerDraft, setSelectedOwnerDraft] = useState("");
   const [isFilterPending, startFilterTransition] = useTransition();
@@ -491,10 +492,11 @@ export function CampaignsContent({ dashboardData, initialOwnerFilter = "todos" }
   const normalizedSummaryName = useMemo(() => normalizeCampaignLabel(summary?.name), [summary?.name]);
   const activeDetailConfig = OVERVIEW_DETAIL_CONFIG[activeDetail] || null;
   const resolvedCampaignSelection = resolveCampaignOptionLabel(campaignOptions, selectedCampaignDraft);
-  const ownerOptions = useMemo(
-    () => buildOwnerOptions(Array.isArray(dashboardData.integration?.ownerDirectory) ? dashboardData.integration.ownerDirectory : []),
-    [dashboardData.integration?.ownerDirectory],
-  );
+  const ownerOptions = useMemo(() => {
+    const dashboardOwners = Array.isArray(dashboardData.integration?.ownerDirectory) ? dashboardData.integration.ownerDirectory : [];
+    const resolvedOwnerDirectory = ownerDirectory.length ? ownerDirectory : dashboardOwners;
+    return buildOwnerOptions(resolvedOwnerDirectory);
+  }, [dashboardData.integration?.ownerDirectory, ownerDirectory]);
   const resolvedOwnerSelection = resolveOwnerOptionLabel(ownerOptions, selectedOwnerDraft);
   const normalizedOwnerSelection = normalizeCampaignSearchValue(resolvedOwnerSelection || "Todos");
   const activeDetailCacheKey = activeDetail
@@ -532,14 +534,17 @@ export function CampaignsContent({ dashboardData, initialOwnerFilter = "todos" }
 
         if (!response.ok) {
           setCampaignOptions([]);
+          setOwnerDirectory([]);
           setCampaignOptionsError(payload?.error || "Nao foi possivel carregar as campanhas da HubSpot.");
           return;
         }
 
         setCampaignOptions(Array.isArray(payload?.campaignOptions) ? payload.campaignOptions : []);
+        setOwnerDirectory(Array.isArray(payload?.integration?.ownerDirectory) ? payload.integration.ownerDirectory : []);
       } catch {
         if (!cancelled) {
           setCampaignOptions([]);
+          setOwnerDirectory([]);
           setCampaignOptionsError("Nao foi possivel carregar as campanhas da HubSpot.");
         }
       } finally {
