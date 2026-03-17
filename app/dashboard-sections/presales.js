@@ -36,6 +36,13 @@ function resolveOwnerOptionLabel(ownerOptions = [], draftValue = "") {
   return matchedOption?.label || "";
 }
 
+function resolveOwnerOption(ownerOptions = [], draftValue = "") {
+  const normalizedDraft = normalizeComparable(draftValue || "todos");
+  return ownerOptions.find((option) =>
+    normalizeComparable(option.label) === normalizedDraft
+    || normalizeComparable(option.email) === normalizedDraft) || null;
+}
+
 function resolveSessionOwnerLabel(ownerOptions = [], sessionUser = {}) {
   const normalizedName = normalizeComparable(sessionUser?.name);
   const normalizedEmail = normalizeComparable(sessionUser?.email);
@@ -103,9 +110,9 @@ export function PreSalesContent({ dashboardData, initialOwnerFilter = "todos", s
     return resolveOwnerOptionLabel(ownerOptions, initialOwnerFilter) || initialOwnerFilter;
   }, [canViewTeam, initialOwnerFilter, ownerOptions, sessionOwnerLabel]);
   const resolvedOwnerSelection = useMemo(() => {
-    const resolvedDraft = resolveOwnerOptionLabel(ownerOptions, selectedOwnerDraft);
-    if (resolvedDraft) {
-      return resolvedDraft;
+    const resolvedDraft = resolveOwnerOption(ownerOptions, selectedOwnerDraft);
+    if (resolvedDraft?.label) {
+      return resolvedDraft.label;
     }
 
     return initialResolvedOwner || "";
@@ -129,14 +136,19 @@ export function PreSalesContent({ dashboardData, initialOwnerFilter = "todos", s
   }, [baselineDraftValue]);
 
   function handleApplyFilters() {
-    if (!resolvedOwnerSelection) {
+    if (!canViewTeam) {
+      return;
+    }
+
+    const resolvedOption = resolveOwnerOption(ownerOptions, selectedOwnerDraft || resolvedOwnerSelection);
+    if (!resolvedOption?.label) {
       return;
     }
 
     startFilterTransition(() => {
       const searchParams = new URLSearchParams();
-      if (normalizeComparable(resolvedOwnerSelection) !== "todos") {
-        searchParams.set("proprietario", resolvedOwnerSelection);
+      if (normalizeComparable(resolvedOption.label) !== "todos") {
+        searchParams.set("proprietario", resolvedOption.label);
       }
 
       const suffix = searchParams.toString();
@@ -177,7 +189,7 @@ export function PreSalesContent({ dashboardData, initialOwnerFilter = "todos", s
           type="button"
           className={`${styles.primaryActionButton} ${styles.filterApplyButton}`.trim()}
           onClick={handleApplyFilters}
-          disabled={!canViewTeam || !resolvedOwnerSelection || !filtersDirty || isFilterPending}
+          disabled={!canViewTeam || !filtersDirty || isFilterPending}
         >
           Filtrar
         </button>
