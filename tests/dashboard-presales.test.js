@@ -128,6 +128,10 @@ describe("dashboard presales", () => {
       meetingsToReschedule: 1,
       opportunitiesWithDeals: 1,
     });
+    expect(summary.details.totalContacts).toHaveLength(2);
+    expect(summary.details.totalCalls).toHaveLength(1);
+    expect(summary.details.opportunitiesWithDeals).toHaveLength(1);
+    expect(summary.details.averageCallsPerContact[0].cells[2]).toBe("1 chamada(s)");
     expect(summary.lists.contactsWithoutConnection[0].title).toBe("Secretaria Boreal");
     expect(summary.lists.meetingsToReschedule[0].status).toBe("Nao compareceu");
   });

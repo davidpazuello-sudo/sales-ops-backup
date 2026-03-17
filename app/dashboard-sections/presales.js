@@ -2,12 +2,100 @@
 
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Card, Metric, PageTitle } from "../dashboard-ui";
+import { Card, PageTitle, SimpleArrow } from "../dashboard-ui";
 import {
   SectionEmptyState,
 } from "../dashboard-section-feedback";
 import styles from "../page.module.css";
 import { canViewTeamTasks } from "lib/services/dashboard-tasks";
+
+const PRESALES_POPUP_PAGE_SIZE = 10;
+const PRESALES_DETAIL_CONFIG = {
+  totalContacts: {
+    title: "Contatos gerais",
+    label: "Contatos sob responsabilidade do pre-vendedor",
+    columns: ["Proprietario", "Contato", "Detalhe", "Status"],
+    columnTemplate: "minmax(220px, 1.2fr) minmax(360px, 2.3fr) minmax(280px, 1.8fr) minmax(200px, 1fr)",
+    emptyMessage: "Nenhum contato encontrado neste recorte.",
+  },
+  contactsWithoutConnection: {
+    title: "Sem conexao",
+    label: "Contatos sem chamada, tarefa ou reuniao registrada",
+    columns: ["Proprietario", "Contato", "Detalhe", "Status"],
+    columnTemplate: "minmax(220px, 1.2fr) minmax(360px, 2.3fr) minmax(280px, 1.8fr) minmax(200px, 1fr)",
+    emptyMessage: "Nenhum contato sem conexao neste recorte.",
+  },
+  qualifiedContacts: {
+    title: "Qualificados",
+    label: "Contatos prontos para avancar para vendas",
+    columns: ["Proprietario", "Contato", "Detalhe", "Status"],
+    columnTemplate: "minmax(220px, 1.2fr) minmax(360px, 2.3fr) minmax(280px, 1.8fr) minmax(200px, 1fr)",
+    emptyMessage: "Nenhum contato qualificado neste recorte.",
+  },
+  opportunitiesWithDeals: {
+    title: "Oportunidades com deal",
+    label: "Contatos com oportunidade associada",
+    columns: ["Proprietario", "Negocio", "Valor", "Status"],
+    columnTemplate: "minmax(220px, 1.2fr) minmax(400px, 2.4fr) minmax(180px, 1fr) minmax(220px, 1.2fr)",
+    emptyMessage: "Nenhuma oportunidade associada neste recorte.",
+  },
+  totalCalls: {
+    title: "Chamadas totais",
+    label: "Registros de chamada ligados aos contatos da carteira",
+    columns: ["Proprietario", "Atividade", "Prazo", "Status"],
+    columnTemplate: "minmax(220px, 1.2fr) minmax(420px, 2.6fr) minmax(200px, 1.2fr) minmax(180px, 1fr)",
+    emptyMessage: "Nenhuma chamada encontrada neste recorte.",
+  },
+  averageCallsPerContact: {
+    title: "Media de chamadas por contato",
+    label: "Contatos com chamadas registradas",
+    columns: ["Proprietario", "Contato", "Chamadas", "Status"],
+    columnTemplate: "minmax(220px, 1.2fr) minmax(360px, 2.2fr) minmax(180px, 1fr) minmax(200px, 1fr)",
+    emptyMessage: "Nenhum contato com chamadas registradas neste recorte.",
+  },
+  totalConnections: {
+    title: "Conexoes totais",
+    label: "Contatos com pelo menos uma interacao registrada",
+    columns: ["Proprietario", "Contato", "Detalhe", "Status"],
+    columnTemplate: "minmax(220px, 1.2fr) minmax(360px, 2.3fr) minmax(280px, 1.8fr) minmax(200px, 1fr)",
+    emptyMessage: "Nenhum contato com conexao neste recorte.",
+  },
+  activitiesDone: {
+    title: "Atividades feitas",
+    label: "Chamadas, reunioes e tarefas concluidas",
+    columns: ["Proprietario", "Atividade", "Prazo", "Status"],
+    columnTemplate: "minmax(220px, 1.2fr) minmax(420px, 2.6fr) minmax(200px, 1.2fr) minmax(180px, 1fr)",
+    emptyMessage: "Nenhuma atividade concluida neste recorte.",
+  },
+  activitiesOpen: {
+    title: "Atividades por fazer",
+    label: "Itens ainda abertos no fluxo operacional",
+    columns: ["Proprietario", "Atividade", "Prazo", "Status"],
+    columnTemplate: "minmax(220px, 1.2fr) minmax(420px, 2.6fr) minmax(200px, 1.2fr) minmax(180px, 1fr)",
+    emptyMessage: "Nenhuma atividade em aberto neste recorte.",
+  },
+  scheduledMeetings: {
+    title: "Reunioes programadas",
+    label: "Agenda futura registrada na HubSpot",
+    columns: ["Proprietario", "Atividade", "Prazo", "Status"],
+    columnTemplate: "minmax(220px, 1.2fr) minmax(420px, 2.6fr) minmax(200px, 1.2fr) minmax(180px, 1fr)",
+    emptyMessage: "Nenhuma reuniao programada neste recorte.",
+  },
+  completedMeetings: {
+    title: "Reunioes realizadas",
+    label: "Reunioes que ja aconteceram na carteira",
+    columns: ["Proprietario", "Atividade", "Prazo", "Status"],
+    columnTemplate: "minmax(220px, 1.2fr) minmax(420px, 2.6fr) minmax(200px, 1.2fr) minmax(180px, 1fr)",
+    emptyMessage: "Nenhuma reuniao realizada neste recorte.",
+  },
+  meetingsToReschedule: {
+    title: "Para reagendar",
+    label: "No-show, canceladas ou que voltaram para o pre-vendedor",
+    columns: ["Proprietario", "Atividade", "Prazo", "Status"],
+    columnTemplate: "minmax(220px, 1.2fr) minmax(420px, 2.6fr) minmax(200px, 1.2fr) minmax(180px, 1fr)",
+    emptyMessage: "Nenhuma reuniao para reagendar neste recorte.",
+  },
+};
 
 function normalizeComparable(value) {
   return String(value || "")
@@ -83,9 +171,63 @@ function PreSalesListCard({ eyebrow, title, items, emptyTitle, emptyDescription 
   );
 }
 
+function buildPopupPaginationItems(totalPages, currentPage) {
+  if (totalPages <= 7) {
+    return Array.from({ length: totalPages }, (_, index) => ({
+      type: "page",
+      value: index + 1,
+    }));
+  }
+
+  const items = [
+    { type: "page", value: 1 },
+    { type: "page", value: 2 },
+  ];
+  const middleStart = Math.max(3, currentPage - 1);
+  const middleEnd = Math.min(totalPages - 1, currentPage + 1);
+
+  if (middleStart > 3) {
+    items.push({ type: "ellipsis", value: "ellipsis-before" });
+  }
+
+  for (let page = middleStart; page <= middleEnd; page += 1) {
+    if (!items.some((item) => item.type === "page" && item.value === page)) {
+      items.push({ type: "page", value: page });
+    }
+  }
+
+  if (middleEnd < totalPages - 1) {
+    items.push({ type: "ellipsis", value: "ellipsis-after" });
+  }
+
+  if (!items.some((item) => item.type === "page" && item.value === totalPages)) {
+    items.push({ type: "page", value: totalPages });
+  }
+
+  return items;
+}
+
+function PreSalesMetricButton({ title, value, note, onOpen, expanded = false }) {
+  return (
+    <button
+      type="button"
+      className={`${styles.metric} ${styles.metricButton}`.trim()}
+      onClick={onOpen}
+      aria-haspopup="dialog"
+      aria-expanded={expanded}
+    >
+      <span>{title}</span>
+      <strong>{value}</strong>
+      {note ? <small>{note}</small> : null}
+    </button>
+  );
+}
+
 export function PreSalesContent({ dashboardData, initialOwnerFilter = "todos", sessionUser = {} }) {
   const router = useRouter();
   const [selectedOwnerDraft, setSelectedOwnerDraft] = useState("");
+  const [activeDetail, setActiveDetail] = useState("");
+  const [activeDetailPage, setActiveDetailPage] = useState(1);
   const [isFilterPending, startFilterTransition] = useTransition();
   const loadingState = dashboardData.states?.loading || "ready";
   const stateErrors = dashboardData.states?.errors || [];
@@ -131,9 +273,26 @@ export function PreSalesContent({ dashboardData, initialOwnerFilter = "todos", s
   const filtersDirty = canViewTeam
     ? normalizeComparable(selectedOwnerDraft || "") !== normalizeComparable(baselineDraftValue)
     : false;
+  const activeDetailConfig = activeDetail ? PRESALES_DETAIL_CONFIG[activeDetail] : null;
+  const activeDetailRows = activeDetail ? summary?.details?.[activeDetail] || [] : [];
+  const activeDetailTotalPages = Math.max(1, Math.ceil(activeDetailRows.length / PRESALES_POPUP_PAGE_SIZE));
+  const popupPaginationItems = useMemo(
+    () => buildPopupPaginationItems(activeDetailTotalPages, activeDetailPage),
+    [activeDetailPage, activeDetailTotalPages],
+  );
+  const paginatedDetailRows = activeDetailRows.slice(
+    (activeDetailPage - 1) * PRESALES_POPUP_PAGE_SIZE,
+    activeDetailPage * PRESALES_POPUP_PAGE_SIZE,
+  );
+
   useEffect(() => {
     setSelectedOwnerDraft(baselineDraftValue);
   }, [baselineDraftValue]);
+
+  function openDetail(detailKey) {
+    setActiveDetail(detailKey);
+    setActiveDetailPage(1);
+  }
 
   function handleApplyFilters() {
     if (!canViewTeam) {
@@ -211,28 +370,28 @@ export function PreSalesContent({ dashboardData, initialOwnerFilter = "todos", s
         <div className={styles.grid}>
           <Card eyebrow="CARTEIRA" title="Acompanhamento geral" wide>
             <div className={styles.campaignProspectingMetrics}>
-              <Metric title="Contatos gerais" value={summary.metrics.totalContacts} note="Contatos sob responsabilidade do pre-vendedor" />
-              <Metric title="Sem conexao" value={summary.metrics.contactsWithoutConnection} note="Sem chamada, tarefa ou reuniao registrada" />
-              <Metric title="Qualificados" value={summary.metrics.qualifiedContacts} note="Contatos prontos para avancar para vendas" />
-              <Metric title="Oportunidades com deal" value={summary.metrics.opportunitiesWithDeals} note="Contatos que ja possuem oportunidade associada" />
+              <PreSalesMetricButton title="Contatos gerais" value={summary.metrics.totalContacts} note="Contatos sob responsabilidade do pre-vendedor" onOpen={() => openDetail("totalContacts")} expanded={activeDetail === "totalContacts"} />
+              <PreSalesMetricButton title="Sem conexao" value={summary.metrics.contactsWithoutConnection} note="Sem chamada, tarefa ou reuniao registrada" onOpen={() => openDetail("contactsWithoutConnection")} expanded={activeDetail === "contactsWithoutConnection"} />
+              <PreSalesMetricButton title="Qualificados" value={summary.metrics.qualifiedContacts} note="Contatos prontos para avancar para vendas" onOpen={() => openDetail("qualifiedContacts")} expanded={activeDetail === "qualifiedContacts"} />
+              <PreSalesMetricButton title="Oportunidades com deal" value={summary.metrics.opportunitiesWithDeals} note="Contatos que ja possuem oportunidade associada" onOpen={() => openDetail("opportunitiesWithDeals")} expanded={activeDetail === "opportunitiesWithDeals"} />
             </div>
           </Card>
 
           <Card eyebrow="DESEMPENHO" title="Execucao do pre-vendedor" wide>
             <div className={styles.campaignProspectingMetrics}>
-              <Metric title="Chamadas totais" value={summary.metrics.totalCalls} note="Registros de chamada ligados aos contatos da carteira" />
-              <Metric title="Media de chamadas por contato" value={summary.metrics.averageCallsPerContact} note="Chamadas totais divididas pela carteira" />
-              <Metric title="Conexoes totais" value={summary.metrics.totalConnections} note="Contatos com pelo menos uma interacao registrada" />
-              <Metric title="Atividades feitas" value={summary.metrics.activitiesDone} note="Chamadas, reunioes e tarefas concluidas" />
-              <Metric title="Atividades por fazer" value={summary.metrics.activitiesOpen} note="Itens ainda abertos no fluxo operacional" />
+              <PreSalesMetricButton title="Chamadas totais" value={summary.metrics.totalCalls} note="Registros de chamada ligados aos contatos da carteira" onOpen={() => openDetail("totalCalls")} expanded={activeDetail === "totalCalls"} />
+              <PreSalesMetricButton title="Media de chamadas por contato" value={summary.metrics.averageCallsPerContact} note="Chamadas totais divididas pela carteira" onOpen={() => openDetail("averageCallsPerContact")} expanded={activeDetail === "averageCallsPerContact"} />
+              <PreSalesMetricButton title="Conexoes totais" value={summary.metrics.totalConnections} note="Contatos com pelo menos uma interacao registrada" onOpen={() => openDetail("totalConnections")} expanded={activeDetail === "totalConnections"} />
+              <PreSalesMetricButton title="Atividades feitas" value={summary.metrics.activitiesDone} note="Chamadas, reunioes e tarefas concluidas" onOpen={() => openDetail("activitiesDone")} expanded={activeDetail === "activitiesDone"} />
+              <PreSalesMetricButton title="Atividades por fazer" value={summary.metrics.activitiesOpen} note="Itens ainda abertos no fluxo operacional" onOpen={() => openDetail("activitiesOpen")} expanded={activeDetail === "activitiesOpen"} />
             </div>
           </Card>
 
           <Card eyebrow="REUNIOES" title="Passagem para vendas" wide>
             <div className={styles.campaignProspectingMetrics}>
-              <Metric title="Reunioes programadas" value={summary.metrics.scheduledMeetings} note="Agenda futura registrada na HubSpot" />
-              <Metric title="Reunioes realizadas" value={summary.metrics.completedMeetings} note="Reunioes que ja aconteceram na carteira" />
-              <Metric title="Para reagendar" value={summary.metrics.meetingsToReschedule} note="No-show, canceladas ou que voltaram para o pre-vendedor" />
+              <PreSalesMetricButton title="Reunioes programadas" value={summary.metrics.scheduledMeetings} note="Agenda futura registrada na HubSpot" onOpen={() => openDetail("scheduledMeetings")} expanded={activeDetail === "scheduledMeetings"} />
+              <PreSalesMetricButton title="Reunioes realizadas" value={summary.metrics.completedMeetings} note="Reunioes que ja aconteceram na carteira" onOpen={() => openDetail("completedMeetings")} expanded={activeDetail === "completedMeetings"} />
+              <PreSalesMetricButton title="Para reagendar" value={summary.metrics.meetingsToReschedule} note="No-show, canceladas ou que voltaram para o pre-vendedor" onOpen={() => openDetail("meetingsToReschedule")} expanded={activeDetail === "meetingsToReschedule"} />
             </div>
           </Card>
 
@@ -277,6 +436,131 @@ export function PreSalesContent({ dashboardData, initialOwnerFilter = "todos", s
           />
         </div>
       )}
+
+      {summary && activeDetailConfig ? (
+        <div className={styles.stageModalBackdrop} role="presentation" onClick={() => setActiveDetail("")}>
+          <div
+            className={`${styles.stageModal} ${styles.campaignReportModal}`.trim()}
+            role="dialog"
+            aria-modal="true"
+            aria-label={`${activeDetailConfig.title} de pre-vendedores`}
+            onClick={(event) => event.stopPropagation()}
+          >
+            <header className={styles.campaignReportHeader}>
+              <h3>Detalhes do relatorio</h3>
+              <button
+                type="button"
+                className={styles.campaignReportClose}
+                onClick={() => setActiveDetail("")}
+                aria-label="Fechar detalhes"
+              >
+                ×
+              </button>
+            </header>
+
+            <div className={styles.campaignReportBody}>
+              <div className={styles.campaignReportBreadcrumb}>
+                <span>Pre-vendedores</span>
+                <span>/</span>
+                <span>{activeDetailConfig.title}</span>
+              </div>
+
+              <div className={styles.campaignReportMetaBar}>
+                <div className={styles.campaignReportMetaPrimary}>
+                  <strong>{activeDetailRows.length} linhas</strong>
+                  <span>{activeDetailConfig.label}</span>
+                </div>
+              </div>
+
+              {activeDetailRows.length ? (
+                <>
+                  <div className={styles.campaignReportTableFrame}>
+                    <div
+                      className={`${styles.campaignReportGrid} ${styles.campaignReportTableHead}`.trim()}
+                      style={{ "--campaign-report-columns": activeDetailConfig.columnTemplate }}
+                    >
+                      {activeDetailConfig.columns.map((column) => <span key={column}>{column}</span>)}
+                    </div>
+                    <div className={styles.campaignTableBody}>
+                      {paginatedDetailRows.map((row) => (
+                        <article
+                          key={row.id}
+                          className={`${styles.campaignReportGrid} ${styles.campaignReportTableRow}`.trim()}
+                          style={{ "--campaign-report-columns": activeDetailConfig.columnTemplate }}
+                        >
+                          {row.cells.map((value, index) => (
+                            <div key={`${row.id}-${index}`} className={styles.campaignReportCell}>
+                              <strong className={styles.campaignTableCellValue} title={value}>{value}</strong>
+                            </div>
+                          ))}
+                        </article>
+                      ))}
+                    </div>
+                  </div>
+                  <div className={styles.campaignReportFooter}>
+                    {activeDetailTotalPages > 1 ? (
+                      <div className={styles.popupPaginationBar}>
+                        <nav className={styles.popupPagination} aria-label={`Paginacao de ${activeDetailConfig.title}`}>
+                          <button
+                            type="button"
+                            className={styles.popupPaginationNav}
+                            onClick={() => setActiveDetailPage((current) => Math.max(1, current - 1))}
+                            disabled={activeDetailPage === 1}
+                          >
+                            <SimpleArrow />
+                            <span>Voltar</span>
+                          </button>
+
+                          <div className={styles.popupPaginationPages}>
+                            {popupPaginationItems.map((item) => {
+                              if (item.type === "ellipsis") {
+                                return (
+                                  <span key={item.value} className={styles.popupPaginationEllipsis} aria-hidden="true">
+                                    ...
+                                  </span>
+                                );
+                              }
+
+                              const page = item.value;
+                              const isCurrentPage = activeDetailPage === page;
+
+                              return (
+                                <button
+                                  key={page}
+                                  type="button"
+                                  className={`${styles.popupPaginationPage} ${isCurrentPage ? styles.popupPaginationPageActive : ""}`.trim()}
+                                  onClick={() => setActiveDetailPage(page)}
+                                  aria-current={isCurrentPage ? "page" : undefined}
+                                  aria-label={`Ir para pagina ${page}`}
+                                >
+                                  {page}
+                                </button>
+                              );
+                            })}
+                          </div>
+
+                          <button
+                            type="button"
+                            className={styles.popupPaginationNav}
+                            onClick={() => setActiveDetailPage((current) => Math.min(activeDetailTotalPages, current + 1))}
+                            disabled={activeDetailPage === activeDetailTotalPages}
+                          >
+                            <span>Proximo</span>
+                            <SimpleArrow right />
+                          </button>
+                        </nav>
+                      </div>
+                    ) : <div />}
+                    <div className={styles.campaignReportPageSize}>10 linhas por pagina</div>
+                  </div>
+                </>
+              ) : (
+                <p className={styles.sellerDetailNote}>{activeDetailConfig.emptyMessage}</p>
+              )}
+            </div>
+          </div>
+        </div>
+      ) : null}
     </section>
   );
 }
