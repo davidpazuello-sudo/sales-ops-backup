@@ -1,4 +1,6 @@
-﻿# Sprint 2 Update
+# Sprint 2 Update
+
+> Historico de entrega. Nao e a fonte principal da arquitetura atual.
 
 ## Objetivo
 

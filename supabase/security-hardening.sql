@@ -1,3 +1,7 @@
+-- HISTORICO
+-- Este arquivo e mantido apenas como referencia antiga.
+-- O caminho oficial do schema versionado e `supabase/migrations/`.
+
 create table if not exists public.user_roles (
   user_id uuid primary key references auth.users(id) on delete cascade,
   email text not null unique,

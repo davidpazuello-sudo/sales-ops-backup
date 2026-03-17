@@ -1,5 +1,7 @@
 # Sprint 1 Update
 
+> Historico de entrega. Nao e a fonte principal da arquitetura atual.
+
 ## Objetivo
 
 Estabilizar a base tecnica do dashboard para reduzir acoplamento, criar validacoes minimas e permitir evolucao segura para a Sprint 2.

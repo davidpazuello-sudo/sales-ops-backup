@@ -127,17 +127,6 @@ export const mappingRows = [
   ["emotional_score", "custom_emotion_score", "Custom"],
 ];
 
-export const errorRows = [
-  ["09:42", "Rate limit no lote 18", "Médio"],
-  ["08:15", "owner_id sem correspondência", "Alto"],
-];
-
-export const metricRows = [
-  ["Estagnação", "36h", "alerta por negócio parado"],
-  ["Meta", "92%", "gatilho para resumo semanal"],
-  ["Resumo", "18:30", "envio automático diário"],
-];
-
 export const reportRows = [
   ["Diretoria", "Resumo executivo", "PDF"],
   ["Gestor", "Pipeline por squad", "XLSX"],
@@ -148,12 +137,6 @@ export const queueRows = [
   ["reuniao-seg.mp3", "Em transcrição", "74%"],
   ["coaching-lucas.wav", "Indexado", "100%"],
   ["weekly-review.mp4", "Na fila", "12%"],
-];
-
-export const auditRows = [
-  ["Ana Souza", "Alterou permissão do cargo Gestor", "Hoje, 10:14"],
-  ["Sistema", "Executou sync completo com HubSpot", "Hoje, 09:00"],
-  ["Carlos Lima", "Exportou relatório consolidado", "Ontem, 18:42"],
 ];
 
 export const maskingRows = [

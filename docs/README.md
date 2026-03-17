@@ -17,6 +17,7 @@ Este diretorio concentra a documentacao tecnica e de produto do sistema.
 11. [Atualizacoes de 2026-03-11 a 2026-03-12](ATUALIZACOES-2026-03-11-2026-03-12.md)
 12. [Sprint 1 Update](sprint-1-update.md)
 13. [Sprint 2 Update](sprint-2-update.md)
+14. [Limpeza e Consolidacao](LIMPEZA-E-CONSOLIDACAO.md)
 
 ## Publico alvo
 
@@ -38,3 +39,18 @@ Atualizar este pacote sempre que houver mudancas em:
 - processo de seguranca, credenciais e rotacao de segredos
 - migrations, politicas RLS e governanca do Supabase
 - consolidado de handoff para retomada em outra maquina
+
+## Leitura rapida
+
+- Documentacao viva:
+  - `ARQUITETURA.md`
+  - `DEPLOY-OPERACAO.md`
+  - `AMBIENTES-E-VARIAVEIS.md`
+  - `SEGURANCA-E-ROTACAO-DE-SEGREDOS.md`
+  - `SUPABASE-MIGRATIONS-E-RLS.md`
+  - `LIMPEZA-E-CONSOLIDACAO.md`
+
+- Documentacao historica:
+  - `ATUALIZACOES-2026-03-11-2026-03-12.md`
+  - `sprint-1-update.md`
+  - `sprint-2-update.md`

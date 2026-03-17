@@ -3,7 +3,10 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import styles from "./page.module.css";
-import { navItems as dashboardNavItems } from "../dashboard-shell-config";
+import {
+  navItems as dashboardNavItems,
+  topMenuItems,
+} from "../dashboard-shell-config";
 import { buildNoraResponse } from "lib/ai-agent-orchestration";
 import {
   getNotificationAction,
@@ -17,8 +20,6 @@ const navItems = [
   { id: "deals", label: "Negócios" },
   { id: "tasks", label: "Tarefas" },
 ];
-
-const topMenuItems = ["Arquivo", "Editar", "Visualizar", "Ajuda"];
 
 const suggestedPrompts = [
   "Quais negócios estão com maior risco de estagnação?",

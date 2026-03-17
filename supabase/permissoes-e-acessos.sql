@@ -1,3 +1,7 @@
+-- HISTORICO
+-- Este arquivo e mantido apenas como referencia antiga.
+-- O caminho oficial do schema versionado e `supabase/migrations/`.
+
 create extension if not exists pgcrypto;
 
 create table if not exists public.access_requests (
