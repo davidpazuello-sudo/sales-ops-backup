@@ -34,6 +34,17 @@ function normalizeDashboardOwnerFilter(value) {
   return String(value || "").trim() || "todos";
 }
 
+function canViewTeamDashboard(user = {}) {
+  const normalizedRole = String(user?.role || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim()
+    .toLowerCase();
+
+  return Boolean(user?.isSuperAdmin)
+    || ["admin", "supervisor", "gerente", "gestor", "manager"].includes(normalizedRole);
+}
+
 function normalizeDashboardActivityWeeks(value) {
   const parsed = Number.parseInt(String(value || "1"), 10);
   if (!Number.isFinite(parsed) || parsed <= 0) {
@@ -100,7 +111,7 @@ export async function GET(request) {
   const searchParams = readRequestSearchParams(request);
   const scope = normalizeDashboardScope(searchParams.get("scope"));
   const pipelineId = scope === "deals" ? normalizeDashboardPipelineId(searchParams.get("pipelineId")) : "";
-  const ownerFilter = scope === "deals" || scope === "campaigns" || scope === "presales"
+  const requestedOwnerFilter = scope === "deals" || scope === "campaigns" || scope === "presales"
     ? normalizeDashboardOwnerFilter(searchParams.get("owner"))
     : "";
   const activityWeeksFilter = scope === "deals" ? normalizeDashboardActivityWeeks(searchParams.get("activityWeeks")) : "";
@@ -117,6 +128,10 @@ export async function GET(request) {
   if (!auth.ok) {
     return jsonWithApiObservation(observation, { ok: false, error: auth.error }, { status: auth.status });
   }
+
+  const ownerFilter = scope === "presales" && !canViewTeamDashboard(auth.user)
+    ? String(auth.user.name || auth.user.email || "").trim()
+    : requestedOwnerFilter;
 
   const clientKey = getRequestClientKey(request);
   const rateLimit = await consumeRateLimit({

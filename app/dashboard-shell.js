@@ -314,7 +314,11 @@ export default function DashboardShell({
         ) : sellerSlug ? (
           <SellerProfileContent dashboardData={dashboardData} sellerSlug={sellerSlug} />
         ) : activeNav === "presales" ? (
-          <PreSalesContent dashboardData={dashboardData} initialOwnerFilter={initialOwnerFilter} />
+          <PreSalesContent
+            dashboardData={dashboardData}
+            initialOwnerFilter={initialOwnerFilter}
+            sessionUser={sessionUser}
+          />
         ) : activeNav === "sellers" ? (
           <SellersContent dashboardData={dashboardData} />
         ) : activeNav === "access" ? (

@@ -5,9 +5,9 @@ import { useRouter } from "next/navigation";
 import { Card, Metric, PageTitle } from "../dashboard-ui";
 import {
   SectionEmptyState,
-  SectionNotice,
 } from "../dashboard-section-feedback";
 import styles from "../page.module.css";
+import { canViewTeamTasks } from "lib/services/dashboard-tasks";
 
 function normalizeComparable(value) {
   return String(value || "")
@@ -22,6 +22,7 @@ function buildOwnerOptions(ownerDirectory = []) {
     .map((owner) => ({
       id: String(owner?.id || "").trim(),
       label: String(owner?.name || "").trim(),
+      email: String(owner?.email || "").trim(),
     }))
     .filter((owner) => owner.label)
     .sort((left, right) => left.label.localeCompare(right.label, "pt-BR"));
@@ -33,6 +34,18 @@ function resolveOwnerOptionLabel(ownerOptions = [], draftValue = "") {
   const normalizedDraft = normalizeComparable(draftValue || "todos");
   const matchedOption = ownerOptions.find((option) => normalizeComparable(option.label) === normalizedDraft);
   return matchedOption?.label || "";
+}
+
+function resolveSessionOwnerLabel(ownerOptions = [], sessionUser = {}) {
+  const normalizedName = normalizeComparable(sessionUser?.name);
+  const normalizedEmail = normalizeComparable(sessionUser?.email);
+  const matchedOption = ownerOptions.find((option) => {
+    const normalizedLabel = normalizeComparable(option.label);
+    return (normalizedName && normalizedLabel === normalizedName)
+      || (normalizedEmail && normalizeComparable(option.email) === normalizedEmail);
+  });
+
+  return matchedOption?.label || String(sessionUser?.name || sessionUser?.email || "").trim();
 }
 
 function PreSalesListCard({ eyebrow, title, items, emptyTitle, emptyDescription }) {
@@ -63,26 +76,57 @@ function PreSalesListCard({ eyebrow, title, items, emptyTitle, emptyDescription 
   );
 }
 
-export function PreSalesContent({ dashboardData, initialOwnerFilter = "todos" }) {
+export function PreSalesContent({ dashboardData, initialOwnerFilter = "todos", sessionUser = {} }) {
   const router = useRouter();
-  const [selectedOwnerDraft, setSelectedOwnerDraft] = useState(initialOwnerFilter || "todos");
+  const [selectedOwnerDraft, setSelectedOwnerDraft] = useState("");
   const [isFilterPending, startFilterTransition] = useTransition();
   const loadingState = dashboardData.states?.loading || "ready";
   const stateErrors = dashboardData.states?.errors || [];
+  const canViewTeam = canViewTeamTasks(sessionUser);
   const ownerOptions = useMemo(
     () => buildOwnerOptions(Array.isArray(dashboardData.integration?.ownerDirectory) ? dashboardData.integration.ownerDirectory : []),
     [dashboardData.integration?.ownerDirectory],
   );
-  const resolvedOwnerSelection = resolveOwnerOptionLabel(ownerOptions, selectedOwnerDraft);
-  const summary = dashboardData.presales || null;
-  const filtersDirty = normalizeComparable(selectedOwnerDraft || "todos") !== normalizeComparable(initialOwnerFilter || "todos");
-  const scopeMessage = resolvedOwnerSelection && normalizeComparable(resolvedOwnerSelection) !== "todos"
-    ? `Mostrando a rotina operacional do pre-vendedor ${resolvedOwnerSelection}.`
-    : "Mostrando a carteira consolidada de todos os pre-vendedores da HubSpot.";
+  const sessionOwnerLabel = useMemo(
+    () => resolveSessionOwnerLabel(ownerOptions, sessionUser),
+    [ownerOptions, sessionUser],
+  );
+  const initialResolvedOwner = useMemo(() => {
+    if (!canViewTeam) {
+      return sessionOwnerLabel;
+    }
 
+    if (!initialOwnerFilter || normalizeComparable(initialOwnerFilter) === "todos") {
+      return "Todos";
+    }
+
+    return resolveOwnerOptionLabel(ownerOptions, initialOwnerFilter) || initialOwnerFilter;
+  }, [canViewTeam, initialOwnerFilter, ownerOptions, sessionOwnerLabel]);
+  const resolvedOwnerSelection = useMemo(() => {
+    const resolvedDraft = resolveOwnerOptionLabel(ownerOptions, selectedOwnerDraft);
+    if (resolvedDraft) {
+      return resolvedDraft;
+    }
+
+    return initialResolvedOwner || "";
+  }, [initialResolvedOwner, ownerOptions, selectedOwnerDraft]);
+  const summary = dashboardData.presales || null;
+  const baselineDraftValue = useMemo(() => {
+    if (!canViewTeam) {
+      return "";
+    }
+
+    return initialResolvedOwner && normalizeComparable(initialResolvedOwner) !== "todos"
+      ? initialResolvedOwner
+      : "";
+  }, [canViewTeam, initialResolvedOwner]);
+  const placeholderText = canViewTeam ? "Todos" : sessionOwnerLabel || "Meu proprietario";
+  const filtersDirty = canViewTeam
+    ? normalizeComparable(selectedOwnerDraft || "") !== normalizeComparable(baselineDraftValue)
+    : false;
   useEffect(() => {
-    setSelectedOwnerDraft(initialOwnerFilter || "todos");
-  }, [initialOwnerFilter]);
+    setSelectedOwnerDraft(baselineDraftValue);
+  }, [baselineDraftValue]);
 
   function handleApplyFilters() {
     if (!resolvedOwnerSelection) {
@@ -117,10 +161,10 @@ export function PreSalesContent({ dashboardData, initialOwnerFilter = "todos" })
             type="text"
             list="presales-owner-options"
             className={styles.campaignFilterInput}
-            placeholder="Buscar proprietario"
+            placeholder={placeholderText}
             value={selectedOwnerDraft}
             onChange={(event) => setSelectedOwnerDraft(event.target.value)}
-            disabled={isFilterPending}
+            disabled={isFilterPending || !canViewTeam}
           />
           <datalist id="presales-owner-options">
             {ownerOptions.map((option) => (
@@ -133,26 +177,17 @@ export function PreSalesContent({ dashboardData, initialOwnerFilter = "todos" })
           type="button"
           className={`${styles.primaryActionButton} ${styles.filterApplyButton}`.trim()}
           onClick={handleApplyFilters}
-          disabled={!resolvedOwnerSelection || !filtersDirty || isFilterPending}
+          disabled={!canViewTeam || !resolvedOwnerSelection || !filtersDirty || isFilterPending}
         >
           Filtrar
         </button>
       </div>
 
-      <SectionNotice
-        variant="info"
-        title="Visao operacional"
-      >
-        {scopeMessage}
-      </SectionNotice>
-
       {stateErrors.length ? (
-        <SectionNotice
-          variant="error"
-          title="Falha de integracao"
-        >
-          {stateErrors[0]}
-        </SectionNotice>
+        <div className={`${styles.sectionNotice} ${styles.sectionNoticeError}`.trim()} role="status" aria-live="polite">
+          <strong className={styles.sectionNoticeTitle}>Falha de integracao</strong>
+          <span>{stateErrors[0]}</span>
+        </div>
       ) : null}
 
       {!summary ? (
