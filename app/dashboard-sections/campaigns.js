@@ -95,8 +95,8 @@ const OVERVIEW_DETAIL_CONFIG = {
   },
   ceciliaDisqualifiedNumbers: {
     eyebrow: "SDR",
-    title: "Desqualificados pela Cecilia",
-    description: "Contatos com ciclo de vida alterado para desqualificado por Mercado Privado",
+    title: "Desqualificados por Mercado Privado",
+    description: "Contatos com Qualificado? = Nao alterado por Mercado Privado",
     columns: ["Proprietario", "Lead", "Detalhe", "Status"],
     columnTemplate: "minmax(180px, 1.1fr) minmax(360px, 2.65fr) minmax(260px, 1.7fr) minmax(210px, 1.1fr)",
   },
@@ -858,7 +858,7 @@ export function CampaignsContent({ dashboardData, initialOwnerFilter = "todos" }
                 expanded={activeDetail === "disqualifiedNumbers"}
               />
               <CampaignMetricButton
-                title="Desqualificados pela Cecilia"
+                title="Desqualificados por Mercado Privado"
                 value={`${summary.prospecting.ceciliaDisqualifiedNumbersCount || 0}`}
                 onClick={() => handleOpenDetail("ceciliaDisqualifiedNumbers")}
                 expanded={activeDetail === "ceciliaDisqualifiedNumbers"}

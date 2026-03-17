@@ -50,6 +50,7 @@ describe("dashboard domain", () => {
         lastname: "Gestora",
         email: "ana@empresa.com",
         lifecyclestage: "1321207898",
+        conectado: "Não",
         hs_lead_status: "OPEN_DEAL",
         campanhas: "Aluno a Bordo 2026",
         hubspot_owner_id: "99",
@@ -61,6 +62,7 @@ describe("dashboard domain", () => {
     }]]));
 
     expect(contact.lifecycleStage).toBe("Desqualificado");
+    expect(contact.qualifiedStatus).toBe("Não");
     expect(contact.leadStatus).toBe("Qualified");
     expect(contact.campaignName).toBe("Aluno a Bordo 2026");
   });
@@ -81,7 +83,7 @@ describe("dashboard domain", () => {
           {
             value: "Desqualificado",
             timestamp: "2026-03-16T14:18:00.000Z",
-            sourceId: { userId: 321 },
+            sourceId: "{userId:321}",
           },
         ],
       },
@@ -99,6 +101,42 @@ describe("dashboard domain", () => {
     }]);
 
     expect(contact.lifecycleUpdatedBy).toBe("Mercado Privado");
+  });
+
+  it("maps the qualified status updater from HubSpot history to the owner directory", () => {
+    const contact = normalizeHubSpotContact({
+      id: "contact-history-2",
+      properties: {
+        firstname: "Contato",
+        lastname: "Qualificado",
+        email: "qualificado@empresa.com",
+        conectado: "Não",
+        hubspot_owner_id: "99",
+      },
+      propertiesWithHistory: {
+        conectado: [
+          {
+            value: "Não",
+            timestamp: "2026-03-17T10:18:00.000Z",
+            sourceId: "{userId:321}",
+          },
+        ],
+      },
+    }, new Map([["99", {
+      id: "99",
+      name: "Ana Souza",
+      email: "ana@empresa.com",
+    }]]), [{
+      id: "654",
+      hubspotOwnerId: "654",
+      userId: "321",
+      name: "Mercado Privado",
+      email: "mercado.privado@sasi.com.br",
+      team: "AM.Comercial",
+    }]);
+
+    expect(contact.qualifiedUpdatedBy).toBe("Mercado Privado");
+    expect(contact.qualifiedNoActors).toEqual(["Mercado Privado"]);
   });
 
   it("builds pipeline stages and dashboard payload from HubSpot data", () => {

@@ -185,7 +185,9 @@ describe("dashboard campaigns service", () => {
           leadStatus: "UNQUALIFIED",
           lifecycleStage: "Desqualificado",
           ownerName: "Carla Costa",
-          lifecycleUpdatedBy: "Mercado Privado",
+          qualifiedStatus: "Nao",
+          qualifiedUpdatedBy: "Mercado Privado",
+          qualifiedNoActors: ["Mercado Privado"],
         },
         {
           id: "contact-i",
@@ -195,7 +197,9 @@ describe("dashboard campaigns service", () => {
           leadStatus: "UNQUALIFIED",
           lifecycleStage: "Desqualificado",
           ownerName: "Ana Ramos",
-          lifecycleUpdatedBy: "Cecília",
+          qualifiedStatus: "Nao",
+          qualifiedUpdatedBy: "Cecilia",
+          qualifiedNoActors: ["Cecilia"],
         },
       ],
     });
@@ -234,7 +238,7 @@ describe("dashboard campaigns service", () => {
         expect.objectContaining({
           leadName: "Lead H",
           detailLabel: "8888-8888",
-          statusLabel: "UNQUALIFIED",
+          statusLabel: "Qualificado? Nao",
         }),
       ]),
     );
