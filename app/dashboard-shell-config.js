@@ -5,6 +5,7 @@ import { hasMinimumRole } from "lib/role-access";
 export const navItems = [
   { id: "reports", label: "Relatórios" },
   { id: "sellers", label: "Vendedores" },
+  { id: "presales", label: "Pre-vendedores" },
   { id: "deals", label: "Negócios" },
   { id: "campaigns", label: "Campanhas" },
   { id: "tasks", label: "Tarefas" },
@@ -28,6 +29,13 @@ export const globalSearchIndex = [
     description: "Desempenho por vendedor e acompanhamento individual.",
     keywords: "vendedores equipe time performance coaching",
     route: "/vendedores",
+  },
+  {
+    id: "presales",
+    label: "Pre-vendedores",
+    description: "Visão operacional da carteira do pré-vendedor, com contatos, conexões, qualificação e reuniões.",
+    keywords: "pre vendedor pre-vendedor pre sales prospeccao conexao contato reuniao agenda qualificacao sdr",
+    route: "/pre-vendedores",
   },
   {
     id: "deals",

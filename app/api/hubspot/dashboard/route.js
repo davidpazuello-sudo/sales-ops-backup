@@ -10,7 +10,7 @@ import { enrichDashboardWithOperationalData } from "lib/operational-data";
 
 function normalizeDashboardScope(value) {
   const normalized = String(value || "").trim().toLowerCase();
-  const allowedScopes = new Set(["default", "ai", "reports", "sellers", "deals", "campaigns", "tasks", "settings"]);
+  const allowedScopes = new Set(["default", "ai", "reports", "sellers", "presales", "deals", "campaigns", "tasks", "settings"]);
   return allowedScopes.has(normalized) ? normalized : "default";
 }
 
@@ -100,7 +100,7 @@ export async function GET(request) {
   const searchParams = readRequestSearchParams(request);
   const scope = normalizeDashboardScope(searchParams.get("scope"));
   const pipelineId = scope === "deals" ? normalizeDashboardPipelineId(searchParams.get("pipelineId")) : "";
-  const ownerFilter = scope === "deals" || scope === "campaigns"
+  const ownerFilter = scope === "deals" || scope === "campaigns" || scope === "presales"
     ? normalizeDashboardOwnerFilter(searchParams.get("owner"))
     : "";
   const activityWeeksFilter = scope === "deals" ? normalizeDashboardActivityWeeks(searchParams.get("activityWeeks")) : "";

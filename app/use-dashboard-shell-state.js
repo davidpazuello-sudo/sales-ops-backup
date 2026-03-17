@@ -213,7 +213,7 @@ function getDashboardHubSpotScope({ initialNav, initialProfileView }) {
     return "none";
   }
 
-  const supportedScopes = new Set(["reports", "sellers", "deals", "campaigns", "tasks"]);
+  const supportedScopes = new Set(["reports", "sellers", "presales", "deals", "campaigns", "tasks"]);
   return supportedScopes.has(initialNav) ? initialNav : "default";
 }
 
@@ -341,7 +341,7 @@ export function useDashboardShellState({
     const abortController = new AbortController();
     const hubspotScope = getDashboardHubSpotScope({ initialNav, initialProfileView });
     const pipelineId = hubspotScope === "deals" ? String(initialPipelineId || "").trim() : "";
-    const ownerFilter = hubspotScope === "deals" || hubspotScope === "campaigns"
+    const ownerFilter = hubspotScope === "deals" || hubspotScope === "campaigns" || hubspotScope === "presales"
       ? String(initialOwnerFilter || "todos").trim()
       : "";
     const activityWeeksFilter = hubspotScope === "deals" ? String(initialActivityWeeksFilter || "1").trim() : "";

@@ -19,6 +19,7 @@ import {
   CampaignsContent,
   DealProfileContent,
   DealsContent,
+  PreSalesContent,
   ReportsContent,
   SellerMeetingDetailContent,
   SellerMeetingsContent,
@@ -312,6 +313,8 @@ export default function DashboardShell({
           <SellerMeetingsContent dashboardData={dashboardData} sellerSlug={sellerSlug} />
         ) : sellerSlug ? (
           <SellerProfileContent dashboardData={dashboardData} sellerSlug={sellerSlug} />
+        ) : activeNav === "presales" ? (
+          <PreSalesContent dashboardData={dashboardData} initialOwnerFilter={initialOwnerFilter} />
         ) : activeNav === "sellers" ? (
           <SellersContent dashboardData={dashboardData} />
         ) : activeNav === "access" ? (

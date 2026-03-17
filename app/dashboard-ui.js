@@ -109,6 +109,10 @@ export function getNavIcon(id) {
     return <BaseIcon><circle cx="9" cy="8" r="3" /><path d="M4 17c0-2.4 2.2-4.3 5-4.3s5 1.9 5 4.3" /><circle cx="17" cy="9" r="2.3" /><path d="M14.6 16.2c.6-1.5 2-2.5 3.7-2.5.8 0 1.5.2 2.1.5" /></BaseIcon>;
   }
 
+  if (id === "presales") {
+    return <BaseIcon><circle cx="8" cy="8" r="2.6" /><path d="M4.2 17.2c0-2.1 1.8-3.8 4.1-3.8s4.1 1.7 4.1 3.8" /><path d="M15 7h5" /><path d="M17.5 4.5v5" /><path d="M14.5 13.5h6" /><path d="M14.5 17h4" /></BaseIcon>;
+  }
+
   if (id === "deals") {
     return <BaseIcon><rect x="4" y="6" width="16" height="12" rx="1.5" /><path d="M12 6v12" /><path d="M4 10h16" /></BaseIcon>;
   }
