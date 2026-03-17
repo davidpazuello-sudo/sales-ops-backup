@@ -345,7 +345,9 @@ export function useDashboardShellState({
       ? String(initialOwnerFilter || "todos").trim()
       : "";
     const activityWeeksFilter = hubspotScope === "deals" ? String(initialActivityWeeksFilter || "1").trim() : "";
-    const campaignName = hubspotScope === "campaigns" ? String(initialCampaignName || "").trim() : "";
+    const campaignName = hubspotScope === "campaigns" || hubspotScope === "presales"
+      ? String(initialCampaignName || "").trim()
+      : "";
     const sellerPage = hubspotScope === "sellers" ? String(initialSellerPage || "1").trim() : "";
     const sellerSearch = hubspotScope === "sellers" ? String(initialSellerSearch || "").trim() : "";
 

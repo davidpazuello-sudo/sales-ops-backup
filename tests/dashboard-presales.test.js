@@ -9,6 +9,7 @@ describe("dashboard presales", () => {
   it("builds the pre-sales summary from contacts and related activities", () => {
     const summary = buildPreSalesSummary({
       ownerFilter: "Ana Souza",
+      campaignName: "Aluno a Bordo 2026",
       contacts: [
         {
           id: "contact-1",
@@ -21,6 +22,7 @@ describe("dashboard presales", () => {
           email: "aurora@cidade.gov.br",
           dealIds: ["deal-1"],
           updatedAt: tomorrow,
+          campaignName: "Aluno a Bordo 2026",
         },
         {
           id: "contact-2",
@@ -33,6 +35,7 @@ describe("dashboard presales", () => {
           email: "boreal@cidade.gov.br",
           dealIds: [],
           updatedAt: yesterday,
+          campaignName: "Aluno a Bordo 2026",
         },
         {
           id: "contact-3",
@@ -42,12 +45,14 @@ describe("dashboard presales", () => {
           leadStatus: "Qualified",
           lifecycleStage: "Prospect",
           dealIds: [],
+          campaignName: "Outra campanha",
         },
       ],
       deals: [
         {
           id: "deal-1",
           contactIds: ["contact-1"],
+          campaignName: "Aluno a Bordo 2026",
         },
       ],
       activities: [

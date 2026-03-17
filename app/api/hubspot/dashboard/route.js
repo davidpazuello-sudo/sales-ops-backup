@@ -118,8 +118,12 @@ export async function GET(request) {
   const sellerPage = scope === "sellers" ? normalizeDashboardSellerPage(searchParams.get("sellerPage")) : "";
   const sellerSearch = scope === "sellers" ? normalizeDashboardSellerSearch(searchParams.get("sellerSearch")) : "";
   const campaignDetailKey = scope === "campaigns" ? normalizeDashboardCampaignDetail(searchParams.get("campaignDetail")) : "";
-  const campaignName = scope === "campaigns" ? normalizeDashboardCampaignName(searchParams.get("campaign")) : "";
-  const campaignOptionsOnly = scope === "campaigns" ? normalizeDashboardCampaignOptionsFlag(searchParams.get("campaignOptions")) : false;
+  const campaignName = scope === "campaigns" || scope === "presales"
+    ? normalizeDashboardCampaignName(searchParams.get("campaign"))
+    : "";
+  const campaignOptionsOnly = scope === "campaigns" || scope === "presales"
+    ? normalizeDashboardCampaignOptionsFlag(searchParams.get("campaignOptions"))
+    : false;
   const auth = await requireAuthenticatedUser({
     route: "api/hubspot/dashboard",
     action: "read-dashboard",

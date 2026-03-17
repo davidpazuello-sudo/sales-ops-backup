@@ -118,6 +118,25 @@ function buildOwnerOptions(ownerDirectory = []) {
   return [{ id: "todos", label: "Todos" }, ...options];
 }
 
+function buildCampaignOptions(campaignOptions = []) {
+  return campaignOptions
+    .map((option) => ({
+      id: String(option?.slug || option?.label || "").trim(),
+      label: String(option?.label || "").trim(),
+    }))
+    .filter((option) => option.label)
+    .sort((left, right) => left.label.localeCompare(right.label, "pt-BR"));
+}
+
+function resolveCampaignOption(campaignOptions = [], draftValue = "") {
+  const normalizedDraft = normalizeComparable(draftValue);
+  return campaignOptions.find((option) => normalizeComparable(option.label) === normalizedDraft) || null;
+}
+
+function resolveCampaignOptionLabel(campaignOptions = [], draftValue = "") {
+  return resolveCampaignOption(campaignOptions, draftValue)?.label || "";
+}
+
 function resolveOwnerOptionLabel(ownerOptions = [], draftValue = "") {
   const normalizedDraft = normalizeComparable(draftValue || "todos");
   const matchedOption = ownerOptions.find((option) => normalizeComparable(option.label) === normalizedDraft);
@@ -223,9 +242,15 @@ function PreSalesMetricButton({ title, value, note, onOpen, expanded = false }) 
   );
 }
 
-export function PreSalesContent({ dashboardData, initialOwnerFilter = "todos", sessionUser = {} }) {
+export function PreSalesContent({
+  dashboardData,
+  initialOwnerFilter = "todos",
+  initialCampaignName = "Aluno a Bordo 2026",
+  sessionUser = {},
+}) {
   const router = useRouter();
   const [selectedOwnerDraft, setSelectedOwnerDraft] = useState("");
+  const [selectedCampaignDraft, setSelectedCampaignDraft] = useState("");
   const [activeDetail, setActiveDetail] = useState("");
   const [activeDetailPage, setActiveDetailPage] = useState(1);
   const [isFilterPending, startFilterTransition] = useTransition();
@@ -235,6 +260,10 @@ export function PreSalesContent({ dashboardData, initialOwnerFilter = "todos", s
   const ownerOptions = useMemo(
     () => buildOwnerOptions(Array.isArray(dashboardData.integration?.ownerDirectory) ? dashboardData.integration.ownerDirectory : []),
     [dashboardData.integration?.ownerDirectory],
+  );
+  const campaignOptions = useMemo(
+    () => buildCampaignOptions(Array.isArray(dashboardData.campaignOptions) ? dashboardData.campaignOptions : []),
+    [dashboardData.campaignOptions],
   );
   const sessionOwnerLabel = useMemo(
     () => resolveSessionOwnerLabel(ownerOptions, sessionUser),
@@ -260,6 +289,10 @@ export function PreSalesContent({ dashboardData, initialOwnerFilter = "todos", s
     return initialResolvedOwner || "";
   }, [initialResolvedOwner, ownerOptions, selectedOwnerDraft]);
   const summary = dashboardData.presales || null;
+  const initialResolvedCampaign = useMemo(
+    () => resolveCampaignOptionLabel(campaignOptions, initialCampaignName) || initialCampaignName,
+    [campaignOptions, initialCampaignName],
+  );
   const baselineDraftValue = useMemo(() => {
     if (!canViewTeam) {
       return "";
@@ -269,10 +302,12 @@ export function PreSalesContent({ dashboardData, initialOwnerFilter = "todos", s
       ? initialResolvedOwner
       : "";
   }, [canViewTeam, initialResolvedOwner]);
+  const baselineCampaignDraftValue = initialResolvedCampaign || "Aluno a Bordo 2026";
   const placeholderText = canViewTeam ? "Todos" : sessionOwnerLabel || "Meu proprietario";
-  const filtersDirty = canViewTeam
-    ? normalizeComparable(selectedOwnerDraft || "") !== normalizeComparable(baselineDraftValue)
-    : false;
+  const filtersDirty = (
+    (canViewTeam && normalizeComparable(selectedOwnerDraft || "") !== normalizeComparable(baselineDraftValue))
+    || normalizeComparable(selectedCampaignDraft || "") !== normalizeComparable(baselineCampaignDraftValue)
+  );
   const activeDetailConfig = activeDetail ? PRESALES_DETAIL_CONFIG[activeDetail] : null;
   const activeDetailRows = activeDetail ? summary?.details?.[activeDetail] || [] : [];
   const activeDetailTotalPages = Math.max(1, Math.ceil(activeDetailRows.length / PRESALES_POPUP_PAGE_SIZE));
@@ -289,6 +324,10 @@ export function PreSalesContent({ dashboardData, initialOwnerFilter = "todos", s
     setSelectedOwnerDraft(baselineDraftValue);
   }, [baselineDraftValue]);
 
+  useEffect(() => {
+    setSelectedCampaignDraft(baselineCampaignDraftValue);
+  }, [baselineCampaignDraftValue]);
+
   function openDetail(detailKey) {
     setActiveDetail(detailKey);
     setActiveDetailPage(1);
@@ -299,14 +338,22 @@ export function PreSalesContent({ dashboardData, initialOwnerFilter = "todos", s
       return;
     }
 
-    const resolvedOption = resolveOwnerOption(ownerOptions, selectedOwnerDraft || resolvedOwnerSelection);
-    if (!resolvedOption?.label) {
+    const resolvedCampaign = resolveCampaignOption(campaignOptions, selectedCampaignDraft || baselineCampaignDraftValue);
+    if (!resolvedCampaign?.label) {
+      return;
+    }
+
+    const resolvedOption = canViewTeam
+      ? resolveOwnerOption(ownerOptions, selectedOwnerDraft || resolvedOwnerSelection)
+      : null;
+    if (canViewTeam && !resolvedOption?.label) {
       return;
     }
 
     startFilterTransition(() => {
       const searchParams = new URLSearchParams();
-      if (normalizeComparable(resolvedOption.label) !== "todos") {
+      searchParams.set("campanha", resolvedCampaign.label);
+      if (canViewTeam && normalizeComparable(resolvedOption.label) !== "todos") {
         searchParams.set("proprietario", resolvedOption.label);
       }
 
@@ -326,6 +373,24 @@ export function PreSalesContent({ dashboardData, initialOwnerFilter = "todos", s
       </header>
 
       <div className={styles.campaignFilterBar}>
+        <label className={styles.campaignFilterField}>
+          <span>Campanha</span>
+          <input
+            type="text"
+            list="presales-campaign-options"
+            className={styles.campaignFilterInput}
+            placeholder="Aluno a Bordo 2026"
+            value={selectedCampaignDraft}
+            onChange={(event) => setSelectedCampaignDraft(event.target.value)}
+            disabled={isFilterPending}
+          />
+          <datalist id="presales-campaign-options">
+            {campaignOptions.map((option) => (
+              <option key={option.id || option.label} value={option.label} />
+            ))}
+          </datalist>
+        </label>
+
         <label className={styles.campaignFilterField}>
           <span>Proprietario</span>
           <input

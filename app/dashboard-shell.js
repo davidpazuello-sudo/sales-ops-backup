@@ -317,6 +317,7 @@ export default function DashboardShell({
           <PreSalesContent
             dashboardData={dashboardData}
             initialOwnerFilter={initialOwnerFilter}
+            initialCampaignName={initialCampaignName}
             sessionUser={sessionUser}
           />
         ) : activeNav === "sellers" ? (
