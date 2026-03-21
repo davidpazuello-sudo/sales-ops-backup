@@ -1,9 +1,6 @@
 # Supabase do projeto
 
-Este diretorio agora segue a seguinte regra:
-
-- `supabase/migrations/` e a fonte oficial do schema versionado
-- `supabase/*.sql` sao referencias historicas e snapshots de trabalho
+`supabase/migrations/` e a unica fonte oficial do schema versionado. Nao existem scripts SQL avulsos neste diretorio.
 
 ## Arquivos oficiais
 

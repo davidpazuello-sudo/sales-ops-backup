@@ -4,12 +4,13 @@ Este documento define a fonte oficial do banco, o modelo de autorizacao por pape
 
 ## Fonte oficial
 
-O estado oficial do banco agora fica em:
+O estado oficial do banco fica exclusivamente em:
 
 - `supabase/migrations/20260311110000_access_control_baseline.sql`
 - `supabase/migrations/20260311111000_operational_tables_audit_and_events.sql`
+- `supabase/migrations/20260312113000_hubspot_idempotency_keys.sql`
 
-Os arquivos soltos em `supabase/*.sql` passam a ser referencia historica e nao devem mais ser usados como processo principal de publicacao.
+Nao existem scripts SQL avulsos no repositorio. Qualquer mudanca de schema deve ser feita criando uma nova migration com `npx supabase@latest migration new`.
 
 ## Papel oficial de autorizacao
 
