@@ -1,0 +1,28 @@
+.logoDark {
+  color: var(--heading);
+}
+
+.logoAccent {
+  color: var(--accent);
+}
+
+.sectionNotice {
+  margin: 0 0 14px;
+  padding: 12px 14px;
+  border: 1px solid rgba(22, 61, 115, 0.12);
+  border-radius: 12px;
+  background: rgba(22, 61, 115, 0.05);
+  color: #24476f;
+  font-size: calc(12px * var(--font-scale));
+  line-height: 1.5;
+}
+
+:global(html[data-theme="dark"]) .sectionNotice {
+  border-color: rgba(104, 141, 192, 0.24);
+  background: rgba(19, 33, 52, 0.88);
+  color: #dce9ff;
+}
+
+.appShellCollapsed .logoAccent {
+  font-size: 14px;
+}

@@ -1,0 +1,769 @@
+.dashboardSection {
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  padding: calc(34px * var(--density-scale)) calc(38px * var(--density-scale)) calc(42px * var(--density-scale));
+}
+
+.sectionHeaderBar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.settingsHeader h1 {
+  margin: 0;
+  color: var(--heading);
+  font-size: calc(29px * var(--font-scale));
+  line-height: 1.1;
+}
+
+.settingsHeader p {
+  max-width: 760px;
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: calc(14px * var(--font-scale));
+  line-height: 1.5;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: calc(18px * var(--density-scale));
+  margin-top: 28px;
+}
+
+.metrics {
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-top: 18px;
+}
+
+.sellerProfilesGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.sellerPageHeader .settingsHeader p {
+  display: none;
+}
+
+.sellerProfileContainer {
+  border: 0;
+  border-radius: var(--surface-radius);
+  background: var(--panel);
+  box-shadow: var(--surface-shadow);
+  padding: 12px;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    transform var(--motion-fast) ease,
+    box-shadow var(--motion-fast) ease,
+    background var(--motion-fast) ease;
+}
+
+.sellerProfileContainer:hover {
+  transform: translateY(-2px);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 28%, var(--border)), 0 12px 24px rgba(17, 32, 58, 0.08);
+}
+
+.sellerProfileCard {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-height: 100%;
+  padding: calc(18px * var(--density-scale));
+  border-radius: calc(var(--surface-radius) - 2px);
+  background: linear-gradient(180deg, var(--panel), var(--panel-soft));
+}
+
+.sellerProfileTop {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sellerAvatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, var(--accent), #f3a43d);
+  color: #fff;
+  font-size: calc(13px * var(--font-scale));
+  font-weight: 800;
+}
+
+.sellerIdentity {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.sellerIdentity strong {
+  color: var(--heading);
+  font-size: calc(14px * var(--font-scale));
+}
+
+.sellerNote {
+  color: var(--muted);
+}
+
+.sellerStats span {
+  font-size: calc(12px * var(--font-scale));
+}
+
+.sellerStats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.sellerStats div {
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--panel) 35%, var(--panel-soft));
+}
+
+.sellerNote {
+  margin: 0;
+  font-size: calc(12px * var(--font-scale));
+  line-height: 1.5;
+}
+
+.sellerInsightBlock {
+  display: grid;
+  gap: 6px;
+}
+
+.sellerInsightLabel {
+  color: var(--muted);
+  font-size: calc(12px * var(--font-scale));
+  font-weight: 700;
+}
+
+.sellerDetailHeader {
+  margin-bottom: 14px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.sellerDetailIdentity {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr);
+  column-gap: 16px;
+  row-gap: 10px;
+  align-items: start;
+}
+
+.sellerDetailIdentity .settingsHeader h1 {
+  font-size: calc(21px * var(--font-scale));
+  letter-spacing: -0.02em;
+}
+
+.sellerDetailHeaderBlock {
+  display: grid;
+  justify-items: flex-start;
+  gap: 0;
+}
+
+.sellerDetailIdentity .settingsHeader p {
+  margin-top: 6px;
+  font-size: calc(12px * var(--font-scale));
+}
+
+.sellerMeetingActions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-top: 14px;
+}
+
+.sellerProfileMeetingActions {
+  grid-column: 1 / -1;
+  margin-top: 0;
+}
+
+.secondaryActionButton {
+  height: 38px;
+  padding: 0 16px;
+  border-radius: 999px;
+  font: inherit;
+  font-size: calc(12px * var(--font-scale));
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    transform var(--motion-fast) ease,
+    box-shadow var(--motion-fast) ease,
+    border-color var(--motion-fast) ease,
+    background var(--motion-fast) ease;
+}
+
+.primaryActionButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  border: 0;
+  background: linear-gradient(135deg, var(--accent), #f3a43d);
+  color: #fff;
+  box-shadow: 0 10px 20px rgba(222, 131, 0, 0.16);
+}
+
+.secondaryActionButton {
+  border: 1px solid var(--border);
+  background: var(--panel);
+  color: var(--heading);
+}
+
+.secondaryActionButton:hover {
+  transform: translateY(-1px);
+}
+
+.secondaryActionButton svg {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.sellerDetailAvatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, var(--accent), #f3a43d);
+  color: #fff;
+  font-size: calc(16px * var(--font-scale));
+  font-weight: 800;
+}
+
+.sellerDetailNote {
+  margin: 12px 0 0;
+  color: var(--muted);
+  font-size: calc(12px * var(--font-scale));
+  line-height: 1.55;
+}
+
+.meetingsList {
+  display: grid;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.meetingRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) minmax(0, 0.7fr) minmax(0, 0.7fr);
+  gap: 14px;
+  width: 100%;
+  padding: calc(14px * var(--density-scale)) calc(16px * var(--density-scale));
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: linear-gradient(180deg, var(--panel), var(--panel-soft));
+  text-align: left;
+  cursor: pointer;
+  transition:
+    transform var(--motion-fast) ease,
+    box-shadow var(--motion-fast) ease,
+    border-color var(--motion-fast) ease;
+}
+
+.meetingRow:hover {
+  transform: translateY(-1px);
+  border-color: color-mix(in srgb, var(--accent) 26%, var(--border));
+  box-shadow: 0 10px 20px rgba(17, 32, 58, 0.06);
+}
+
+.meetingMeta {
+  display: grid;
+  gap: 4px;
+}
+
+.meetingMeta strong {
+  color: var(--heading);
+  font-size: calc(13px * var(--font-scale));
+}
+
+.meetingMeta span {
+  color: var(--muted);
+  font-size: calc(11px * var(--font-scale));
+  line-height: 1.55;
+}
+
+.meetingDetailStack {
+  display: grid;
+  gap: 14px;
+  margin-top: 14px;
+}
+
+.meetingAudioPanel {
+  display: grid;
+  gap: 8px;
+  padding: calc(12px * var(--density-scale)) calc(14px * var(--density-scale));
+  border-radius: 14px;
+  background: linear-gradient(180deg, var(--panel), var(--panel-soft));
+  border: 1px solid color-mix(in srgb, var(--border) 88%, transparent);
+}
+
+.meetingAudioPanel strong {
+  color: var(--heading);
+  font-size: calc(12px * var(--font-scale));
+}
+
+.meetingAudioPanel p {
+  margin: 0;
+  color: var(--muted);
+  font-size: calc(11px * var(--font-scale));
+  line-height: 1.6;
+}
+
+.meetingAudioPlayer {
+  display: grid;
+  gap: 8px;
+}
+
+.meetingAudioPlayer span {
+  color: var(--muted);
+  font-size: calc(11px * var(--font-scale));
+}
+
+.meetingAudioPlayer audio {
+  width: 100%;
+}
+
+.meetingFieldRow {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.meetingField {
+  display: grid;
+  gap: 8px;
+}
+
+.meetingField span {
+  color: var(--muted);
+  font-size: calc(11px * var(--font-scale));
+  font-weight: 700;
+}
+
+.meetingField textarea {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--panel);
+  color: var(--text);
+  font: inherit;
+  outline: none;
+  resize: vertical;
+}
+
+.meetingField textarea:focus {
+  border-color: rgba(222, 131, 0, 0.58);
+  box-shadow: 0 0 0 4px rgba(222, 131, 0, 0.08);
+}
+
+.meetingFormActions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 4px;
+}
+
+.dealsFilters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: flex-end;
+  margin: 12px 0 18px;
+}
+
+.filterActionGroup {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.dealsFilterSummary {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  margin: -4px 0 18px;
+  color: var(--muted);
+  font-size: calc(13px * var(--font-scale));
+}
+
+.paginationNumbers {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.paginationNumberButton {
+  min-width: 42px;
+  height: 42px;
+  padding: 0 14px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--panel);
+  color: var(--heading);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font: inherit;
+  font-size: calc(13px * var(--font-scale));
+  font-weight: 800;
+  cursor: pointer;
+  transition:
+    transform var(--motion-fast) ease,
+    background var(--motion-fast) ease,
+    border-color var(--motion-fast) ease,
+    color var(--motion-fast) ease,
+    box-shadow var(--motion-fast) ease;
+}
+
+.paginationNumberButton:hover {
+  transform: translateY(-1px);
+  border-color: color-mix(in srgb, var(--accent) 34%, var(--border));
+}
+
+.paginationNumberButtonActive {
+  border-color: color-mix(in srgb, var(--accent) 70%, transparent);
+  background: linear-gradient(135deg, var(--accent), #f3a43d);
+  color: #ffffff;
+  box-shadow: 0 10px 20px rgba(222, 131, 0, 0.18);
+}
+
+.paginationNumberButton:disabled {
+  cursor: default;
+}
+
+.filterApplyButton {
+  min-width: 112px;
+  justify-content: center;
+}
+
+.filterApplyButton:disabled {
+  cursor: default;
+  opacity: 0.55;
+  transform: none;
+  box-shadow: none;
+}
+
+.filterApplyButton:disabled:hover {
+  transform: none;
+}
+
+.dealsFilterField {
+  display: grid;
+  gap: 6px;
+  min-width: 210px;
+}
+
+.dealsFilterField span {
+  color: var(--muted);
+  font-size: calc(10px * var(--font-scale));
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.dealsFilterField select {
+  height: 36px;
+  padding: 0 10px;
+  border: 1px solid #c7d2df;
+  border-radius: 9px;
+  background: #f7f9fc;
+  color: var(--text);
+  font: inherit;
+  font-size: calc(12px * var(--font-scale));
+  outline: none;
+}
+
+.dealsFilterInput {
+  height: 36px;
+  padding: 0 10px;
+  border: 1px solid #c7d2df;
+  border-radius: 9px;
+  background: #f7f9fc;
+  color: var(--text);
+  font: inherit;
+  font-size: calc(12px * var(--font-scale));
+  outline: none;
+}
+
+.dealsFilterField select:focus {
+  border-color: #a8bacf;
+  box-shadow: 0 0 0 3px rgba(74, 105, 143, 0.12);
+}
+
+.dealsFilterInput:focus {
+  border-color: #a8bacf;
+  box-shadow: 0 0 0 3px rgba(74, 105, 143, 0.12);
+}
+
+.dealsFilterInput::placeholder {
+  color: color-mix(in srgb, var(--muted) 88%, white);
+}
+
+.sectionEmptyPanel {
+  display: grid;
+  gap: 6px;
+  margin: 0 0 16px;
+  padding: 18px 20px;
+  border: 1px dashed #c7d2df;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.sectionEmptyPanel strong {
+  color: #19395a;
+  font-size: calc(14px * var(--font-scale));
+}
+
+.sectionEmptyPanel p {
+  margin: 0;
+  color: #5c7698;
+  font-size: calc(12px * var(--font-scale));
+}
+
+.pipelineStageChart {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  align-items: end;
+  margin-top: 14px;
+  padding: calc(14px * var(--density-scale));
+  border-radius: 16px;
+  background: linear-gradient(180deg, var(--panel), var(--panel-soft));
+  border: 1px solid color-mix(in srgb, var(--border) 88%, transparent);
+}
+
+.pipelineStageBarCard {
+  display: grid;
+  gap: 8px;
+  justify-items: center;
+  border: 0;
+  width: 100%;
+  background: transparent;
+  cursor: pointer;
+  padding: 6px 4px;
+  border-radius: 14px;
+  transition:
+    transform var(--motion-fast) ease,
+    background var(--motion-fast) ease;
+}
+
+.pipelineStageBarCard:hover {
+  transform: translateY(-1px);
+  background: color-mix(in srgb, var(--panel) 45%, var(--panel-soft));
+}
+
+.pipelineStageBarWrap {
+  width: 100%;
+  height: 132px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 10px 0;
+  border-radius: 12px;
+  background:
+    linear-gradient(to top, color-mix(in srgb, var(--border) 70%, transparent) 1px, transparent 1px);
+  background-size: 100% 28px;
+}
+
+.pipelineStageBar {
+  width: min(52px, 64%);
+  min-height: 16px;
+  border-radius: 12px 12px 4px 4px;
+  background: linear-gradient(180deg, #f3ae43, var(--accent));
+  box-shadow: 0 8px 18px rgba(222, 131, 0, 0.16);
+}
+
+.pipelineStageBarCard strong {
+  color: var(--heading);
+  font-size: calc(15px * var(--font-scale));
+}
+
+.pipelineStageBarCard span {
+  color: var(--muted);
+  font-size: calc(11px * var(--font-scale));
+  font-weight: 700;
+  text-align: center;
+}
+
+.stageModalBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 110;
+  display: grid;
+  place-items: center;
+  background: rgba(33, 52, 77, 0.34);
+  backdrop-filter: blur(8px);
+  padding: clamp(24px, 3vw, 48px);
+}
+
+.stageModal {
+  width: min(1120px, calc(100vw - 72px));
+  max-height: min(88vh, 860px);
+  display: grid;
+  grid-template-rows: auto 1fr;
+  gap: 14px;
+  padding: 20px;
+  border-radius: 20px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  box-shadow: 0 30px 60px rgba(17, 32, 58, 0.24);
+}
+
+.stageModalHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.stageModalHeader span {
+  color: var(--muted);
+  font-size: calc(11px * var(--font-scale));
+  font-weight: 700;
+}
+
+.stageModalHeader h3 {
+  margin: 4px 0 0;
+  color: var(--heading);
+  font-size: calc(21px * var(--font-scale));
+  line-height: 1.2;
+}
+
+.stageModalHeader p {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: calc(12px * var(--font-scale));
+}
+
+.stageModalList {
+  display: grid;
+  gap: 6px;
+  overflow: hidden;
+  padding-right: 0;
+}
+
+.stageModalItem {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 0;
+  border-radius: 0;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 88%, transparent);
+}
+
+.stageModalItem div {
+  display: grid;
+  gap: 0;
+}
+
+.stageModalItem strong {
+  color: var(--heading);
+  font-size: calc(12px * var(--font-scale));
+  line-height: 1.25;
+}
+
+.stageModalItem span {
+  color: var(--muted);
+  font-size: calc(11px * var(--font-scale));
+}
+
+.kpiCard span {
+  color: var(--muted);
+  font-size: calc(11px * var(--font-scale));
+  font-weight: 700;
+}
+
+.kpiCard strong {
+  color: var(--heading);
+  font-size: calc(18px * var(--font-scale));
+}
+
+.kpiRow {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.kpiCard {
+  display: grid;
+  gap: 6px;
+  padding: calc(12px * var(--density-scale));
+  border-radius: 14px;
+  background: linear-gradient(180deg, var(--panel), var(--panel-soft));
+  border: 1px solid color-mix(in srgb, var(--border) 88%, transparent);
+}
+
+.dealList {
+  display: grid;
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.dealListItem {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr) minmax(0, 0.8fr);
+  gap: 12px;
+  align-items: center;
+  padding: calc(11px * var(--density-scale)) calc(13px * var(--density-scale));
+  border-radius: 13px;
+  background: linear-gradient(180deg, var(--panel), var(--panel-soft));
+}
+
+.sellerDealListItem {
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, 0.8fr) minmax(0, 0.8fr);
+}
+
+.dealMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.dealMeta strong {
+  color: var(--heading);
+  font-size: calc(12px * var(--font-scale));
+}
+
+.dealMeta span {
+  color: var(--muted);
+  font-size: calc(11px * var(--font-scale));
+}
+
+@media (max-width: 980px) {
+
+    .meetingFieldRow {
+      grid-template-columns: 1fr;
+    }
+
+}
+
+  .sectionHeaderBar {
+    flex-direction: column;
+    align-items: stretch;
+  }

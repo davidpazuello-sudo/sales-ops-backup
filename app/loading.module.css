@@ -1,0 +1,42 @@
+.appRouteLoadingScreen {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: var(--bg);
+}
+
+.appRouteLoadingPanel {
+  min-width: min(460px, 100%);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 20px;
+  border: 1px solid color-mix(in srgb, var(--border) 88%, transparent);
+  border-radius: 20px;
+  background: linear-gradient(180deg, var(--panel), var(--panel-soft));
+  box-shadow: var(--surface-shadow);
+}
+
+.appRouteLoadingPanel strong {
+  display: block;
+  color: var(--heading);
+  font-size: calc(14px * var(--font-scale));
+}
+
+.appRouteLoadingPanel p {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: calc(12px * var(--font-scale));
+  line-height: 1.45;
+}
+
+.sectionLoadingSpinner {
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  border: 2px solid color-mix(in srgb, var(--accent) 24%, var(--border));
+  border-top-color: var(--accent);
+  animation: sectionSpinner 0.8s linear infinite;
+  flex: 0 0 auto;
+}

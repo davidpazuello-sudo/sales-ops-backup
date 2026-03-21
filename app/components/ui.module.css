@@ -1,0 +1,400 @@
+.hamburger {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  height: 14px;
+}
+
+.hamburger span {
+  width: 12px;
+  height: 1.2px;
+  border-radius: 999px;
+  background: currentColor;
+}
+
+.panelsIcon {
+  width: 16px;
+  height: 16px;
+  border: 1.6px solid currentColor;
+  border-radius: 4px;
+  position: relative;
+}
+
+.panelsIcon::before {
+  content: "";
+  position: absolute;
+  top: -2px;
+  bottom: -2px;
+  left: 4px;
+  width: 1.6px;
+  background: currentColor;
+}
+
+.pageTitleRow {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.pageTitleStatus {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+
+.pageTitleSpinner {
+  width: 16px;
+  height: 16px;
+}
+
+.card {
+  height: 100%;
+  min-height: 290px;
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--surface-radius);
+  padding: calc(22px * var(--density-scale)) calc(24px * var(--density-scale));
+  background: var(--panel);
+  box-shadow: var(--surface-shadow);
+  transition:
+    background var(--motion-normal) ease,
+    box-shadow var(--motion-normal) ease,
+    color var(--motion-normal) ease;
+}
+
+.cardWide {
+  grid-column: auto;
+  min-height: 290px;
+}
+
+.photoOption {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 0 0 18px;
+  border-bottom: 1px solid var(--border);
+}
+
+.photoPreview {
+  width: 58px;
+  height: 58px;
+  border-radius: 18px;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, var(--accent), #f3a43d);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  color: #fff;
+  font-size: calc(24px * var(--font-scale));
+  font-weight: 800;
+}
+
+.photoMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.photoMeta strong {
+  color: var(--heading);
+  font-size: calc(14px * var(--font-scale));
+}
+
+.photoMeta span {
+  color: var(--muted);
+  font-size: calc(12px * var(--font-scale));
+}
+
+.photoAction {
+  margin-left: auto;
+  height: 38px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.hiddenFileInput {
+  display: none;
+}
+
+.cardEyebrow {
+  color: var(--muted);
+  font-size: calc(11px * var(--font-scale));
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.cardTitle {
+  margin: 8px 0 0;
+  color: var(--heading);
+  font-size: calc(21px * var(--font-scale));
+  font-weight: 800;
+}
+
+.detailRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: calc(14px * var(--density-scale)) 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.tableRow:last-child {
+  border-bottom: 0;
+}
+
+.detailLabel {
+  color: var(--muted);
+  font-size: calc(13px * var(--font-scale));
+  font-weight: 600;
+}
+
+.detailValueBox {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  text-align: right;
+}
+
+.detailValue {
+  color: var(--heading);
+  font-size: calc(14px * var(--font-scale));
+}
+
+.detailHelper {
+  color: var(--muted);
+  font-size: calc(12px * var(--font-scale));
+}
+
+.table {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.tableRow {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr auto;
+  gap: 14px;
+  align-items: center;
+}
+
+.tableHead {
+  color: var(--accent);
+  font-size: calc(11px * var(--font-scale));
+  font-weight: 800;
+  letter-spacing: 0.05em;
+}
+
+.tableRow {
+  padding: calc(12px * var(--density-scale)) 0;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+  font-size: calc(13px * var(--font-scale));
+}
+
+.matrixCols {
+  grid-template-columns: 1.3fr repeat(3, 80px);
+}
+
+.matrixCols span:not(:first-child) {
+  text-align: center;
+}
+
+.sectionLoadingSpinner {
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  border: 2px solid color-mix(in srgb, var(--accent) 24%, var(--border));
+  border-top-color: var(--accent);
+  animation: sectionSpinner 0.8s linear infinite;
+  flex: 0 0 auto;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.campaignProspectingMetrics > .metric {
+  min-width: 0;
+}
+
+.optionGroup {
+  margin-top: 18px;
+}
+
+.optionGroup:first-of-type {
+  margin-top: 20px;
+}
+
+.optionGroupLabel {
+  display: block;
+  color: var(--muted);
+  font-size: calc(12px * var(--font-scale));
+  font-weight: 700;
+}
+
+.optionPills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.optionPill {
+  padding: calc(10px * var(--density-scale)) calc(14px * var(--density-scale));
+  border: 0;
+  border-radius: 999px;
+  background: var(--panel-soft);
+  color: var(--text);
+  font: inherit;
+  font-size: calc(12px * var(--font-scale));
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.optionPillActive {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.preferenceTable {
+  display: grid;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.preferenceRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: calc(14px * var(--density-scale)) calc(16px * var(--density-scale));
+  border-radius: calc(var(--surface-radius) - 4px);
+  background: var(--panel-soft);
+}
+
+.preferenceCopy {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.preferenceCopy strong {
+  color: var(--heading);
+  font-size: calc(13px * var(--font-scale));
+}
+
+.preferenceCopy span {
+  color: var(--muted);
+  font-size: calc(12px * var(--font-scale));
+  line-height: 1.45;
+}
+
+.toggleButton {
+  width: 52px;
+  height: 30px;
+  padding: 3px;
+  border: 0;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--panel) 72%, var(--border));
+  cursor: pointer;
+  transition: background var(--motion-fast) ease;
+}
+
+.toggleButton span {
+  display: block;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--panel);
+  box-shadow: 0 3px 10px rgba(20, 33, 54, 0.16);
+  transition: transform var(--motion-fast) ease;
+}
+
+.toggleButtonActive {
+  background: linear-gradient(135deg, var(--accent), #f3a43d);
+}
+
+.toggleButtonActive span {
+  transform: translateX(22px);
+}
+
+.metric {
+  flex: 1 1 180px;
+  border-radius: calc(var(--surface-radius) - 4px);
+  padding: calc(18px * var(--density-scale));
+  background: linear-gradient(180deg, var(--panel), var(--panel-soft));
+}
+
+.metric small {
+  display: block;
+}
+
+.metric span {
+  color: var(--muted);
+  font-size: calc(12px * var(--font-scale));
+  font-weight: 700;
+}
+
+.metric strong {
+  display: block;
+  margin-top: 10px;
+  color: var(--heading);
+  font-size: calc(25px * var(--font-scale));
+}
+
+.metric small {
+  margin-top: 8px;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+  .cardWide {
+    grid-column: auto;
+  }
+
+  .matrixCols {
+    grid-template-columns: 1fr;
+  }
+
+  .matrixCols span:not(:first-child) {
+    text-align: left;
+  }
+
+  .detailValueBox {
+    align-items: flex-start;
+    text-align: left;
+  }
+
+  .toggleButton {
+    margin-left: 0;
+  }
+
+  .preferenceRow {
+    width: 100%;
+  }

@@ -1,0 +1,62 @@
+.dashboardSection {
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  padding: calc(34px * var(--density-scale)) calc(38px * var(--density-scale)) calc(42px * var(--density-scale));
+}
+
+.sectionHeaderBar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.settingsHeader h1 {
+  margin: 0;
+  color: var(--heading);
+  font-size: calc(29px * var(--font-scale));
+  line-height: 1.1;
+}
+
+.settingsHeader p {
+  max-width: 760px;
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: calc(14px * var(--font-scale));
+  line-height: 1.5;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: calc(18px * var(--density-scale));
+  margin-top: 28px;
+}
+
+.metrics {
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-top: 18px;
+}
+
+.sellerPageHeader .settingsHeader p {
+  display: none;
+}
+
+.sellerDetailIdentity .settingsHeader h1 {
+  font-size: calc(21px * var(--font-scale));
+  letter-spacing: -0.02em;
+}
+
+.sellerDetailIdentity .settingsHeader p {
+  margin-top: 6px;
+  font-size: calc(12px * var(--font-scale));
+}
+
+  .sectionHeaderBar {
+    flex-direction: column;
+    align-items: stretch;
+  }

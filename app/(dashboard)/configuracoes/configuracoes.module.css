@@ -1,0 +1,158 @@
+.settingsSidebarItem {
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+}
+
+.settingsSidebarItem:hover {
+  background: var(--panel-soft);
+}
+
+.settingsSidebarItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-radius: 10px;
+  text-align: left;
+}
+
+.settingsSidebarItemActive {
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.settingsSidebarIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: currentColor;
+  flex: 0 0 auto;
+}
+
+.settingsSidebarIcon svg {
+  width: 18px;
+  height: 18px;
+  stroke-width: 1.8;
+}
+
+.settingsSidebarLabel {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.integrationNotice {
+  margin-top: 20px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: calc(12px * var(--font-scale));
+  font-weight: 700;
+}
+
+.settingsLayout {
+  display: grid;
+  grid-template-columns: 236px 1fr;
+  min-height: 100%;
+  align-items: start;
+}
+
+.settingsSidebar {
+  position: sticky;
+  top: 0;
+  align-self: start;
+  height: calc(100vh - 60px);
+  overflow: auto;
+  padding: calc(22px * var(--density-scale)) 12px;
+  background: var(--sidebar);
+  border-right: 1px solid var(--border);
+}
+
+.settingsSidebarTitle {
+  margin: 4px 8px 14px;
+  color: var(--muted);
+  font-size: calc(10px * var(--font-scale));
+  font-weight: 800;
+  letter-spacing: 0.09em;
+}
+
+.settingsSidebarList {
+  flex-direction: column;
+  gap: calc(6px * var(--density-scale));
+}
+
+.settingsSidebarItem {
+  width: 100%;
+  min-height: calc(40px * var(--density-scale));
+  padding: calc(8px * var(--density-scale)) calc(12px * var(--density-scale));
+  color: var(--muted);
+  font-size: calc(13px * var(--font-scale));
+}
+
+.settingsContent {
+  padding: calc(34px * var(--density-scale)) calc(38px * var(--density-scale)) calc(42px * var(--density-scale));
+}
+
+.sectionHeaderBar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.settingsHeader h1 {
+  margin: 0;
+  color: var(--heading);
+  font-size: calc(29px * var(--font-scale));
+  line-height: 1.1;
+}
+
+.settingsHeader p {
+  max-width: 760px;
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: calc(14px * var(--font-scale));
+  line-height: 1.5;
+}
+
+.sellerPageHeader .settingsHeader p {
+  display: none;
+}
+
+.sellerDetailIdentity .settingsHeader h1 {
+  font-size: calc(21px * var(--font-scale));
+  letter-spacing: -0.02em;
+}
+
+.sellerDetailIdentity .settingsHeader p {
+  margin-top: 6px;
+  font-size: calc(12px * var(--font-scale));
+}
+
+@media (max-width: 1180px) {
+
+    .settingsLayout {
+      grid-template-columns: 216px 1fr;
+    }
+
+}
+
+  .settingsSidebar {
+    position: static;
+    height: auto;
+    overflow: visible;
+    border-right: 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .settingsContent {
+    padding: 24px 18px 30px;
+  }
+
+  .sectionHeaderBar {
+    flex-direction: column;
+    align-items: stretch;
+  }

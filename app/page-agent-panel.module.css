@@ -1,0 +1,228 @@
+.pageAgentToggleButton {
+  min-height: 42px;
+  padding: 0 16px;
+  border: 1px solid color-mix(in srgb, var(--accent) 18%, var(--border));
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--panel) 40%, var(--panel-soft));
+  color: var(--heading);
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font: inherit;
+  font-size: calc(12px * var(--font-scale));
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    transform var(--motion-fast) ease,
+    border-color var(--motion-fast) ease,
+    background var(--motion-fast) ease,
+    color var(--motion-fast) ease,
+    box-shadow var(--motion-fast) ease;
+}
+
+.pageAgentToggleButton:hover {
+  transform: translateY(-1px);
+  border-color: color-mix(in srgb, var(--accent) 30%, var(--border));
+  background: color-mix(in srgb, var(--accent-soft) 54%, var(--panel));
+}
+
+.pageAgentToggleButtonActive {
+  border-color: color-mix(in srgb, var(--accent) 34%, var(--border));
+  background: color-mix(in srgb, var(--accent-soft) 76%, var(--panel));
+  color: var(--accent);
+  box-shadow: 0 10px 24px rgba(222, 131, 0, 0.1);
+}
+
+.pageAgentToggleButton svg {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  flex: 0 0 auto;
+}
+
+.secondaryActionButton {
+  height: 38px;
+  padding: 0 16px;
+  border-radius: 999px;
+  font: inherit;
+  font-size: calc(12px * var(--font-scale));
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    transform var(--motion-fast) ease,
+    box-shadow var(--motion-fast) ease,
+    border-color var(--motion-fast) ease,
+    background var(--motion-fast) ease;
+}
+
+.primaryActionButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  border: 0;
+  background: linear-gradient(135deg, var(--accent), #f3a43d);
+  color: #fff;
+  box-shadow: 0 10px 20px rgba(222, 131, 0, 0.16);
+}
+
+.secondaryActionButton {
+  border: 1px solid var(--border);
+  background: var(--panel);
+  color: var(--heading);
+}
+
+.secondaryActionButton:hover {
+  transform: translateY(-1px);
+}
+
+.secondaryActionButton svg {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.pageAgentPanel {
+  display: grid;
+  gap: 16px;
+  margin-top: 18px;
+}
+
+.pageAgentHeader {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 12px;
+  align-items: start;
+}
+
+.pageAgentBadge {
+  width: 40px;
+  height: 40px;
+  border-radius: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, rgba(222, 131, 0, 0.16), rgba(243, 164, 61, 0.24));
+  color: var(--accent);
+}
+
+.pageAgentBadge svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.pageAgentIntro {
+  display: grid;
+  gap: 4px;
+}
+
+.pageAgentIntro strong {
+  color: var(--heading);
+  font-size: calc(14px * var(--font-scale));
+}
+
+.pageAgentIntro p {
+  margin: 0;
+  color: var(--muted);
+  font-size: calc(12px * var(--font-scale));
+  line-height: 1.55;
+}
+
+.pageAgentPromptRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.pageAgentPromptChip {
+  min-height: 34px;
+  padding: 0 14px;
+  border: 1px solid color-mix(in srgb, var(--accent) 18%, var(--border));
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--panel) 32%, var(--panel-soft));
+  color: var(--heading);
+  font: inherit;
+  font-size: calc(12px * var(--font-scale));
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    transform var(--motion-fast) ease,
+    border-color var(--motion-fast) ease,
+    background var(--motion-fast) ease;
+}
+
+.pageAgentPromptChip:hover {
+  transform: translateY(-1px);
+  border-color: color-mix(in srgb, var(--accent) 30%, var(--border));
+  background: color-mix(in srgb, var(--accent-soft) 48%, var(--panel));
+}
+
+.pageAgentComposer {
+  display: grid;
+  gap: 12px;
+}
+
+.pageAgentComposer input {
+  width: 100%;
+  height: 44px;
+  padding: 0 14px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--panel);
+  color: var(--text);
+  font: inherit;
+  outline: none;
+}
+
+.pageAgentComposer input:focus {
+  border-color: rgba(222, 131, 0, 0.58);
+  box-shadow: 0 0 0 4px rgba(222, 131, 0, 0.08);
+}
+
+.pageAgentActions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.pageAgentResponse {
+  display: grid;
+  gap: 8px;
+  padding: calc(14px * var(--density-scale)) calc(16px * var(--density-scale));
+  border-radius: 18px;
+  background: linear-gradient(180deg, var(--panel), var(--panel-soft));
+  border: 1px solid color-mix(in srgb, var(--border) 88%, transparent);
+}
+
+.pageAgentResponse small {
+  color: var(--muted);
+  font-size: calc(11px * var(--font-scale));
+}
+
+.pageAgentResponse strong {
+  color: var(--heading);
+  font-size: calc(14px * var(--font-scale));
+}
+
+.pageAgentResponse p {
+  margin: 0;
+  color: var(--text);
+  font-size: calc(13px * var(--font-scale));
+  line-height: 1.65;
+}
+
+  .pageAgentToggleButton {
+    justify-content: center;
+  }

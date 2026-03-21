@@ -23,6 +23,10 @@
     "react-dom": "19.0.0"
   },
   "devDependencies": {
+    "@babel/core": "^7.29.0",
+    "@babel/generator": "^7.29.1",
+    "@babel/parser": "^7.29.2",
+    "@babel/traverse": "^7.29.0",
     "@playwright/test": "^1.58.2",
     "@types/node": "^25.4.0",
     "@types/react": "^19.2.14",

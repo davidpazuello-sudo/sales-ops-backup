@@ -1,0 +1,239 @@
+.secondaryActionButton {
+  height: 38px;
+  padding: 0 16px;
+  border-radius: 999px;
+  font: inherit;
+  font-size: calc(12px * var(--font-scale));
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    transform var(--motion-fast) ease,
+    box-shadow var(--motion-fast) ease,
+    border-color var(--motion-fast) ease,
+    background var(--motion-fast) ease;
+}
+
+.primaryActionButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  border: 0;
+  background: linear-gradient(135deg, var(--accent), #f3a43d);
+  color: #fff;
+  box-shadow: 0 10px 20px rgba(222, 131, 0, 0.16);
+}
+
+.secondaryActionButton {
+  border: 1px solid var(--border);
+  background: var(--panel);
+  color: var(--heading);
+}
+
+.secondaryActionButton:hover {
+  transform: translateY(-1px);
+}
+
+.secondaryActionButton svg {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.sectionNotice {
+  margin: 0 0 14px;
+  padding: 12px 14px;
+  border: 1px solid rgba(22, 61, 115, 0.12);
+  border-radius: 12px;
+  background: rgba(22, 61, 115, 0.05);
+  color: #24476f;
+  font-size: calc(12px * var(--font-scale));
+  line-height: 1.5;
+}
+
+:global(html[data-theme="dark"]) .sectionNotice {
+  border-color: rgba(104, 141, 192, 0.24);
+  background: rgba(19, 33, 52, 0.88);
+  color: #dce9ff;
+}
+
+.accessRequestActions {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+:global(html[data-theme="dark"]) .twoFactorField input::placeholder {
+  color: #8fa4c2;
+}
+
+.twoFactorPanel {
+  display: grid;
+  gap: 14px;
+}
+
+.twoFactorStatusRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: linear-gradient(180deg, var(--panel), var(--panel-soft));
+}
+
+.twoFactorStatusRow strong {
+  display: block;
+  margin-top: 4px;
+  color: var(--heading);
+  font-size: calc(15px * var(--font-scale));
+}
+
+.twoFactorStatusRow p {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: calc(12px * var(--font-scale));
+  line-height: 1.55;
+}
+
+.twoFactorEyebrow {
+  color: var(--muted);
+  font-size: calc(10px * var(--font-scale));
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.twoFactorBadge {
+  min-width: 82px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(222, 131, 0, 0.12);
+  color: var(--accent);
+  text-align: center;
+  font-size: calc(11px * var(--font-scale));
+  font-weight: 800;
+}
+
+.twoFactorBadgeActive {
+  background: rgba(31, 136, 61, 0.14);
+  color: #1f883d;
+}
+
+.twoFactorEnrollment {
+  display: grid;
+  grid-template-columns: minmax(0, 220px) minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.twoFactorQrBox {
+  display: grid;
+  gap: 12px;
+  justify-items: center;
+}
+
+.twoFactorQrImage {
+  width: 200px;
+  height: 200px;
+  padding: 12px;
+  border-radius: 18px;
+  background: #fff;
+  border: 1px solid var(--border);
+  box-shadow: 0 12px 32px rgba(17, 32, 58, 0.08);
+}
+
+.twoFactorSecretBox {
+  width: 100%;
+  display: grid;
+  gap: 6px;
+  padding: 12px;
+  border: 1px dashed var(--border);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--panel) 56%, var(--panel-soft));
+}
+
+.twoFactorSummary span {
+  color: var(--muted);
+  font-size: calc(11px * var(--font-scale));
+  font-weight: 700;
+}
+
+.twoFactorSummary strong {
+  color: var(--heading);
+  font-size: calc(13px * var(--font-scale));
+  line-height: 1.45;
+  word-break: break-word;
+}
+
+.twoFactorCodeForm {
+  display: grid;
+  gap: 12px;
+}
+
+.twoFactorSummary small {
+  color: var(--muted);
+  font-size: calc(12px * var(--font-scale));
+  line-height: 1.55;
+}
+
+.twoFactorSummary {
+  display: grid;
+  gap: 10px;
+}
+
+.twoFactorActions {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: linear-gradient(180deg, var(--panel), var(--panel-soft));
+}
+
+.twoFactorField {
+  display: grid;
+  gap: 8px;
+}
+
+.twoFactorField span {
+  color: var(--heading);
+  font-size: calc(12px * var(--font-scale));
+  font-weight: 700;
+}
+
+.twoFactorField input {
+  width: 100%;
+  height: 42px;
+  padding: 0 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--panel);
+  color: var(--text);
+  font: inherit;
+  outline: none;
+}
+
+.twoFactorField input:focus {
+  border-color: #a8bacf;
+  box-shadow: 0 0 0 3px rgba(74, 105, 143, 0.12);
+}
+
+.twoFactorFormInfo {
+  padding: 10px 12px;
+  border: 1px solid rgba(180, 72, 55, 0.18);
+  border-radius: 12px;
+  background: rgba(180, 72, 55, 0.08);
+  color: #7d3021;
+  font-size: calc(12px * var(--font-scale));
+  line-height: 1.5;
+}
+
+  .accessRequestActions {
+    width: 100%;
+    justify-content: flex-start;
+  }
