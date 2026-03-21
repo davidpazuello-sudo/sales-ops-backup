@@ -6,8 +6,8 @@ const TARGET_DIRS = ["app", "lib"];
 const ALLOWED_EXTENSIONS = new Set([".js", ".jsx", ".ts", ".tsx", ".css", ".md"]);
 
 const forbiddenPatterns = [
-  { label: "mojibake: Ã", regex: /Ã[\w\u00C0-\u017F]/g },
-  { label: "mojibake: Â", regex: /Â[\w\u00C0-\u017F]/g },
+  { label: "mojibake: Ã", regex: /Ã[\u0080-\u00BF]/g },
+  { label: "mojibake: Â", regex: /Â[\u0080-\u00BF]/g },
   { label: "mojibake: ï¿½", regex: /ï¿½/g },
   { label: "replacement char", regex: /\uFFFD/g },
 ];
