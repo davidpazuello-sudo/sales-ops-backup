@@ -196,6 +196,7 @@
 }
 
 .tableHead {
+  display: grid;
   color: var(--accent);
   font-size: calc(11px * var(--font-scale));
   font-weight: 800;
