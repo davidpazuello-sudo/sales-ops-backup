@@ -91,13 +91,13 @@ export function SellerMeetingsContent({ dashboardData, sellerSlug }) {
       </header>
 
       {stateErrors.length ? (
-        <SectionNotice variant="error">{stateErrors[0] || "Nao foi possivel carregar as reunioes agora."}</SectionNotice>
+        <SectionNotice variant="error">{stateErrors[0] || "Não foi possível carregar as reuniões agora."}</SectionNotice>
       ) : null}
 
       {!meetings.length && loadingState === "ready" && !stateErrors.length ? (
         <SectionEmptyState
           title="Sem reunioes neste vendedor"
-          description="Quando houver reunioes reais da HubSpot ou registros internos, elas aparecerao aqui."
+          description="Quando houver reuniões reais da HubSpot ou registros internos, elas aparecerão aqui."
         />
       ) : (
         <section className={styles.meetingsList}>
@@ -185,7 +185,7 @@ export function SellerMeetingDetailContent({ dashboardData, sellerSlug, meetingI
           <p>Preparando os dados do vendedor para esta tela.</p>
         </header>
         {stateErrors.length ? (
-          <SectionNotice variant="error">{stateErrors[0] || "Nao foi possivel carregar o vendedor agora."}</SectionNotice>
+          <SectionNotice variant="error">{stateErrors[0] || "Não foi possível carregar o vendedor agora."}</SectionNotice>
         ) : null}
         <SectionEmptyState
           title={loadingState === "loading" ? "Carregando vendedor" : "Vendedor nao encontrado"}
@@ -229,7 +229,7 @@ export function SellerMeetingDetailContent({ dashboardData, sellerSlug, meetingI
     setSaving(false);
 
     if (!response?.ok) {
-      setFormError(payload?.error || "Nao foi possivel registrar a reuniao agora.");
+      setFormError(payload?.error || "Não foi possível registrar a reunião agora.");
       return;
     }
 
@@ -457,13 +457,13 @@ export function SellersContent({ dashboardData }) {
         ) : null}
 
       {stateErrors.length ? (
-        <SectionNotice variant="error">{stateErrors[0] || "A lista de vendedores ainda nao conseguiu carregar dados reais."}</SectionNotice>
+        <SectionNotice variant="error">{stateErrors[0] || "A lista de vendedores ainda não conseguiu carregar dados reais."}</SectionNotice>
       ) : null}
 
       {!filteredSellers.length && loadingState === "ready" && !stateErrors.length ? (
         <SectionEmptyState
           title={sellerFilter.trim() ? "Nenhum vendedor encontrado" : "Nenhum vendedor sincronizado"}
-          description={sellerFilter.trim() ? "Tente ajustar o nome pesquisado ou limpar o filtro." : "Quando a HubSpot retornar owners reais, eles aparecerao nesta lista."}
+          description={sellerFilter.trim() ? "Tente ajustar o nome pesquisado ou limpar o filtro." : "Quando a HubSpot retornar owners reais, eles aparecerão nesta lista."}
         />
       ) : null}
 
@@ -577,9 +577,9 @@ export function SellerProfileContent({ dashboardData, sellerSlug }) {
       </header>
 
       <div className={styles.grid}>
-        <Card eyebrow="GERAL" title="Visao geral do pipeline" wide>
+        <Card eyebrow="GERAL" title="Visão geral do pipeline" wide>
           <div className={styles.metrics}>
-            <Metric title="Negocios abertos" value={`${seller.openDeals}`} />
+            <Metric title="Negócios abertos" value={`${seller.openDeals}`} />
             <Metric title="Valor total na pipeline" value={formatCurrency(totalPipelineValue)} />
             <Metric title="Atividades pendentes" value={`${pendingTasks}`} />
             <Metric title="Status motivacao" value={motivationStatus} />
@@ -599,7 +599,7 @@ export function SellerProfileContent({ dashboardData, sellerSlug }) {
 
         <Card eyebrow="PERFORMANCE" title="Performance e produtividade" wide>
           <div className={styles.metrics}>
-            <Metric title="Taxa de conversao" value={`${conversionRate}%`} note="Negocios ganhos vs. perdidos/em aberto" />
+            <Metric title="Taxa de conversão" value={`${conversionRate}%`} note="Negócios ganhos vs. perdidos/em aberto" />
             <Metric title="Atingimento de meta" value={`${seller.metaPercent}%`} note="Comparativo com a cota atual" />
             <Metric title="Pipeline" value={seller.pipelineLabel} note="Valor comercial sob gestao" />
           </div>
@@ -674,7 +674,7 @@ export function SellerProfileContent({ dashboardData, sellerSlug }) {
 
       {selectedStage ? (
         <div className={styles.stageModalBackdrop} role="presentation" onClick={() => setSelectedStage("")}>
-          <div className={styles.stageModal} role="dialog" aria-modal="true" aria-label={`Negocios em ${selectedStage}`} onClick={(event) => event.stopPropagation()}>
+          <div className={styles.stageModal} role="dialog" aria-modal="true" aria-label={`Negócios em ${selectedStage}`} onClick={(event) => event.stopPropagation()}>
             <header className={styles.stageModalHeader}>
               <div>
                 <span>ETAPA</span>

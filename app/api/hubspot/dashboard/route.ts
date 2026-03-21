@@ -156,7 +156,7 @@ export async function GET(request) {
       observation,
       createDashboardFallbackData({
         loading: "error",
-        status: "Limite temporario",
+        status: "Limite temporário",
         error: "Muitas consultas ao dashboard em pouco tempo. Aguarde alguns instantes.",
       }),
       { status: 429 },
@@ -193,13 +193,13 @@ export async function GET(request) {
     const missingToken = message.includes("HUBSPOT_TOKEN_MISSING");
     const errorMessage = missingToken
       ? "Configure HUBSPOT_ACCESS_TOKEN para carregar os dados reais da HubSpot."
-      : "Nao foi possivel consultar a HubSpot no momento.";
+      : "Não foi possível consultar a HubSpot no momento.";
 
     return jsonWithApiObservation(
       observation,
       createDashboardFallbackData({
         loading: missingToken ? "config_required" : "error",
-        status: missingToken ? "Configuracao pendente" : "Falha na sincronizacao",
+        status: missingToken ? "Configuração pendente" : "Falha na sincronização",
         error: errorMessage,
       }),
       { status: missingToken ? 503 : 500 },

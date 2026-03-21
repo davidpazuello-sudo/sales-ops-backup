@@ -51,7 +51,7 @@ export function AccessPermissionsContent({ sessionUser, onNotificationsRefresh }
 
     if (!response?.ok) {
       setRequests([]);
-      setRequestsError(payload?.error || "Nao foi possivel carregar as solicitacoes pendentes.");
+      setRequestsError(payload?.error || "Não foi possível carregar as solicitações pendentes.");
       setLoading(false);
       return;
     }
@@ -69,7 +69,7 @@ export function AccessPermissionsContent({ sessionUser, onNotificationsRefresh }
     if (!response?.ok) {
       setUsers([]);
       setRoleDrafts({});
-      setUsersError(payload?.error || "Nao foi possivel carregar os usuarios do sistema.");
+      setUsersError(payload?.error || "Não foi possível carregar os usuários do sistema.");
       setUsersLoading(false);
       return;
     }
@@ -106,7 +106,7 @@ export function AccessPermissionsContent({ sessionUser, onNotificationsRefresh }
     setBusyRequestId("");
 
     if (!response?.ok) {
-      setFeedback({ type: "error", message: payload?.error || "Nao foi possivel concluir a solicitacao." });
+      setFeedback({ type: "error", message: payload?.error || "Não foi possível concluir a solicitação." });
       return;
     }
 
@@ -151,7 +151,7 @@ export function AccessPermissionsContent({ sessionUser, onNotificationsRefresh }
     setBusyUserId("");
 
     if (!response?.ok) {
-      setFeedback({ type: "error", message: payload?.error || "Nao foi possivel atualizar o cargo do usuario." });
+      setFeedback({ type: "error", message: payload?.error || "Não foi possível atualizar o cargo do usuário." });
       return;
     }
 
@@ -193,7 +193,7 @@ export function AccessPermissionsContent({ sessionUser, onNotificationsRefresh }
     setBusyUserId("");
 
     if (!response?.ok) {
-      setFeedback({ type: "error", message: payload?.error || "Nao foi possivel excluir o usuario." });
+      setFeedback({ type: "error", message: payload?.error || "Não foi possível excluir o usuário." });
       return;
     }
 
@@ -384,7 +384,7 @@ export function AccessPermissionsContent({ sessionUser, onNotificationsRefresh }
           ) : (
             <SectionEmptyState
               title="Nenhum usuario encontrado"
-              description="Quando houver usuarios cadastrados no sistema, eles aparecerao aqui para gestao de cargo."
+              description="Quando houver usuários cadastrados no sistema, eles aparecerão aqui para gestão de cargo."
             />
           )}
         </Card>

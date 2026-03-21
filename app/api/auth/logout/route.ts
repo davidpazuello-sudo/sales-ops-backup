@@ -34,7 +34,7 @@ export async function POST(request) {
     logAuthRouteError("api/auth/logout", "sign-out", error, { clientKey });
     return jsonWithApiObservation(
       observation,
-      { ok: false, error: "Nao foi possivel encerrar a sessao." },
+      { ok: false, error: "Não foi possível encerrar a sessão." },
       { status: 500 },
       { clientKey },
     );

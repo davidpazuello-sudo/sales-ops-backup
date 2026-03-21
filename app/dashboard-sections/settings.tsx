@@ -172,7 +172,7 @@ export function SettingsContent({
         </Card>
         <Card eyebrow="DADOS" title="Dados que alimentam a IA" wide>
           <div className={styles.tags}>
-            <span>Negocios</span>
+            <span>Negócios</span>
             <span>Atividades</span>
             <span>Calls gravadas</span>
             <span>Sentimento do vendedor</span>
@@ -225,7 +225,7 @@ export function SettingsContent({
       <div className={styles.grid}>
         {showAgentPanel ? sectionAgentPanel : null}
 
-        <Card eyebrow="AGENDAMENTO" title="Relatorios & Exportacao">
+        <Card eyebrow="AGENDAMENTO" title="Relatórios & Exportação">
           <Row label="Envio semanal" value="Segunda, 07:30" />
           <Row label="Formato" value="PDF + XLSX" />
           <Row label="Marca d'agua" value="Confidencial" />
@@ -279,8 +279,8 @@ export function SettingsContent({
       <Card eyebrow="LGPD" title="Consentimento e conformidade">
         <Row label="Consentimento" value="Registrado por contato" />
         <Row label="Esquecimento" value="Fluxo habilitado" helper="remocao em ate 7 dias" />
-        <Row label="Relatorio" value="Atualizado hoje" />
-        {!auditLogs.length ? <SectionNotice variant="info">Os eventos de auditoria aparecerao aqui assim que o workspace registrar novas acoes administrativas.</SectionNotice> : null}
+        <Row label="Relatório" value="Atualizado hoje" />
+        {!auditLogs.length ? <SectionNotice variant="info">Os eventos de auditoria aparecerão aqui assim que o workspace registrar novas ações administrativas.</SectionNotice> : null}
       </Card>
     </div>
   );

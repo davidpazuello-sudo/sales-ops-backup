@@ -54,7 +54,7 @@ export async function GET(request) {
       observation,
       {
         ok: false,
-        error: error instanceof Error ? error.message : "Nao foi possivel carregar as notificacoes.",
+        error: error instanceof Error ? error.message : "Não foi possível carregar as notificações.",
         notifications: [],
       },
       { status: 503 },

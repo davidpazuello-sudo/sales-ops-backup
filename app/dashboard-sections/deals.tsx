@@ -135,7 +135,7 @@ export function DealsContent({
     if (!response?.ok) {
       setFeedback({
         type: "error",
-        message: payload?.error || "Nao foi possivel atualizar a etapa do negocio.",
+        message: payload?.error || "Não foi possível atualizar a etapa do negócio.",
       });
       return;
     }
@@ -236,13 +236,13 @@ export function DealsContent({
       </form>
 
       {stateErrors.length ? (
-        <SectionNotice variant="error">{stateErrors[0] || "A pipeline ainda nao conseguiu carregar dados reais."}</SectionNotice>
+        <SectionNotice variant="error">{stateErrors[0] || "A pipeline ainda não conseguiu carregar dados reais."}</SectionNotice>
       ) : null}
 
       {!boardColumns.length && loadingState === "ready" && !stateErrors.length ? (
         <SectionEmptyState
           title="Pipeline sem negocios sincronizados"
-          description="Assim que a HubSpot retornar etapas e negocios reais, elas aparecerao aqui."
+          description="Assim que a HubSpot retornar etapas e negócios reais, eles aparecerão aqui."
         />
       ) : null}
 
@@ -397,7 +397,7 @@ export function DealProfileContent({ dashboardData, dealId }: DealProfileContent
           <p>Nao localizamos esse negocio no pipeline atual.</p>
         </header>
         <button type="button" className={styles.secondaryActionButton} onClick={() => router.push("/negocios")}>
-          Voltar para Negocios
+          Voltar para Negócios
         </button>
       </section>
     );
@@ -423,10 +423,10 @@ export function DealProfileContent({ dashboardData, dealId }: DealProfileContent
 
         <Card eyebrow="ACOES" title="Proximos Passos">
           <Row label="Sincronizacao" value="HubSpot ativa" helper="Negocio vinculado ao pipeline principal" />
-          <Row label="Movimentacao" value="Atualize pela etapa do pipeline" helper="Use o seletor no quadro de Negocios para persistir a nova etapa" />
+          <Row label="Movimentação" value="Atualize pela etapa do pipeline" helper="Use o seletor no quadro de Negocios para persistir a nova etapa" />
           <Row label="Atividades em aberto" value={`${openTasks.length}`} helper="Tasks reais vinculadas a este negocio" />
           <button type="button" className={styles.secondaryActionButton} onClick={() => router.push("/negocios")}>
-            Voltar para Negocios
+            Voltar para Negócios
           </button>
         </Card>
 
@@ -446,7 +446,7 @@ export function DealProfileContent({ dashboardData, dealId }: DealProfileContent
           ) : (
             <SectionEmptyState
               title="Nenhuma atividade pendente"
-              description="Quando houver follow-ups, chamadas ou reunioes em aberto ligadas a este negocio, elas aparecerao aqui."
+              description="Quando houver follow-ups, chamadas ou reuniões em aberto ligadas a este negócio, elas aparecerão aqui."
             />
           )}
         </Card>

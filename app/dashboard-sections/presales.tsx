@@ -14,7 +14,7 @@ const PRESALES_POPUP_PAGE_SIZE = 10;
 const PRESALES_DETAIL_CONFIG = {
   totalContacts: {
     title: "Contatos gerais",
-    label: "Contatos sob responsabilidade do pre-vendedor",
+    label: "Contatos sob responsabilidade do pré-vendedor",
     columns: ["Proprietario", "Contato", "Detalhe", "Status"],
     columnTemplate: "minmax(220px, 1.2fr) minmax(360px, 2.3fr) minmax(280px, 1.8fr) minmax(200px, 1fr)",
     emptyMessage: "Nenhum contato encontrado neste recorte.",
@@ -91,7 +91,7 @@ const PRESALES_DETAIL_CONFIG = {
   },
   meetingsToReschedule: {
     title: "Para reagendar",
-    label: "No-show, canceladas ou que voltaram para o pre-vendedor",
+    label: "No-show, canceladas ou que voltaram para o pré-vendedor",
     columns: ["Proprietario", "Atividade", "Prazo", "Status"],
     columnTemplate: "minmax(220px, 1.2fr) minmax(420px, 2.6fr) minmax(200px, 1.2fr) minmax(180px, 1fr)",
     emptyMessage: "Nenhuma reuniao para reagendar neste recorte.",
@@ -367,7 +367,7 @@ export function PreSalesContent({
     <section className={styles.dashboardSection}>
       <header className={styles.sectionHeaderBar}>
         <div className={styles.settingsHeader}>
-          <PageTitle loading={loadingState === "loading"} loadingLabel="Carregando dados do pre-vendedor">
+          <PageTitle loading={loadingState === "loading"} loadingLabel="Carregando dados do pré-vendedor">
             Pre-vendedores
           </PageTitle>
         </div>
@@ -429,21 +429,21 @@ export function PreSalesContent({
 
       {!summary ? (
         <SectionEmptyState
-          title="Sem dados do pre-vendedor por enquanto"
+          title="Sem dados do pré-vendedor por enquanto"
           description="Assim que a HubSpot sincronizar contatos, atividades e reunioes dos proprietarios, esta pagina vai mostrar a rotina operacional."
         />
       ) : (
         <div className={styles.grid}>
           <Card eyebrow="CARTEIRA" title="Acompanhamento geral" wide>
             <div className={styles.campaignProspectingMetrics}>
-              <PreSalesMetricButton title="Contatos gerais" value={summary.metrics.totalContacts} note="Contatos sob responsabilidade do pre-vendedor" onOpen={() => openDetail("totalContacts")} expanded={activeDetail === "totalContacts"} />
+              <PreSalesMetricButton title="Contatos gerais" value={summary.metrics.totalContacts} note="Contatos sob responsabilidade do pré-vendedor" onOpen={() => openDetail("totalContacts")} expanded={activeDetail === "totalContacts"} />
               <PreSalesMetricButton title="Sem conexao" value={summary.metrics.contactsWithoutConnection} note="Sem chamada, tarefa ou reuniao registrada" onOpen={() => openDetail("contactsWithoutConnection")} expanded={activeDetail === "contactsWithoutConnection"} />
               <PreSalesMetricButton title="Qualificados" value={summary.metrics.qualifiedContacts} note="Contatos prontos para avancar para vendas" onOpen={() => openDetail("qualifiedContacts")} expanded={activeDetail === "qualifiedContacts"} />
               <PreSalesMetricButton title="Oportunidades com deal" value={summary.metrics.opportunitiesWithDeals} note="Contatos que ja possuem oportunidade associada" onOpen={() => openDetail("opportunitiesWithDeals")} expanded={activeDetail === "opportunitiesWithDeals"} />
             </div>
           </Card>
 
-          <Card eyebrow="DESEMPENHO" title="Execucao do pre-vendedor" wide>
+          <Card eyebrow="DESEMPENHO" title="Execução do pré-vendedor" wide>
             <div className={styles.campaignProspectingMetrics}>
               <PreSalesMetricButton title="Chamadas totais" value={summary.metrics.totalCalls} note="Registros de chamada ligados aos contatos da carteira" onOpen={() => openDetail("totalCalls")} expanded={activeDetail === "totalCalls"} />
               <PreSalesMetricButton title="Media de chamadas por contato" value={summary.metrics.averageCallsPerContact} note="Chamadas totais divididas pela carteira" onOpen={() => openDetail("averageCallsPerContact")} expanded={activeDetail === "averageCallsPerContact"} />
@@ -457,7 +457,7 @@ export function PreSalesContent({
             <div className={styles.campaignProspectingMetrics}>
               <PreSalesMetricButton title="Reunioes programadas" value={summary.metrics.scheduledMeetings} note="Agenda futura registrada na HubSpot" onOpen={() => openDetail("scheduledMeetings")} expanded={activeDetail === "scheduledMeetings"} />
               <PreSalesMetricButton title="Reunioes realizadas" value={summary.metrics.completedMeetings} note="Reunioes que ja aconteceram na carteira" onOpen={() => openDetail("completedMeetings")} expanded={activeDetail === "completedMeetings"} />
-              <PreSalesMetricButton title="Para reagendar" value={summary.metrics.meetingsToReschedule} note="No-show, canceladas ou que voltaram para o pre-vendedor" onOpen={() => openDetail("meetingsToReschedule")} expanded={activeDetail === "meetingsToReschedule"} />
+              <PreSalesMetricButton title="Para reagendar" value={summary.metrics.meetingsToReschedule} note="No-show, canceladas ou que voltaram para o pré-vendedor" onOpen={() => openDetail("meetingsToReschedule")} expanded={activeDetail === "meetingsToReschedule"} />
             </div>
           </Card>
 
@@ -509,11 +509,11 @@ export function PreSalesContent({
             className={`${styles.stageModal} ${styles.campaignReportModal}`.trim()}
             role="dialog"
             aria-modal="true"
-            aria-label={`${activeDetailConfig.title} de pre-vendedores`}
+            aria-label={`${activeDetailConfig.title} de pré-vendedores`}
             onClick={(event) => event.stopPropagation()}
           >
             <header className={styles.campaignReportHeader}>
-              <h3>Detalhes do relatorio</h3>
+              <h3>Detalhes do relatório</h3>
               <button
                 type="button"
                 className={styles.campaignReportClose}
@@ -526,7 +526,7 @@ export function PreSalesContent({
 
             <div className={styles.campaignReportBody}>
               <div className={styles.campaignReportBreadcrumb}>
-                <span>Pre-vendedores</span>
+                <span>Pré-vendedores</span>
                 <span>/</span>
                 <span>{activeDetailConfig.title}</span>
               </div>

@@ -163,7 +163,7 @@ export async function POST(request) {
   } catch (error) {
     const failedPayload = {
       ok: false,
-      error: "Nao foi possivel atualizar a etapa do negocio agora.",
+      error: "Não foi possível atualizar a etapa do negócio agora.",
     };
     logAuthRouteError("api/deals/stage", "update-deal-stage", error, {
       actorEmail: auth.user.email,

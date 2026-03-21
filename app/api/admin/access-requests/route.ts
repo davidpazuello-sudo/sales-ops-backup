@@ -54,7 +54,7 @@ export async function GET(request) {
       observation,
       {
         ok: false,
-        error: error instanceof Error ? error.message : "Nao foi possivel carregar as solicitacoes.",
+        error: error instanceof Error ? error.message : "Não foi possível carregar as solicitações.",
       },
       { status: 503 },
       { actorEmail: auth.user.email, clientKey, actorUserId: auth.user.id, actorRole: auth.user.role },
@@ -153,7 +153,7 @@ export async function POST(request) {
       observation,
       {
         ok: false,
-        error: `Nao foi possivel aprovar a solicitacao. ${result.error || "Erro desconhecido."}`,
+        error: `Não foi possível aprovar a solicitação. ${result.error || "Erro desconhecido."}`,
       },
       { status: 400 },
       { actorEmail: auth.user.email, clientKey, actorUserId: auth.user.id, actorRole: auth.user.role },

@@ -69,7 +69,7 @@ export async function GET(request) {
         ok: false,
         error: message === "SUPABASE_ADMIN_UNAVAILABLE"
           ? "O modo admin do Supabase nao esta configurado para listar usuarios."
-          : "Nao foi possivel carregar os usuarios do sistema.",
+          : "Não foi possível carregar os usuários do sistema.",
       },
       { status: 503 },
       { actorEmail: auth.user.email, clientKey, actorUserId: auth.user.id, actorRole: auth.user.role },
@@ -176,7 +176,7 @@ export async function POST(request) {
       role,
     });
 
-    const message = error instanceof Error ? error.message : "Nao foi possivel atualizar o cargo.";
+    const message = error instanceof Error ? error.message : "Não foi possível atualizar o cargo.";
     const status = message === "SYSTEM_USER_ROLE_LOCKED" || message === "SYSTEM_USER_ROLE_INVALID" || message === "SYSTEM_USER_INVALID"
       ? 400
       : 503;
@@ -188,8 +188,8 @@ export async function POST(request) {
       : message === "SYSTEM_USER_ROLE_INVALID"
         ? "Selecione um cargo valido para continuar."
         : message === "SYSTEM_USER_INVALID"
-          ? "Nao foi possivel identificar esse usuario."
-          : "Nao foi possivel atualizar o cargo do usuario.";
+          ? "Não foi possível identificar esse usuário."
+          : "Não foi possível atualizar o cargo do usuário.";
 
     return jsonWithApiObservation(
       observation,
@@ -296,7 +296,7 @@ export async function DELETE(request) {
       userId,
     });
 
-    const message = error instanceof Error ? error.message : "Nao foi possivel excluir o usuario.";
+    const message = error instanceof Error ? error.message : "Não foi possível excluir o usuário.";
     const status = message === "SYSTEM_USER_DELETE_LOCKED" || message === "SYSTEM_USER_DELETE_SELF" || message === "SYSTEM_USER_INVALID"
       ? 400
       : 503;
@@ -308,8 +308,8 @@ export async function DELETE(request) {
         : message === "SYSTEM_USER_DELETE_SELF"
           ? "Voce nao pode excluir sua propria conta por aqui."
           : message === "SYSTEM_USER_INVALID"
-            ? "Nao foi possivel identificar esse usuario."
-            : "Nao foi possivel excluir o usuario.";
+            ? "Não foi possível identificar esse usuário."
+            : "Não foi possível excluir o usuário.";
 
     return jsonWithApiObservation(
       observation,

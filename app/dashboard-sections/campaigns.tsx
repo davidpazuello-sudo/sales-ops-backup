@@ -167,13 +167,13 @@ const OVERVIEW_DETAIL_CONFIG = {
   proposals: {
     eyebrow: "VENDAS",
     title: "Propostas",
-    description: "Negocios em etapa de proposta",
+    description: "Negócios em etapa de proposta",
     columns: ["Proprietario", "Negocio", "Valor", "Status"],
     columnTemplate: "minmax(180px, 1.1fr) minmax(400px, 2.7fr) minmax(180px, 1.15fr) minmax(220px, 1.2fr)",
   },
   closedWon: {
     eyebrow: "FECHADOS",
-    title: "Negocios fechados",
+    title: "Negócios fechados",
     description: "Contratos fechados na campanha",
     columns: ["Proprietario", "Negocio", "Valor", "Status"],
     columnTemplate: "minmax(180px, 1.1fr) minmax(400px, 2.7fr) minmax(180px, 1.15fr) minmax(220px, 1.2fr)",
@@ -188,7 +188,7 @@ const OVERVIEW_DETAIL_CONFIG = {
   qualifiedOpportunities: {
     eyebrow: "OPORTUNIDADES",
     title: "Oportunidades qualificadas",
-    description: "Negocios qualificados em aberto na campanha",
+    description: "Negócios qualificados em aberto na campanha",
     columns: ["Proprietario", "Negocio", "Valor", "Status"],
     columnTemplate: "minmax(180px, 1.1fr) minmax(400px, 2.7fr) minmax(180px, 1.15fr) minmax(220px, 1.2fr)",
   },
@@ -547,7 +547,7 @@ export function CampaignsContent({ dashboardData, initialOwnerFilter = "todos" }
         if (!response.ok) {
           setCampaignOptions([]);
           setOwnerDirectory([]);
-          setCampaignOptionsError(payload?.error || "Nao foi possivel carregar as campanhas da HubSpot.");
+          setCampaignOptionsError(payload?.error || "Não foi possível carregar as campanhas da HubSpot.");
           return;
         }
 
@@ -557,7 +557,7 @@ export function CampaignsContent({ dashboardData, initialOwnerFilter = "todos" }
         if (!cancelled) {
           setCampaignOptions([]);
           setOwnerDirectory([]);
-          setCampaignOptionsError("Nao foi possivel carregar as campanhas da HubSpot.");
+          setCampaignOptionsError("Não foi possível carregar as campanhas da HubSpot.");
         }
       } finally {
         if (!cancelled) {
@@ -623,7 +623,7 @@ export function CampaignsContent({ dashboardData, initialOwnerFilter = "todos" }
       const payload = await response.json().catch(() => null);
 
       if (!response.ok) {
-        setDetailError(payload?.error || "Nao foi possivel carregar os detalhes deste indicador.");
+        setDetailError(payload?.error || "Não foi possível carregar os detalhes deste indicador.");
         return;
       }
 
@@ -633,7 +633,7 @@ export function CampaignsContent({ dashboardData, initialOwnerFilter = "todos" }
         [detailCacheKey]: renderCampaignDetailRows(detailKey, detailSummary),
       }));
     } catch {
-      setDetailError("Nao foi possivel carregar os detalhes deste indicador.");
+      setDetailError("Não foi possível carregar os detalhes deste indicador.");
     } finally {
       setDetailLoadingKey("");
     }
@@ -733,7 +733,7 @@ export function CampaignsContent({ dashboardData, initialOwnerFilter = "todos" }
       ) : null}
 
       {primaryErrorMessage ? (
-        <SectionNotice variant="error">{primaryErrorMessage || "A campanha ainda nao conseguiu carregar dados reais."}</SectionNotice>
+        <SectionNotice variant="error">{primaryErrorMessage || "A campanha ainda não conseguiu carregar dados reais."}</SectionNotice>
       ) : null}
 
       {!summary && loadingState === "ready" && !primaryErrorMessage ? (
@@ -790,7 +790,7 @@ export function CampaignsContent({ dashboardData, initialOwnerFilter = "todos" }
             </div>
           </Card>
 
-          <Card eyebrow="SDR" title="Relatorios de prospeccao e atividade" wide>
+          <Card eyebrow="SDR" title="Relatórios de prospecção e atividade" wide>
             <div className={`${styles.metrics} ${styles.campaignProspectingMetrics}`.trim()}>
               <CampaignMetricButton
                 title="Contatos conectados hoje"
@@ -867,7 +867,7 @@ export function CampaignsContent({ dashboardData, initialOwnerFilter = "todos" }
             </div>
           </Card>
 
-          <Card eyebrow="QUALIFICACAO" title="Relatorios de qualificacao e conversao">
+          <Card eyebrow="QUALIFICACAO" title="Relatórios de qualificação e conversão">
             <div className={styles.metrics}>
               <CampaignMetricButton
                 title="Total de leads"
@@ -914,7 +914,7 @@ export function CampaignsContent({ dashboardData, initialOwnerFilter = "todos" }
             </div>
           </Card>
 
-          <Card eyebrow="VENDAS" title="Relatorios de desempenho e fechamento">
+          <Card eyebrow="VENDAS" title="Relatórios de desempenho e fechamento">
             <div className={styles.metrics}>
               <CampaignMetricButton
                 title="Propostas"
@@ -956,7 +956,7 @@ export function CampaignsContent({ dashboardData, initialOwnerFilter = "todos" }
             onClick={(event) => event.stopPropagation()}
           >
             <header className={styles.campaignReportHeader}>
-              <h3>Detalhes do relatorio</h3>
+              <h3>Detalhes do relatório</h3>
               <button
                 type="button"
                 className={styles.campaignReportClose}

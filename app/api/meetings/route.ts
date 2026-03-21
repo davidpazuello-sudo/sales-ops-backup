@@ -58,7 +58,7 @@ export async function GET(request) {
     });
     return jsonWithApiObservation(
       observation,
-      { ok: false, error: "Nao foi possivel carregar as reunioes operacionais.", meetings: [] },
+      { ok: false, error: "Não foi possível carregar as reuniões operacionais.", meetings: [] },
       { status: 503 },
       { actorEmail: auth.user.email, actorUserId: auth.user.id, actorRole: auth.user.role, clientKey },
     );
@@ -167,7 +167,7 @@ export async function POST(request) {
     });
     return jsonWithApiObservation(
       observation,
-      { ok: false, error: "Nao foi possivel salvar a reuniao agora." },
+      { ok: false, error: "Não foi possível salvar a reunião agora." },
       { status: 503 },
       { actorEmail: auth.user.email, actorUserId: auth.user.id, actorRole: auth.user.role, clientKey },
     );

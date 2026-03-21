@@ -370,13 +370,13 @@ export function TasksContent({ dashboardData, sessionUser = {} }) {
       <div className={styles.taskScopeHint}>{scopeMessage}</div>
 
       {stateErrors.length ? (
-        <SectionNotice variant="error">{stateErrors[0] || "As tarefas ainda nao conseguiram carregar dados reais."}</SectionNotice>
+        <SectionNotice variant="error">{stateErrors[0] || "As tarefas ainda não conseguiram carregar dados reais."}</SectionNotice>
       ) : null}
 
       {!upcomingTasks.length && loadingState === "ready" && !stateErrors.length ? (
         <SectionEmptyState
           title="Sem proximas tarefas"
-          description="Quando a HubSpot retornar reunioes, chamadas e outras tarefas futuras, elas aparecerao aqui."
+          description="Quando a HubSpot retornar reuniões, chamadas e outras tarefas futuras, elas aparecerão aqui."
         />
       ) : null}
 
@@ -412,7 +412,7 @@ export function TasksContent({ dashboardData, sessionUser = {} }) {
           title="Chamadas"
           tasks={groupedTasks.call}
           emptyTitle="Nenhuma chamada neste recorte"
-          emptyDescription="Quando houver chamadas ligadas ao usuario ou ao vendedor filtrado, elas aparecerao aqui."
+          emptyDescription="Quando houver chamadas ligadas ao usuário ou ao vendedor filtrado, elas aparecerão aqui."
           onOpen={() => openDetail("call")}
         />
 
@@ -436,7 +436,7 @@ export function TasksContent({ dashboardData, sessionUser = {} }) {
             onClick={(event) => event.stopPropagation()}
           >
             <header className={styles.campaignReportHeader}>
-              <h3>Detalhes do relatorio</h3>
+              <h3>Detalhes do relatório</h3>
               <button
                 type="button"
                 className={styles.campaignReportClose}
