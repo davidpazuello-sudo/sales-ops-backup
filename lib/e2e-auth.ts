@@ -31,7 +31,10 @@ function buildE2EUser(role: E2ERole): E2EUser {
 }
 
 export function readE2EUserFromCookies(cookieStore: CookieReader): E2EUser | null {
-  if (process.env.E2E_AUTH_BYPASS !== "true") {
+  if (
+    process.env.E2E_AUTH_BYPASS !== "true" ||
+    process.env.NODE_ENV === "production"
+  ) {
     return null;
   }
 
