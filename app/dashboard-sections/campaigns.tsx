@@ -21,175 +21,175 @@ const OVERVIEW_DETAIL_CONFIG = {
     eyebrow: "SDR",
     title: "Contatos conectados hoje",
     description: "Contatos da campanha com chamada no dia",
-    columns: ["Proprietario", "Lead", "Data", "Status"],
+    columns: ["Proprietário", "Lead", "Data", "Status"],
     columnTemplate: "minmax(180px, 1.1fr) minmax(320px, 2.35fr) minmax(210px, 1.3fr) minmax(180px, 1fr)",
   },
   callsWeekly: {
     eyebrow: "SDR",
     title: "Chamadas na semana",
     description: "Chamadas da semana na campanha",
-    columns: ["Proprietario", "Lead", "Data", "Status"],
+    columns: ["Proprietário", "Lead", "Data", "Status"],
     columnTemplate: "minmax(180px, 1.1fr) minmax(320px, 2.35fr) minmax(210px, 1.3fr) minmax(180px, 1fr)",
   },
   connectionsDaily: {
     eyebrow: "SDR",
-    title: "Conexoes hoje",
+    title: "Conexões hoje",
     description: "Chamadas registradas no dia na campanha",
-    columns: ["Proprietario", "Lead", "Data", "Status"],
+    columns: ["Proprietário", "Lead", "Data", "Status"],
     columnTemplate: "minmax(180px, 1.1fr) minmax(320px, 2.35fr) minmax(210px, 1.3fr) minmax(180px, 1fr)",
   },
   connectionsWeekly: {
     eyebrow: "SDR",
-    title: "Conexoes na semana",
-    description: "Conexoes da semana na campanha",
-    columns: ["Proprietario", "Lead", "Data", "Status"],
+    title: "Conexões na semana",
+    description: "Conexões da semana na campanha",
+    columns: ["Proprietário", "Lead", "Data", "Status"],
     columnTemplate: "minmax(180px, 1.1fr) minmax(320px, 2.35fr) minmax(210px, 1.3fr) minmax(180px, 1fr)",
   },
   firstAttemptContacts: {
     eyebrow: "SDR",
-    title: "1a tentativa",
+    title: "1ª tentativa",
     description: "Contatos na primeira tentativa",
-    columns: ["Proprietario", "Lead", "Detalhe", "Status"],
+    columns: ["Proprietário", "Lead", "Detalhe", "Status"],
     columnTemplate: "minmax(180px, 1.1fr) minmax(360px, 2.65fr) minmax(260px, 1.7fr) minmax(210px, 1.1fr)",
   },
   secondAttemptContacts: {
     eyebrow: "SDR",
-    title: "2a tentativa",
+    title: "2ª tentativa",
     description: "Contatos na segunda tentativa",
-    columns: ["Proprietario", "Lead", "Detalhe", "Status"],
+    columns: ["Proprietário", "Lead", "Detalhe", "Status"],
     columnTemplate: "minmax(180px, 1.1fr) minmax(360px, 2.65fr) minmax(260px, 1.7fr) minmax(210px, 1.1fr)",
   },
   thirdAttemptContacts: {
     eyebrow: "SDR",
-    title: "3a tentativa",
+    title: "3ª tentativa",
     description: "Contatos na terceira tentativa",
-    columns: ["Proprietario", "Lead", "Detalhe", "Status"],
+    columns: ["Proprietário", "Lead", "Detalhe", "Status"],
     columnTemplate: "minmax(180px, 1.1fr) minmax(360px, 2.65fr) minmax(260px, 1.7fr) minmax(210px, 1.1fr)",
   },
   fourthAttemptContacts: {
     eyebrow: "SDR",
-    title: "4a tentativa+",
+    title: "4ª tentativa+",
     description: "Contatos na quarta tentativa ou mais",
-    columns: ["Proprietario", "Lead", "Detalhe", "Status"],
+    columns: ["Proprietário", "Lead", "Detalhe", "Status"],
     columnTemplate: "minmax(180px, 1.1fr) minmax(360px, 2.65fr) minmax(260px, 1.7fr) minmax(210px, 1.1fr)",
   },
   wrongNumbers: {
     eyebrow: "SDR",
-    title: "Numeros errados",
-    description: "Contatos marcados com numero errado",
-    columns: ["Proprietario", "Lead", "Detalhe", "Status"],
+    title: "Números errados",
+    description: "Contatos marcados com número errado",
+    columns: ["Proprietário", "Lead", "Detalhe", "Status"],
     columnTemplate: "minmax(180px, 1.1fr) minmax(360px, 2.65fr) minmax(260px, 1.7fr) minmax(210px, 1.1fr)",
   },
   updatedPhones: {
     eyebrow: "SDR",
     title: "Telefone atualizado",
     description: "Contatos com telefone atualizado",
-    columns: ["Proprietario", "Lead", "Detalhe", "Status"],
+    columns: ["Proprietário", "Lead", "Detalhe", "Status"],
     columnTemplate: "minmax(180px, 1.1fr) minmax(360px, 2.65fr) minmax(260px, 1.7fr) minmax(210px, 1.1fr)",
   },
   disqualifiedNumbers: {
     eyebrow: "SDR",
-    title: "Numeros desqualificados",
+    title: "Números desqualificados",
     description: "Contatos desqualificados na campanha",
-    columns: ["Proprietario", "Lead", "Detalhe", "Status"],
+    columns: ["Proprietário", "Lead", "Detalhe", "Status"],
     columnTemplate: "minmax(180px, 1.1fr) minmax(360px, 2.65fr) minmax(260px, 1.7fr) minmax(210px, 1.1fr)",
   },
   ceciliaDisqualifiedNumbers: {
     eyebrow: "SDR",
     title: "Desqualificados por Mercado Privado",
-    description: "Contatos com Qualificado? = Nao alterado por Mercado Privado",
-    columns: ["Proprietario", "Lead", "Detalhe", "Status"],
+    description: "Contatos com Qualificado? = Não alterado por Mercado Privado",
+    columns: ["Proprietário", "Lead", "Detalhe", "Status"],
     columnTemplate: "minmax(180px, 1.1fr) minmax(360px, 2.65fr) minmax(260px, 1.7fr) minmax(210px, 1.1fr)",
   },
   totalLeads: {
     eyebrow: "LEADS",
     title: "Total de leads",
     description: "Leads mapeados na campanha",
-    columns: ["Proprietario", "Lead", "Detalhe", "Status"],
+    columns: ["Proprietário", "Lead", "Detalhe", "Status"],
     columnTemplate: "minmax(180px, 1.1fr) minmax(360px, 2.65fr) minmax(280px, 1.8fr) minmax(190px, 1fr)",
   },
   leadStage: {
-    eyebrow: "QUALIFICACAO",
+    eyebrow: "QUALIFICAÇÃO",
     title: "Lead",
     description: "Contatos em etapa Lead",
-    columns: ["Proprietario", "Lead", "Detalhe", "Status"],
+    columns: ["Proprietário", "Lead", "Detalhe", "Status"],
     columnTemplate: "minmax(180px, 1.1fr) minmax(360px, 2.65fr) minmax(280px, 1.8fr) minmax(190px, 1fr)",
   },
   prospects: {
-    eyebrow: "QUALIFICACAO",
+    eyebrow: "QUALIFICAÇÃO",
     title: "Prospect",
     description: "Contatos em etapa Prospect",
-    columns: ["Proprietario", "Lead", "Detalhe", "Status"],
+    columns: ["Proprietário", "Lead", "Detalhe", "Status"],
     columnTemplate: "minmax(180px, 1.1fr) minmax(360px, 2.65fr) minmax(280px, 1.8fr) minmax(190px, 1fr)",
   },
   uncontactedLeads: {
     eyebrow: "SQLS",
     title: "Leads sem contato",
     description: "Leads sem registro de chamada",
-    columns: ["Proprietario", "Lead", "Detalhe", "Status"],
+    columns: ["Proprietário", "Lead", "Detalhe", "Status"],
     columnTemplate: "minmax(180px, 1.1fr) minmax(360px, 2.65fr) minmax(280px, 1.8fr) minmax(190px, 1fr)",
   },
   sqls: {
     eyebrow: "SQLS",
     title: "Leads qualificados",
     description: "Leads qualificados por vendas",
-    columns: ["Proprietario", "Lead", "Detalhe", "Status"],
+    columns: ["Proprietário", "Lead", "Detalhe", "Status"],
     columnTemplate: "minmax(180px, 1.1fr) minmax(360px, 2.65fr) minmax(280px, 1.8fr) minmax(190px, 1fr)",
   },
   mqls: {
-    eyebrow: "QUALIFICACAO",
+    eyebrow: "QUALIFICAÇÃO",
     title: "MQLs",
     description: "Leads de marketing da campanha",
-    columns: ["Proprietario", "Lead", "Detalhe", "Status"],
+    columns: ["Proprietário", "Lead", "Detalhe", "Status"],
     columnTemplate: "minmax(180px, 1.1fr) minmax(360px, 2.65fr) minmax(280px, 1.8fr) minmax(190px, 1fr)",
   },
   qualificationConversion: {
-    eyebrow: "QUALIFICACAO",
+    eyebrow: "QUALIFICAÇÃO",
     title: "Taxa MQL > SQL",
-    description: "Base de conversao de MQL para SQL",
-    columns: ["Proprietario", "Lead", "Detalhe", "Status"],
+    description: "Base de conversão de MQL para SQL",
+    columns: ["Proprietário", "Lead", "Detalhe", "Status"],
     columnTemplate: "minmax(180px, 1.1fr) minmax(360px, 2.65fr) minmax(280px, 1.8fr) minmax(190px, 1fr)",
   },
   meetings: {
-    eyebrow: "REUNIOES",
-    title: "Reunioes programadas",
-    description: "Reunioes agendadas da campanha",
-    columns: ["Proprietario", "Lead", "Data", "Status"],
+    eyebrow: "REUNIÕES",
+    title: "Reuniões programadas",
+    description: "Reuniões agendadas da campanha",
+    columns: ["Proprietário", "Lead", "Data", "Status"],
     columnTemplate: "minmax(180px, 1.1fr) minmax(320px, 2.35fr) minmax(210px, 1.3fr) minmax(180px, 1fr)",
   },
   completedMeetings: {
-    eyebrow: "REUNIOES",
-    title: "Reunioes concluidas",
-    description: "Reunioes concluidas da campanha",
-    columns: ["Proprietario", "Lead", "Data", "Status"],
+    eyebrow: "REUNIÕES",
+    title: "Reuniões concluídas",
+    description: "Reuniões concluídas da campanha",
+    columns: ["Proprietário", "Lead", "Data", "Status"],
     columnTemplate: "minmax(180px, 1.1fr) minmax(320px, 2.35fr) minmax(210px, 1.3fr) minmax(180px, 1fr)",
   },
   proposals: {
     eyebrow: "VENDAS",
     title: "Propostas",
     description: "Negócios em etapa de proposta",
-    columns: ["Proprietario", "Negocio", "Valor", "Status"],
+    columns: ["Proprietário", "Negócio", "Valor", "Status"],
     columnTemplate: "minmax(180px, 1.1fr) minmax(400px, 2.7fr) minmax(180px, 1.15fr) minmax(220px, 1.2fr)",
   },
   closedWon: {
     eyebrow: "FECHADOS",
     title: "Negócios fechados",
     description: "Contratos fechados na campanha",
-    columns: ["Proprietario", "Negocio", "Valor", "Status"],
+    columns: ["Proprietário", "Negócio", "Valor", "Status"],
     columnTemplate: "minmax(180px, 1.1fr) minmax(400px, 2.7fr) minmax(180px, 1.15fr) minmax(220px, 1.2fr)",
   },
   salesConversion: {
     eyebrow: "VENDAS",
     title: "Taxa proposta > fechamento",
-    description: "Base de conversao de propostas em fechamentos",
-    columns: ["Proprietario", "Negocio", "Valor", "Status"],
+    description: "Base de conversão de propostas em fechamentos",
+    columns: ["Proprietário", "Negócio", "Valor", "Status"],
     columnTemplate: "minmax(180px, 1.1fr) minmax(400px, 2.7fr) minmax(180px, 1.15fr) minmax(220px, 1.2fr)",
   },
   qualifiedOpportunities: {
     eyebrow: "OPORTUNIDADES",
     title: "Oportunidades qualificadas",
     description: "Negócios qualificados em aberto na campanha",
-    columns: ["Proprietario", "Negocio", "Valor", "Status"],
+    columns: ["Proprietário", "Negócio", "Valor", "Status"],
     columnTemplate: "minmax(180px, 1.1fr) minmax(400px, 2.7fr) minmax(180px, 1.15fr) minmax(220px, 1.2fr)",
   },
 };
@@ -413,15 +413,15 @@ function CampaignMetricButton({ title, value, note, onClick, expanded = false })
 function getDetailCellValues(detailKey, item) {
   if (["proposals", "closedWon", "salesConversion", "qualifiedOpportunities"].includes(detailKey)) {
     return [
-      item.ownerName || "Sem proprietario",
-      item.recordName || "Negocio sem nome",
+      item.ownerName || "Sem proprietário",
+      item.recordName || "Negócio sem nome",
       item.detailLabel || "Sem valor",
       item.statusLabel || "Sem status",
     ];
   }
 
   return [
-    item.ownerName || "Sem proprietario",
+    item.ownerName || "Sem proprietário",
     item.leadName || item.recordName || "Sem registro",
     item.dateLabel || item.detailLabel || "Sem detalhe",
     item.statusLabel || "Sem status",
@@ -691,12 +691,12 @@ export function CampaignsContent({ dashboardData, initialOwnerFilter = "todos" }
         </label>
 
         <label className={styles.campaignFilterField}>
-          <span>Proprietario</span>
+          <span>Proprietário</span>
           <input
             type="text"
             list="campaigns-owner-options"
             className={styles.campaignFilterInput}
-            placeholder="Buscar proprietario"
+            placeholder="Buscar proprietário"
             value={selectedOwnerDraft}
             onChange={(event) => setSelectedOwnerDraft(event.target.value)}
             disabled={isFilterPending}
@@ -745,7 +745,7 @@ export function CampaignsContent({ dashboardData, initialOwnerFilter = "todos" }
 
       {summary ? (
         <div className={styles.grid}>
-          <Card eyebrow="VISAO GERAL" title={summary.name} wide>
+          <Card eyebrow="VISÃO GERAL" title={summary.name} wide>
             <div className={styles.metrics}>
               <CampaignMetricButton
                 title="Total de leads"
@@ -762,16 +762,16 @@ export function CampaignsContent({ dashboardData, initialOwnerFilter = "todos" }
                 expanded={activeDetail === "sqls"}
               />
               <CampaignMetricButton
-                title="Reunioes programadas"
+                title="Reuniões programadas"
                 value={`${summary.meetingCount}`}
                 note="Meta da campanha: 70"
                 onClick={() => handleOpenDetail("meetings")}
                 expanded={activeDetail === "meetings"}
               />
               <CampaignMetricButton
-                title="Reunioes concluidas"
+                title="Reuniões concluídas"
                 value={`${summary.completedMeetingCount || 0}`}
-                note="Reunioes realizadas na campanha"
+                note="Reuniões realizadas na campanha"
                 onClick={() => handleOpenDetail("completedMeetings")}
                 expanded={activeDetail === "completedMeetings"}
               />
@@ -784,9 +784,9 @@ export function CampaignsContent({ dashboardData, initialOwnerFilter = "todos" }
               />
             </div>
             <div className={styles.campaignSummaryMeta}>
-              <span>{`Ultima atividade: ${formatDateTime(summary.lastActivityAt)}`}</span>
-              <span>{`Conversao MQL > SQL: ${summary.qualification.conversionRate}%`}</span>
-              <span>{`Conversao proposta > fechamento: ${summary.sales.conversionRate}%`}</span>
+              <span>{`Última atividade: ${formatDateTime(summary.lastActivityAt)}`}</span>
+              <span>{`Conversão MQL > SQL: ${summary.qualification.conversionRate}%`}</span>
+              <span>{`Conversão proposta > fechamento: ${summary.sales.conversionRate}%`}</span>
             </div>
           </Card>
 
@@ -805,43 +805,43 @@ export function CampaignsContent({ dashboardData, initialOwnerFilter = "todos" }
                 expanded={activeDetail === "callsWeekly"}
               />
               <CampaignMetricButton
-                title="Conexoes hoje"
+                title="Conexões hoje"
                 value={`${summary.prospecting.connectionsDaily}`}
                 onClick={() => handleOpenDetail("connectionsDaily")}
                 expanded={activeDetail === "connectionsDaily"}
               />
               <CampaignMetricButton
-                title="Conexoes na semana"
+                title="Conexões na semana"
                 value={`${summary.prospecting.connectionsWeekly}`}
                 onClick={() => handleOpenDetail("connectionsWeekly")}
                 expanded={activeDetail === "connectionsWeekly"}
               />
               <CampaignMetricButton
-                title="1a tentativa"
+                title="1ª tentativa"
                 value={`${summary.prospecting.firstAttemptCount || 0}`}
                 onClick={() => handleOpenDetail("firstAttemptContacts")}
                 expanded={activeDetail === "firstAttemptContacts"}
               />
               <CampaignMetricButton
-                title="2a tentativa"
+                title="2ª tentativa"
                 value={`${summary.prospecting.secondAttemptCount || 0}`}
                 onClick={() => handleOpenDetail("secondAttemptContacts")}
                 expanded={activeDetail === "secondAttemptContacts"}
               />
               <CampaignMetricButton
-                title="3a tentativa"
+                title="3ª tentativa"
                 value={`${summary.prospecting.thirdAttemptCount || 0}`}
                 onClick={() => handleOpenDetail("thirdAttemptContacts")}
                 expanded={activeDetail === "thirdAttemptContacts"}
               />
               <CampaignMetricButton
-                title="4a tentativa+"
+                title="4ª tentativa+"
                 value={`${summary.prospecting.fourthAttemptCount || 0}`}
                 onClick={() => handleOpenDetail("fourthAttemptContacts")}
                 expanded={activeDetail === "fourthAttemptContacts"}
               />
               <CampaignMetricButton
-                title="Numeros errados"
+                title="Números errados"
                 value={`${summary.prospecting.wrongNumbersCount || 0}`}
                 onClick={() => handleOpenDetail("wrongNumbers")}
                 expanded={activeDetail === "wrongNumbers"}
@@ -853,7 +853,7 @@ export function CampaignsContent({ dashboardData, initialOwnerFilter = "todos" }
                 expanded={activeDetail === "updatedPhones"}
               />
               <CampaignMetricButton
-                title="Numeros desqualificados"
+                title="Números desqualificados"
                 value={`${summary.prospecting.disqualifiedNumbersCount || 0}`}
                 onClick={() => handleOpenDetail("disqualifiedNumbers")}
                 expanded={activeDetail === "disqualifiedNumbers"}
@@ -867,7 +867,7 @@ export function CampaignsContent({ dashboardData, initialOwnerFilter = "todos" }
             </div>
           </Card>
 
-          <Card eyebrow="QUALIFICACAO" title="Relatórios de qualificação e conversão">
+          <Card eyebrow="QUALIFICAÇÃO" title="Relatórios de qualificação e conversão">
             <div className={styles.metrics}>
               <CampaignMetricButton
                 title="Total de leads"
@@ -900,14 +900,14 @@ export function CampaignsContent({ dashboardData, initialOwnerFilter = "todos" }
               <CampaignMetricButton
                 title="SQLs"
                 value={`${summary.qualification.sqlCount}`}
-                note="Meta da campanha: 40 ate 17/05/2026"
+                note="Meta da campanha: 40 até 17/05/2026"
                 onClick={() => handleOpenDetail("sqls")}
                 expanded={activeDetail === "sqls"}
               />
               <CampaignMetricButton
                 title="Taxa MQL > SQL"
                 value={`${summary.qualification.conversionRate}%`}
-                note="Efetividade da qualificacao SDR"
+                note="Efetividade da qualificação SDR"
                 onClick={() => handleOpenDetail("qualificationConversion")}
                 expanded={activeDetail === "qualificationConversion"}
               />
@@ -1020,7 +1020,7 @@ export function CampaignsContent({ dashboardData, initialOwnerFilter = "todos" }
                   <div className={styles.campaignReportFooter}>
                     {activeDetailTotalPages > 1 ? (
                       <div className={styles.popupPaginationBar}>
-                        <nav className={styles.popupPagination} aria-label={`Paginacao de ${activeDetailConfig.title}`}>
+                        <nav className={styles.popupPagination} aria-label={`Paginação de ${activeDetailConfig.title}`}>
                           <button
                             type="button"
                             className={styles.popupPaginationNav}
@@ -1057,7 +1057,7 @@ export function CampaignsContent({ dashboardData, initialOwnerFilter = "todos" }
                                     [activeDetailCacheKey]: page,
                                   }))}
                                   aria-current={isCurrentPage ? "page" : undefined}
-                                  aria-label={`Ir para pagina ${page}`}
+                                  aria-label={`Ir para página ${page}`}
                                 >
                                   {page}
                                 </button>
@@ -1074,13 +1074,13 @@ export function CampaignsContent({ dashboardData, initialOwnerFilter = "todos" }
                             }))}
                             disabled={activeDetailPage === activeDetailTotalPages}
                           >
-                            <span>Proximo</span>
+                            <span>Próximo</span>
                             <SimpleArrow right />
                           </button>
                         </nav>
                       </div>
                     ) : <div />}
-                    <div className={styles.campaignReportPageSize}>10 linhas por pagina</div>
+                    <div className={styles.campaignReportPageSize}>10 linhas por página</div>
                   </div>
                 </>
               ) : (
